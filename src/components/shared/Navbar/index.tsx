@@ -16,10 +16,13 @@ export default function Navbar() {
       flexDirection="row"
       justifyContent="space-between"
       sx={{
+        flex: 'none',
         height: 60,
         background: 'white',
         px: 2,
         borderBottom: 'thin solid #0000002A',
+        position: 'sticky',
+        top: 1,
       }}
     >
       <Stack flexDirection="row" alignItems="center">
@@ -28,7 +31,7 @@ export default function Navbar() {
             <Menu />
           </IconButton>
         )}
-        <img src="/logo.svg" width={40} height={40} alt="logo" />
+        <img src="/logo-pertamina.svg" width={140} height={40} alt="logo" />
         {!isMobile && (
           <Typography variant="h6" sx={{ ml: 1, fontWeight: 500 }}>
             Internal Dashboard

@@ -1,18 +1,18 @@
 import React from 'react'
 import ReactDOM from 'react-dom/client'
 import { createBrowserRouter, RouterProvider } from 'react-router-dom'
-import App from './App'
 import ErrorPage from './ErrorPage'
 import './index.css'
 import LoginPage from './modules/auth/Login'
 import DashboardLayout from './modules/dashboard/Layout'
+import Report from './modules/dashboard/report/Report'
 import SubmissionList from './modules/dashboard/submission/SubmissionList'
 import reportWebVitals from './reportWebVitals'
 
 const router = createBrowserRouter([
   {
     path: '/',
-    element: <App />,
+    element: <LoginPage />,
     errorElement: <ErrorPage />,
   },
   {
@@ -28,6 +28,10 @@ const router = createBrowserRouter([
       {
         path: 'submission',
         element: <SubmissionList />,
+      },
+      {
+        path: 'report',
+        element: <Report />,
       },
     ],
   },

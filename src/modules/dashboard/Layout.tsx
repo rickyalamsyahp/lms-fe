@@ -17,7 +17,7 @@ export default function DashboardLayout() {
           }}
         >
           <Navbar />
-          <Box sx={{ flex: 1 }}>
+          <Box sx={{ flex: 1, p: 2 }}>
             <Outlet />
           </Box>
         </Box>

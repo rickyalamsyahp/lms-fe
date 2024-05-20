@@ -37,7 +37,7 @@ export default function LoginPage() {
     try {
       const res = await login(payload)
       setAccessToken(cookieNames.USER_ACCESS_TOKEN, res.data)
-      navigate('/dashboard/submission')
+      navigate('/dashboard/report')
       toast.remove(loadingId)
     } catch (error: any) {
       toast.error(error.message, { id: loadingId })
@@ -56,15 +56,15 @@ export default function LoginPage() {
       <Container maxWidth={'xs'} sx={{ textAlign: 'center' }}>
         <Paper
           sx={{
-            p: 4,
+            p: 5,
             position: 'relative',
             borderRadius: 2,
-            background: '#FFFFFFAD',
+            background: '#f6f6f6',
           }}
         >
           <img
-            src="/hnfh-logo.svg"
-            width={120}
+            src="/logo-pertamina.svg"
+            width={320}
             height={120}
             alt="logo"
             style={{
@@ -73,7 +73,7 @@ export default function LoginPage() {
           />
           <Typography variant="h5" sx={{ mt: 1, mb: 6, color: 'primary.main' }}>
             Welcome to <br />
-            <strong>Internal Dashboard</strong>
+            <strong>Computer Vision Dashboard</strong>
           </Typography>
           <form onSubmit={handleSubmit}>
             <Stack sx={{ gap: 2 }}>
@@ -96,7 +96,7 @@ export default function LoginPage() {
             </Stack>
           </form>
         </Paper>
-        <Typography sx={{ mt: 1 }}>
+        <Typography sx={{ mt: 2 }}>
           Powered by <b>AVS</b> Simulator
         </Typography>
       </Container>
