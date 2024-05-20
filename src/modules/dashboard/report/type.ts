@@ -5,8 +5,8 @@ export type VehicleData = {
 }
 
 export enum chartColor {
-  COLOR_8 = '#6420AA',
-  COLOR_2 = '#FF3EA5',
+  COLOR_2 = '#6420AA',
+  COLOR_8 = '#FF3EA5',
   COLOR_5 = '#FF7ED4',
   COLOR_4 = '#FFB5DA',
   COLOR_3 = '#007F73',
