@@ -45,61 +45,66 @@ export default function LoginPage() {
   }
 
   return (
-    <Stack
-      justifyContent="center"
-      alignItems="center"
-      sx={{
-        minHeight: '100vh',
-        backgroundImage: 'url("/bg-pattern.png")',
-      }}
-    >
-      <Container maxWidth={'xs'} sx={{ textAlign: 'center' }}>
-        <Paper
-          sx={{
-            p: 5,
-            position: 'relative',
-            borderRadius: 2,
-            background: '#f6f6f6',
-          }}
-        >
-          <img
-            src="/logo-pertamina.svg"
-            width={320}
-            height={120}
-            alt="logo"
-            style={{
-              margin: '0 auto',
+    <>
+      <Stack
+        justifyContent="center"
+        alignItems="center"
+        sx={{
+          minHeight: '100vh',
+          backgroundImage: 'url("/bg-pattern.png")',
+        }}
+      >
+        <Container maxWidth={'xs'} sx={{ textAlign: 'center' }}>
+          <Paper
+            sx={{
+              p: 5,
+              position: 'relative',
+              borderRadius: 2,
+              background: '#f6f6f6',
             }}
-          />
-          <Typography variant="h5" sx={{ mt: 1, mb: 6, color: 'primary.main' }}>
-            Welcome to <br />
-            <strong>Computer Vision Dashboard</strong>
+          >
+            <img
+              src="/logo-pertamina.svg"
+              width={320}
+              height={120}
+              alt="logo"
+              style={{
+                margin: '0 auto',
+              }}
+            />
+            <Typography
+              variant="h5"
+              sx={{ mt: 1, mb: 6, color: 'primary.main' }}
+            >
+              Welcome to <br />
+              <strong>Internal Dashboard</strong>
+            </Typography>
+            <form onSubmit={handleSubmit}>
+              <Stack sx={{ gap: 2 }}>
+                <TextField
+                  label="username"
+                  inputProps={{ required: true }}
+                  type="username"
+                  value={payload.username}
+                  onChange={(e) => handleChange('username', e.target.value)}
+                />
+                <TextField
+                  label="password"
+                  type="password"
+                  value={payload.password}
+                  onChange={(e) => handleChange('password', e.target.value)}
+                />
+                <Button variant="contained" type="submit">
+                  Login
+                </Button>
+              </Stack>
+            </form>
+          </Paper>
+          <Typography sx={{ mt: 2 }}>
+            Powered by <b>AVS</b> Simulator
           </Typography>
-          <form onSubmit={handleSubmit}>
-            <Stack sx={{ gap: 2 }}>
-              <TextField
-                label="username"
-                inputProps={{ required: true }}
-                type="username"
-                value={payload.username}
-                onChange={(e) => handleChange('username', e.target.value)}
-              />
-              <TextField
-                label="password"
-                type="password"
-                value={payload.password}
-                onChange={(e) => handleChange('password', e.target.value)}
-              />
-              <Button variant="contained" type="submit">
-                Login
-              </Button>
-            </Stack>
-          </form>
-        </Paper>
-        <Typography sx={{ mt: 2 }}>
-          Powered by <b>AVS</b> Simulator
-        </Typography>
-      </Container>
-    </Stack>
+        </Container>
+      </Stack>
+    </>
   )
 }
