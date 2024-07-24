@@ -21,7 +21,6 @@ export default function Navbar() {
         background: 'white',
         px: 2,
         borderBottom: 'thin solid #0000002A',
-        position: 'sticky',
         top: 1,
       }}
     >

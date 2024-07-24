@@ -8,6 +8,7 @@ import LoginPage from './modules/auth/Login'
 import DashboardLayout from './modules/dashboard/Layout'
 import Report from './modules/dashboard/report/Report'
 import SubmissionList from './modules/dashboard/submission/SubmissionList'
+import UserList from './modules/dashboard/user/UserList'
 import reportWebVitals from './reportWebVitals'
 
 const router = createBrowserRouter([
@@ -33,6 +34,10 @@ const router = createBrowserRouter([
       {
         path: 'report',
         element: <Report />,
+      },
+      {
+        path: 'user',
+        element: <UserList />,
       },
     ],
   },

@@ -12,5 +12,6 @@ export type User = {
 
 export enum ScopeSlug {
   ADMIN = 'admin',
-  USER = 'user',
+  INSTRUCTOR = 'instructor',
+  TRAINEE = 'trainee',
 }

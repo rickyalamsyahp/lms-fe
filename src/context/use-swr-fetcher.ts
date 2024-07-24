@@ -9,7 +9,6 @@ export function useSWRFetcher<T>(
   config?: Partial<SWRConfiguration>
 ) {
   const { data, ...response } = useSWR(key, fetcherFunction, config)
-
   return {
     data: data?.data,
     ...response,

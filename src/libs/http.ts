@@ -2,6 +2,23 @@ import axios from 'axios'
 import cookie from 'cookie-cutter'
 import { API_URL } from './env'
 
+class Options {
+  headers: any
+  constructor() {
+    this.headers = {}
+  }
+
+  setHeaders(key: string, value: string) {
+    this.headers[key as keyof typeof this] = value
+  }
+
+  deleteHeaders(key: string) {
+    delete this.headers[key]
+  }
+}
+
+export const options = new Options()
+
 export const cookieNames = {
   USER_ACCESS_TOKEN: 'user_access_token',
 }
@@ -22,6 +39,24 @@ export const deleteAccessToken = (name: string) => {
 
 export const setUrlPrefix = (value: any) => {
   urlPrefix = value
+}
+
+export const generateFormData = (
+  files: {
+    key: string
+    file: File
+  }[],
+  payload: any = {}
+) => {
+  const formData = new FormData()
+  files.forEach((each) => {
+    formData.append(each.key, each.file)
+  })
+  for (const key in payload) {
+    formData.append(key, payload[key as keyof typeof payload])
+  }
+
+  return formData
 }
 
 const Request = (baseURL: string, cookieName?: string) => {

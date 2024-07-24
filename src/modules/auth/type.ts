@@ -1,3 +1,5 @@
+import { ScopeSlug } from '../../context/auth/__shared/type'
+
 export type LoginPayload = {
   username: string
   password: string
@@ -12,9 +14,4 @@ export type User = {
   username: string
   email: string
   scope: ScopeSlug
-}
-
-export enum ScopeSlug {
-  ADMIN = 'admin',
-  USER = 'user',
 }
