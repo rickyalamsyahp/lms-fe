@@ -1,6 +1,12 @@
 import { Menu } from '@mui/icons-material'
 import { IconButton, Stack, Typography } from '@mui/material'
 import { useSession } from '../../../context/session/context'
+import {
+  LOGO,
+  NAVBAR_LOGO_HEIGHT,
+  NAVBAR_LOGO_WIDTH,
+  TITLE,
+} from '../../../libs/env'
 import Profile from './__components/Profile'
 
 export default function Navbar() {
@@ -30,10 +36,15 @@ export default function Navbar() {
             <Menu />
           </IconButton>
         )}
-        <img src="/logo-pertamina.svg" width={140} height={40} alt="logo" />
+        <img
+          src={LOGO}
+          width={NAVBAR_LOGO_WIDTH}
+          height={NAVBAR_LOGO_HEIGHT}
+          alt="logo"
+        />
         {!isMobile && (
           <Typography variant="h6" sx={{ ml: 1, fontWeight: 500 }}>
-            Internal Dashboard
+            {TITLE}
           </Typography>
         )}
       </Stack>

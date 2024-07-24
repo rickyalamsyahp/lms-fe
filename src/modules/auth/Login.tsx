@@ -13,6 +13,12 @@ import toast from 'react-hot-toast'
 import { useNavigate } from 'react-router-dom'
 import { login } from '../../context/auth/__shared/api'
 import { LoginPayload } from '../../context/auth/__shared/type'
+import {
+  LOGIN_LOGO_HEIGHT,
+  LOGIN_LOGO_WIDTH,
+  LOGO,
+  TITLE,
+} from '../../libs/env'
 import { cookieNames, setAccessToken } from '../../libs/http'
 
 export default function LoginPage() {
@@ -64,9 +70,9 @@ export default function LoginPage() {
             }}
           >
             <img
-              src="/logo-pertamina.svg"
-              width={320}
-              height={120}
+              src={LOGO}
+              width={LOGIN_LOGO_WIDTH}
+              height={LOGIN_LOGO_HEIGHT}
               alt="logo"
               style={{
                 margin: '0 auto',
@@ -77,7 +83,7 @@ export default function LoginPage() {
               sx={{ mt: 1, mb: 6, color: 'primary.main' }}
             >
               Welcome to <br />
-              <strong>Internal Dashboard</strong>
+              <strong>{TITLE}</strong>
             </Typography>
             <form onSubmit={handleSubmit}>
               <Stack sx={{ gap: 2 }}>
