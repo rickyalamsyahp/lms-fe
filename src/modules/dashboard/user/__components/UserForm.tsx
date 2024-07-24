@@ -127,7 +127,7 @@ export default function UserForm({
           {initialData && (
             <>
               <InputFile
-                label="Thumbnail"
+                label="Avatar"
                 onChange={(file?: File) => {
                   setAvatarFile(file)
                 }}

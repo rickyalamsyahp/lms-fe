@@ -23,7 +23,7 @@ export default function SessionProvider(props: any) {
   }
 
   useEffect(() => {
-    if (profile.data) {
+    if (profile.data && !state.profile) {
       const { scope } = profile.data
       handleChangeState('profile', profile.data)
       handleChangeState(
@@ -35,6 +35,7 @@ export default function SessionProvider(props: any) {
         true
       )
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [profile])
 
   return (

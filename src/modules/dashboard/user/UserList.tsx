@@ -1,6 +1,6 @@
 'use client'
 
-import { Add, Delete, Edit, Menu, Replay } from '@mui/icons-material'
+import { Add, Delete, Edit, Lock, Menu, Replay } from '@mui/icons-material'
 import {
   Avatar,
   Box,
@@ -28,13 +28,14 @@ import Dropdown from '../../../components/shared/Dropdown'
 import InfiniteScroll from '../../../components/shared/InfiniteScroll'
 import { ScopeSlug } from '../../../context/auth/__shared/type'
 import { useSession } from '../../../context/session'
+import ChangePassword from './__components/ChangePassword'
 import UserCard from './__components/UserCard'
 import UserForm from './__components/UserForm'
 import {
   changeStatus,
   deleteUser,
   getUserAvatarUrl,
-  useProfileList,
+  useUserList,
 } from './__shared/api'
 import { User } from './__shared/type'
 
@@ -45,6 +46,7 @@ export default function UserList() {
   const [size, setSize] = useState(10)
   const [search, setSearch] = useState<string>('')
   const [showForm, setShowForm] = useState(false)
+  const [showChangePassword, setShowChangePassword] = useState(false)
   const [selectedItem, setSelectedItem] = useState<User | undefined>()
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
   const [selectedScope, setSelectedScope] = useState<ScopeSlug>(
@@ -56,7 +58,7 @@ export default function UserList() {
     size,
   }
 
-  const { data: userList, mutate: refetch } = useProfileList(selectedScope, {
+  const { data: userList, mutate: refetch } = useUserList(selectedScope, {
     ...query,
     'name:likeLower': search ? `%${search}%` : undefined,
   })
@@ -241,6 +243,17 @@ export default function UserList() {
                             </ListItemIcon>
                             <ListItemText>Edit</ListItemText>
                           </MenuItem>
+                          <MenuItem
+                            onClick={() => {
+                              setSelectedItem(item)
+                              setShowChangePassword(true)
+                            }}
+                          >
+                            <ListItemIcon>
+                              <Lock />
+                            </ListItemIcon>
+                            <ListItemText>Ubah Password</ListItemText>
+                          </MenuItem>
                           <Divider />
                           <MenuItem
                             onClick={() => {
@@ -290,6 +303,14 @@ export default function UserList() {
         title="Delete"
         content={`Yakin menghapus akun dengan email ${selectedItem?.email}?`}
         onSubmit={handleDelete}
+      />
+      <ChangePassword
+        isOpen={showChangePassword}
+        user={selectedItem}
+        onClose={() => {
+          setShowChangePassword(false)
+          setSelectedItem(undefined)
+        }}
       />
     </>
   )

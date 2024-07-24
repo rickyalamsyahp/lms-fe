@@ -1,16 +1,4 @@
-import {
-  AccountBalance,
-  Apps,
-  CalendarMonth,
-  Contacts,
-  Groups,
-  HealthAndSafety,
-  LocationCity,
-  Notes,
-  Person,
-  Tv,
-  WorkHistory,
-} from '@mui/icons-material'
+import { AccountBalance, Groups, Person } from '@mui/icons-material'
 import {
   Box,
   Drawer,
@@ -48,7 +36,7 @@ type MenuItemProps = {
 const menuList: MenuItemProps[] = [
   {
     menuType: MenuItemType.DIVIDER,
-    label: 'Master',
+    label: 'Menu Utama',
   },
   {
     menuType: MenuItemType.LINK,
@@ -60,7 +48,7 @@ const menuList: MenuItemProps[] = [
   },
   {
     menuType: MenuItemType.LINK,
-    label: 'Fraksi',
+    label: 'Modul Pembelajaran',
     icon: <AccountBalance fontSize="small" />,
     href: '/dashboard/faction',
     activeRegex: /.*faction/gi,
@@ -68,91 +56,10 @@ const menuList: MenuItemProps[] = [
   },
   {
     menuType: MenuItemType.LINK,
-    label: 'Grup',
+    label: 'Submission',
     icon: <Groups fontSize="small" />,
     href: '/dashboard/group',
     activeRegex: /.*group/gi,
-    scope: ScopeSlug.ADMIN,
-  },
-  {
-    menuType: MenuItemType.LINK,
-    label: 'Dapil',
-    icon: <LocationCity fontSize="small" />,
-    href: '/dashboard/dapil',
-    activeRegex: /.*dapil/gi,
-    scope: ScopeSlug.ADMIN,
-  },
-  {
-    menuType: MenuItemType.DIVIDER,
-    label: 'Menu Informasi',
-  },
-  {
-    menuType: MenuItemType.LINK,
-    label: 'TV Parlemen',
-    icon: <Tv fontSize="small" />,
-    href: '/dashboard/tvparlemen',
-    activeRegex: /.*tvparlemen/gi,
-    scope: ScopeSlug.ADMIN,
-  },
-  {
-    menuType: MenuItemType.LINK,
-    label: 'Agenda',
-    icon: <CalendarMonth fontSize="small" />,
-    href: '/dashboard/agenda',
-    activeRegex: /.*agenda/gi,
-    scope: ScopeSlug.ADMIN,
-  },
-  {
-    menuType: MenuItemType.LINK,
-    label: 'Kontak',
-    icon: <Contacts fontSize="small" />,
-    href: '/dashboard/contact',
-    activeRegex: /.*contact/gi,
-    scope: ScopeSlug.ADMIN,
-  },
-  {
-    menuType: MenuItemType.LINK,
-    label: 'Artikel',
-    icon: <Notes fontSize="small" />,
-    href: '/dashboard/article',
-    activeRegex: /.*article/gi,
-    scope: ScopeSlug.ADMIN,
-  },
-  {
-    menuType: MenuItemType.LINK,
-    label: 'Referensi',
-    icon: <Apps fontSize="small" />,
-    href: '/dashboard/reference',
-    activeRegex: /.*reference/gi,
-    scope: ScopeSlug.ADMIN,
-  },
-  /*{
-    menuType: MenuItemType.LINK,
-    label: 'Profil',
-    icon: <Info fontSize="small" />,
-    href: '/dashboard/organization/[organizationId]/profile',
-    activeRegex: /.*profile/gi,
-    scope: ScopeSlug.INSTRUCTOR,
-  },
-  */
-  {
-    menuType: MenuItemType.DIVIDER,
-    label: 'DPR',
-  },
-  {
-    menuType: MenuItemType.LINK,
-    label: 'Kinerja',
-    icon: <HealthAndSafety fontSize="small" />,
-    href: '/dashboard/performance',
-    activeRegex: /.*performance/gi,
-    scope: ScopeSlug.ADMIN,
-  },
-  {
-    menuType: MenuItemType.LINK,
-    label: 'Masa Bakti',
-    icon: <WorkHistory fontSize="small" />,
-    href: '/dashboard/period',
-    activeRegex: /(.*period)|(.*member)/gi,
     scope: ScopeSlug.ADMIN,
   },
 ]

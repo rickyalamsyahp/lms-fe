@@ -16,7 +16,7 @@ type GetUserListQuery = {
   size: number
 } & any
 
-type ChangePasswordBody = {
+export type ChangePasswordBody = {
   oldPassword: string
   newPassword: string
   newPasswordConfirmation: string
@@ -44,8 +44,16 @@ export function changeStatus(id: string) {
   return api.put<User>(`/admin/user-account/${id}/activate`)
 }
 
-export async function changePassword(body: ChangePasswordBody) {
-  return await api.put(`/my-profile/change-password`, body)
+export async function changePassword(
+  body: ChangePasswordBody,
+  userId?: string
+) {
+  return await api.put(
+    userId
+      ? `/admin/user-account/${userId}/change-password`
+      : `/my-profile/change-password`,
+    body
+  )
 }
 
 export function deleteUser(id: string) {
@@ -61,7 +69,7 @@ export function getUserAvatarUrl(id: string) {
   return `${API_URL}/open/user-account/${id}/avatar`
 }
 
-export function useProfileList(
+export function useUserList(
   scope: ScopeSlug,
   query: GetUserListQuery,
   config?: Partial<SWRConfiguration>
@@ -73,7 +81,7 @@ export function useProfileList(
   )
 }
 
-export function useProfile(id: string, config?: Partial<SWRConfiguration>) {
+export function useUser(id: string, config?: Partial<SWRConfiguration>) {
   return useSWRFetcher(
     [id, 'get-user-by-id'],
     ([id]) => getUserById(id),

@@ -4,7 +4,7 @@ import { User } from '../__shared/type'
 
 type UserCardProps = BoxProps & {
   data: User
-  onActivate: () => void
+  onActivate?: () => void
 }
 
 export default function UserCard({
@@ -56,7 +56,9 @@ export default function UserCard({
           </Stack>
         </Box>
       </Box>
-      <Switch checked={data.isActive} onChange={() => onActivate()} />
+      {onActivate && (
+        <Switch checked={data.isActive} onChange={() => onActivate()} />
+      )}
     </Box>
   )
 }
