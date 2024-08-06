@@ -50,7 +50,7 @@ export default function UserList() {
   const [selectedItem, setSelectedItem] = useState<User | undefined>()
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
   const [selectedScope, setSelectedScope] = useState<ScopeSlug>(
-    ScopeSlug.INSTRUCTOR
+    ScopeSlug.TRAINEE
   )
 
   const query = {
@@ -58,10 +58,14 @@ export default function UserList() {
     size,
   }
 
-  const { data: userList, mutate: refetch } = useUserList(selectedScope, {
-    ...query,
-    'name:likeLower': search ? `%${search}%` : undefined,
-  })
+  const { data: userList, mutate: refetch } = useUserList(
+    state.profile.scope,
+    selectedScope,
+    {
+      ...query,
+      'name:likeLower': search ? `%${search}%` : undefined,
+    }
+  )
 
   async function handleDelete() {
     try {
@@ -131,7 +135,7 @@ export default function UserList() {
           <Tab
             value={ScopeSlug.INSTRUCTOR}
             label="Instruktur"
-            sx={state.isTrainee ? { display: 'none' } : {}}
+            sx={!state.isAdmin ? { display: 'none' } : {}}
           />
           <Tab
             value={ScopeSlug.ADMIN}

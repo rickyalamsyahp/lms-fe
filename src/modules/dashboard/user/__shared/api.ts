@@ -27,9 +27,14 @@ export function getUserList(scope: ScopeSlug, query: GetUserListQuery) {
     `/admin/user-account/scope/${scope}?${qs.stringify(query)}`
   )
 }
+export function getUserListInstruktur(query: GetUserListQuery) {
+  return api.get<GetUserListResponse>(
+    `/instructor/user-account?${qs.stringify(query)}`
+  )
+}
 
-export function getUserById(id: string) {
-  return api.get<User>(`/admin/user-account/${id}`)
+export function getUserById(role: string, id: string) {
+  return api.get<User>(`/${role}/user-account/${id}`)
 }
 
 export function createUser(payload: User) {
@@ -70,21 +75,29 @@ export function getUserAvatarUrl(id: string) {
 }
 
 export function useUserList(
+  role: string,
   scope: ScopeSlug,
   query: GetUserListQuery,
   config?: Partial<SWRConfiguration>
 ) {
   return useSWRFetcher(
-    [scope, query, 'get-User-list'],
-    ([scope, query]) => getUserList(scope, query),
+    [role, scope, query, 'get-User-list'],
+    ([role, scope, query]) =>
+      role === 'instructor'
+        ? getUserListInstruktur(query)
+        : getUserList(scope, query),
     config
   )
 }
 
-export function useUser(id: string, config?: Partial<SWRConfiguration>) {
+export function useUser(
+  role: string,
+  id: string,
+  config?: Partial<SWRConfiguration>
+) {
   return useSWRFetcher(
-    [id, 'get-user-by-id'],
-    ([id]) => getUserById(id),
+    [role, id, 'get-user-by-id'],
+    ([role, id]) => getUserById(role, id),
     config
   )
 }

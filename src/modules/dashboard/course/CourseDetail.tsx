@@ -7,14 +7,14 @@ import { DialogConfirm } from '../../../components/shared/Dialog/DialogConfirm'
 import Sidebar from '../../../components/shared/Sidebar'
 import { useSession } from '../../../context/session'
 import { ellipsis } from '../../../libs/utils'
-import { deleteUser, useUser } from './__shared/api'
+import { deleteUser, useCours } from './__shared/api'
 
 export default function UserDtail() {
   const navigate = useNavigate()
   const { pathname } = useLocation()
   const { userId } = useParams()
   const { isMobile, state } = useSession()
-  const { data: user } = useUser(state.profile.scope, userId as string)
+  const { data: user } = useCours(userId as string)
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
   const [tab, setTab] = useState<string>(
     pathname.replace(`/dashboard/user/${userId}/`, '')
@@ -38,7 +38,11 @@ export default function UserDtail() {
     <>
       <Stack sx={{ flex: 1 }}>
         <Commandbar
-          title={user?.name ? ellipsis(user.name, isMobile ? 24 : 48) : '...'}
+          title={
+            user?.description
+              ? ellipsis(user.description, isMobile ? 24 : 48)
+              : '...'
+          }
           breadcrumbsProps={{
             items: [
               {
@@ -70,7 +74,7 @@ export default function UserDtail() {
             </>
           }
         />
-        {state.isAdmin || state.isInstructor ? (
+        {state.isAdmin ? (
           <>
             <Tabs
               value={tab}

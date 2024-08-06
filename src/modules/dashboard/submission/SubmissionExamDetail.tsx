@@ -1,5 +1,4 @@
-import { Delete } from '@mui/icons-material'
-import { Box, Button, IconButton, Stack, Tab, Tabs } from '@mui/material'
+import { Box, Stack, Tab, Tabs } from '@mui/material'
 import { SyntheticEvent, useState } from 'react'
 import { Outlet, useLocation, useNavigate, useParams } from 'react-router-dom'
 import Commandbar from '../../../components/shared/Commandbar'
@@ -7,28 +6,29 @@ import { DialogConfirm } from '../../../components/shared/Dialog/DialogConfirm'
 import Sidebar from '../../../components/shared/Sidebar'
 import { useSession } from '../../../context/session'
 import { ellipsis } from '../../../libs/utils'
-import { deleteUser, useUser } from './__shared/api'
+import { deleteExam, useCours } from './__shared/api'
 
 export default function UserDtail() {
   const navigate = useNavigate()
   const { pathname } = useLocation()
-  const { userId } = useParams()
+  const { submissionId } = useParams()
+
   const { isMobile, state } = useSession()
-  const { data: user } = useUser(state.profile.scope, userId as string)
+  const { data: exam } = useCours(state.profile.scope, submissionId as string)
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
   const [tab, setTab] = useState<string>(
-    pathname.replace(`/dashboard/user/${userId}/`, '')
+    pathname.replace(`/dashboard/submission/${submissionId}/`, '')
   )
 
   function handleTabChange(e: SyntheticEvent, newTab: string) {
     setTab(newTab)
-    navigate(`/dashboard/user/${userId}/${newTab}`)
+    navigate(`/dashboard/submission/${submissionId}/${newTab}`)
   }
 
   async function handleDelete() {
     try {
-      await deleteUser(userId as string)
-      navigate('/dashboard/user')
+      await deleteExam(submissionId as string)
+      navigate('/dashboard/submission')
     } catch (error) {
       throw error
     }
@@ -38,37 +38,15 @@ export default function UserDtail() {
     <>
       <Stack sx={{ flex: 1 }}>
         <Commandbar
-          title={user?.name ? ellipsis(user.name, isMobile ? 24 : 48) : '...'}
+          title={exam?.owner ? ellipsis(exam.owner, isMobile ? 24 : 48) : '...'}
           breadcrumbsProps={{
             items: [
               {
-                label: 'Pengguna',
-                path: '/dashboard/user',
+                label: 'Submission',
+                path: '/dashboard/submission',
               },
             ],
           }}
-          rightAddon={
-            <>
-              {state.isAdmin &&
-                (isMobile ? (
-                  <IconButton
-                    color="warning"
-                    onClick={() => setShowDeleteConfirm(true)}
-                  >
-                    <Delete />
-                  </IconButton>
-                ) : (
-                  <Button
-                    startIcon={<Delete />}
-                    color="warning"
-                    variant="contained"
-                    onClick={() => setShowDeleteConfirm(true)}
-                  >
-                    Hapus
-                  </Button>
-                ))}
-            </>
-          }
         />
         {state.isAdmin || state.isInstructor ? (
           <>

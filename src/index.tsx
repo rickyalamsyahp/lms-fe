@@ -5,8 +5,16 @@ import { createBrowserRouter, RouterProvider } from 'react-router-dom'
 import ErrorPage from './ErrorPage'
 import './index.css'
 import LoginPage from './modules/auth/Login'
+import CourseList from './modules/dashboard/course/CourseList'
+import CourseExamListDetail from './modules/dashboard/courseExam/CourseExamDetail'
+import CourseExamListOverview from './modules/dashboard/courseExam/CourseExamDetailOverview'
+import CourseExamListPenilaian from './modules/dashboard/courseExam/CourseExamDetailPenilaian'
+import CourseExamListSetting from './modules/dashboard/courseExam/CourseExamDetailSetting'
+import CourseExamList from './modules/dashboard/courseExam/CourseExamList'
 import DashboardLayout from './modules/dashboard/Layout'
 import Report from './modules/dashboard/report/Report'
+import SubmissionDetail from './modules/dashboard/submission/SubmissionExamDetail'
+import SubmissionDetailOverview from './modules/dashboard/submission/SubmissionExamDetailOverview'
 import SubmissionList from './modules/dashboard/submission/SubmissionList'
 import UserDetail from './modules/dashboard/user/UserDetail'
 import UserDetailOverview from './modules/dashboard/user/UserDetailOverview'
@@ -32,6 +40,42 @@ const router = createBrowserRouter([
       {
         path: '/dashboard/submission',
         element: <SubmissionList />,
+      },
+      {
+        path: '/dashboard/submission/:submissionId',
+        element: <SubmissionDetail />,
+        children: [
+          {
+            path: '/dashboard/submission/:submissionId/overview',
+            element: <SubmissionDetailOverview />,
+          },
+        ],
+      },
+      {
+        path: '/dashboard/course',
+        element: <CourseList />,
+      },
+      {
+        path: '/dashboard/exam',
+        element: <CourseExamList />,
+      },
+      {
+        path: '/dashboard/exam/:examId',
+        element: <CourseExamListDetail />,
+        children: [
+          {
+            path: '/dashboard/exam/:examId/overview',
+            element: <CourseExamListOverview />,
+          },
+          {
+            path: '/dashboard/exam/:examId/setting',
+            element: <CourseExamListSetting />,
+          },
+          {
+            path: '/dashboard/exam/:examId/penilaian',
+            element: <CourseExamListPenilaian />,
+          },
+        ],
       },
       {
         path: '/dashboard/report',

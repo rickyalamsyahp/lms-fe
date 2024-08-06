@@ -7,28 +7,29 @@ import { DialogConfirm } from '../../../components/shared/Dialog/DialogConfirm'
 import Sidebar from '../../../components/shared/Sidebar'
 import { useSession } from '../../../context/session'
 import { ellipsis } from '../../../libs/utils'
-import { deleteUser, useUser } from './__shared/api'
+import { deleteExam, useCours } from './__shared/api'
 
 export default function UserDtail() {
   const navigate = useNavigate()
   const { pathname } = useLocation()
-  const { userId } = useParams()
+  const { examId } = useParams()
   const { isMobile, state } = useSession()
-  const { data: user } = useUser(state.profile.scope, userId as string)
+
+  const { data: exam } = useCours(state.profile.scope, examId as string)
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
   const [tab, setTab] = useState<string>(
-    pathname.replace(`/dashboard/user/${userId}/`, '')
+    pathname.replace(`/dashboard/exam/${examId}/`, '')
   )
 
   function handleTabChange(e: SyntheticEvent, newTab: string) {
     setTab(newTab)
-    navigate(`/dashboard/user/${userId}/${newTab}`)
+    navigate(`/dashboard/exam/${examId}/${newTab}`)
   }
 
   async function handleDelete() {
     try {
-      await deleteUser(userId as string)
-      navigate('/dashboard/user')
+      await deleteExam(examId as string)
+      navigate('/dashboard/exam')
     } catch (error) {
       throw error
     }
@@ -38,18 +39,23 @@ export default function UserDtail() {
     <>
       <Stack sx={{ flex: 1 }}>
         <Commandbar
-          title={user?.name ? ellipsis(user.name, isMobile ? 24 : 48) : '...'}
+          title={
+            exam?.description
+              ? ellipsis(exam.description, isMobile ? 24 : 48)
+              : '...'
+          }
           breadcrumbsProps={{
             items: [
               {
-                label: 'Pengguna',
-                path: '/dashboard/user',
+                label: 'Course Exam',
+                path: '/dashboard/exam',
               },
             ],
           }}
           rightAddon={
             <>
               {state.isAdmin &&
+                state.profile.scope === 'instructor' &&
                 (isMobile ? (
                   <IconButton
                     color="warning"
@@ -79,6 +85,8 @@ export default function UserDtail() {
             >
               <Box sx={{ borderColor: 'thin solid divider' }} />
               <Tab label="Overview" value="overview" />
+              <Tab label="Setting " value="setting" />
+              <Tab label="Penilaian" value="penilaian" />
             </Tabs>
             <Box sx={{ flex: 1, position: 'relative' }}>
               <Box

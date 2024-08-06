@@ -2,13 +2,13 @@ import { Box, Paper } from '@mui/material'
 import { useParams } from 'react-router-dom'
 import JumpingLoader from '../../../components/shared/JumpingLoader'
 import { useSession } from '../../../context/session'
-import UserForm from './__components/UserForm'
-import { useUser } from './__shared/api'
+import UserForm from './__components/CourseExamForm'
+import { useCours } from './__shared/api'
 
 export default function UserDetailOverview() {
-  const { userId } = useParams()
+  const { examId } = useParams()
   const { state } = useSession()
-  const { data: user } = useUser(state.profile.scope, userId as string)
+  const { data: user } = useCours(state.profile.scope, examId as string)
 
   return user ? (
     <Box maxWidth={'sm'}>

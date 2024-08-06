@@ -89,6 +89,8 @@ export default function DataTable({
       </Stack>
     </Box>
   )
+  console.log(hidePaper)
+
   return hidePaper ? (
     <Box sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
       {renderTable}

@@ -10,9 +10,9 @@ import DataTable from '../../../components/shared/DataTable'
 import { DialogConfirm } from '../../../components/shared/Dialog/DialogConfirm'
 import InfiniteScroll from '../../../components/shared/InfiniteScroll'
 import { useSession } from '../../../context/session'
-import UserForm from './__components/SubmissionForm'
-import { deleteExam, useSubmissionList } from './__shared/api'
-import { SubmissionExam } from './__shared/type'
+import UserForm from './__components/CourseExamForm'
+import { deleteExam, useCourseExamList } from './__shared/api'
+import { CourseExam } from './__shared/type'
 
 export default function UserListExam() {
   const navigate = useNavigate()
@@ -21,7 +21,7 @@ export default function UserListExam() {
   const [size, setSize] = useState(10)
   const [search, setSearch] = useState<string>('')
   const [showForm, setShowForm] = useState(false)
-  const [selectedItem, setSelectedItem] = useState<SubmissionExam | undefined>()
+  const [selectedItem, setSelectedItem] = useState<CourseExam | undefined>()
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
 
   const query = {
@@ -29,7 +29,7 @@ export default function UserListExam() {
     size,
   }
 
-  const { data: examList, mutate: refetch } = useSubmissionList(
+  const { data: examList, mutate: refetch } = useCourseExamList(
     state.profile.scope,
     {
       ...query,
@@ -52,10 +52,10 @@ export default function UserListExam() {
     <>
       <Stack sx={{ flex: 1 }}>
         <Commandbar
-          title="Daftar Submission"
+          title="Daftar Course Exam"
           searchProps={{
             onSearch: (newSearch) => setSearch(newSearch),
-            placeholder: 'Cari Submission...',
+            placeholder: 'Cari Course Exam...',
           }}
           breadcrumbsProps={{
             items: [
@@ -87,45 +87,45 @@ export default function UserListExam() {
               loading={!examList}
               columns={[
                 {
-                  label: 'Owner',
-                  render: (item: any) => (
-                    <Link
-                      onClick={() =>
-                        navigate(`/dashboard/submission/${item.id}/overview`)
-                      }
-                    >
-                      <Typography color={'blue'}>{item.owner}</Typography>
-                    </Link>
-                  ),
-                },
-                {
                   label: 'Course ID',
                   render: (item: any) => (
                     <Typography>{item.courseId}</Typography>
                   ),
                 },
                 {
-                  label: 'Course Exam ID',
-                  render: (item: any) => (
-                    <Typography>{item.courseExamId}</Typography>
-                  ),
-                },
-                {
-                  label: 'Object Type',
-                  render: (item: any) => (
-                    <Typography>{item.objectType}</Typography>
+                  label: 'Title',
+                  render: (item: CourseExam) => (
+                    <Link
+                      onClick={() =>
+                        navigate(`/dashboard/exam/${item.id}/overview`)
+                      }
+                    >
+                      <Typography color={'blue'}>{item.title}</Typography>
+                    </Link>
                   ),
                 },
 
                 {
+                  label: 'Description',
+                  render: (item: CourseExam) => (
+                    <Typography>{item.description}</Typography>
+                  ),
+                },
+                {
+                  label: 'Level',
+                  render: (item: CourseExam) => (
+                    <Typography>{item.level}</Typography>
+                  ),
+                },
+                {
                   label: 'Dibuat',
-                  render: (item: SubmissionExam) => (
+                  render: (item: CourseExam) => (
                     <Typography>{item.createdBy}</Typography>
                   ),
                 },
                 {
                   label: 'Tanggal Dibuat',
-                  render: (item: SubmissionExam) => (
+                  render: (item: CourseExam) => (
                     <Typography sx={{ minWidth: 160 }}>
                       {dayjs(item.createdAt).format('DD MMM YYYY HH:mm:ss')}
                     </Typography>
