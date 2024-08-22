@@ -1,3 +1,5 @@
+import { FileMeta } from '../../../filemeta/__shared/type'
+
 export type CourseExam = {
   id?: string
   courseId?: string
@@ -9,6 +11,7 @@ export type CourseExam = {
   createdAt?: Date
   modifiedBy?: string
   modifiedAt?: Date
+  fileMeta?: FileMeta
 }
 
 export type CourseExamSetting = {

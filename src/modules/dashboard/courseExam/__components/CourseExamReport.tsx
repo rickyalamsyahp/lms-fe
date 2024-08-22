@@ -1,3 +1,4 @@
+import { Check, Close } from '@mui/icons-material'
 import {
   Box,
   BoxProps,
@@ -43,6 +44,7 @@ export default function CourseExamReport({
             size="small"
             label={data?.hasFinished ? 'sudah' : 'belum'}
             color={data?.hasFinished ? 'success' : 'default'}
+            icon={data?.hasFinished ? <Check /> : <Close />}
           />
         ) : (
           <CircularProgress size={16} />

@@ -141,6 +141,7 @@ export default function CourseForm({
           />
           <InputFile
             label="File Upload"
+            accept="*.*"
             onChange={(file?: File) => {
               handlePayloadChange('file', file)
             }}
@@ -224,7 +225,7 @@ export default function CourseForm({
       fullWidth={true}
       maxWidth={'xs'}
     >
-      <DialogTitle>Form Course</DialogTitle>
+      <DialogTitle>Form Modul Pembelajaran</DialogTitle>
       <DialogContent>{content}</DialogContent>
       <DialogActions>{action}</DialogActions>
     </Dialog>

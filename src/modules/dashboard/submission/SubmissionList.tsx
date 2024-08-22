@@ -1,10 +1,9 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 'use client'
 
-import { Box, Link, Stack, Typography } from '@mui/material'
+import { Box, Stack, Typography } from '@mui/material'
 import dayjs from 'dayjs'
 import { useEffect, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
 import Commandbar from '../../../components/shared/Commandbar'
 import DataTable from '../../../components/shared/DataTable'
 import { DialogConfirm } from '../../../components/shared/Dialog/DialogConfirm'
@@ -14,8 +13,15 @@ import UserForm from './__components/SubmissionForm'
 import { deleteExam, useSubmissionList } from './__shared/api'
 import { SubmissionExam } from './__shared/type'
 
-export default function UserListExam() {
-  const navigate = useNavigate()
+type SubmissionListProps = {
+  asPage?: boolean
+  owner?: string
+}
+
+export default function SubmissionList({
+  asPage = true,
+  owner,
+}: SubmissionListProps) {
   const { isMobile, state } = useSession()
   const [page, setPage] = useState(1)
   const [size, setSize] = useState(10)
@@ -27,6 +33,7 @@ export default function UserListExam() {
   const query = {
     page,
     size,
+    ...(owner ? { 'owner:eq': owner } : {}),
   }
 
   const { data: examList, mutate: refetch } = useSubmissionList(
@@ -48,7 +55,51 @@ export default function UserListExam() {
     }
   }
 
-  return (
+  const renderContent = (
+    <DataTable
+      fit={asPage}
+      data={examList?.results}
+      loading={!examList}
+      columns={[
+        {
+          label: 'Modul',
+          render: (item: any) => <Typography>{item?.course.title}</Typography>,
+        },
+        {
+          label: 'Exam/Pelatihan',
+          render: (item: any) => (
+            <Typography>{item?.courseExam.title}</Typography>
+          ),
+        },
+        {
+          label: 'Status',
+          render: (item: any) => <Typography>{item.status}</Typography>,
+        },
+        {
+          label: 'Nilai/Skor',
+          render: (item: any) => <Typography>{item.score || '-'}</Typography>,
+        },
+        {
+          label: 'Tanggal Dibuat',
+          render: (item: SubmissionExam) => (
+            <Typography sx={{ minWidth: 160 }}>
+              {dayjs(item.createdAt).format('DD MMM YYYY HH:mm:ss')}
+            </Typography>
+          ),
+        },
+      ]}
+      paginationProps={{
+        rowsPerPageOptions: [10, 25, 50],
+        rowsPerPage: size,
+        count: Number(examList?.total || 0),
+        page,
+        onPageChange: (e, value) => setPage(value),
+        onRowsPerPageChange: (e) => setSize(Number(e.target.value)),
+      }}
+    />
+  )
+
+  return asPage ? (
     <>
       <Stack sx={{ flex: 1 }}>
         <Commandbar
@@ -60,7 +111,7 @@ export default function UserListExam() {
           breadcrumbsProps={{
             items: [
               {
-                label: 'Kategori',
+                label: 'Menu Utama',
               },
             ],
           }}
@@ -82,65 +133,7 @@ export default function UserListExam() {
               </Stack>
             </InfiniteScroll>
           ) : (
-            <DataTable
-              data={examList?.results}
-              loading={!examList}
-              columns={[
-                {
-                  label: 'Owner',
-                  render: (item: any) => (
-                    <Link
-                      onClick={() =>
-                        navigate(`/dashboard/submission/${item.id}/overview`)
-                      }
-                    >
-                      <Typography color={'blue'}>{item.owner}</Typography>
-                    </Link>
-                  ),
-                },
-                {
-                  label: 'Course ID',
-                  render: (item: any) => (
-                    <Typography>{item.courseId}</Typography>
-                  ),
-                },
-                {
-                  label: 'Course Exam ID',
-                  render: (item: any) => (
-                    <Typography>{item.courseExamId}</Typography>
-                  ),
-                },
-                {
-                  label: 'Object Type',
-                  render: (item: any) => (
-                    <Typography>{item.objectType}</Typography>
-                  ),
-                },
-
-                {
-                  label: 'Dibuat',
-                  render: (item: SubmissionExam) => (
-                    <Typography>{item.createdBy}</Typography>
-                  ),
-                },
-                {
-                  label: 'Tanggal Dibuat',
-                  render: (item: SubmissionExam) => (
-                    <Typography sx={{ minWidth: 160 }}>
-                      {dayjs(item.createdAt).format('DD MMM YYYY HH:mm:ss')}
-                    </Typography>
-                  ),
-                },
-              ]}
-              paginationProps={{
-                rowsPerPageOptions: [10, 25, 50],
-                rowsPerPage: size,
-                count: Number(examList?.total || 0),
-                page,
-                onPageChange: (e, value) => setPage(value),
-                onRowsPerPageChange: (e) => setSize(Number(e.target.value)),
-              }}
-            />
+            renderContent
           )}
         </Box>
       </Stack>
@@ -164,5 +157,7 @@ export default function UserListExam() {
         onSubmit={handleDelete}
       />
     </>
+  ) : (
+    renderContent
   )
 }

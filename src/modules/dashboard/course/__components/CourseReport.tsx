@@ -1,6 +1,8 @@
+import { ArrowRightAlt, Check, Close } from '@mui/icons-material'
 import {
   Box,
   BoxProps,
+  Button,
   Chip,
   CircularProgress,
   TableCell,
@@ -13,12 +15,14 @@ type CourseReportProps = BoxProps & {
   courseId: string
   userId?: string
   asTableCell?: boolean
+  onClickExam?: () => void
 }
 
 export default function CourseReport({
   courseId,
   userId,
   asTableCell,
+  onClickExam,
   ...props
 }: CourseReportProps) {
   const { data } = useCourseStats(courseId as string, userId as string)
@@ -30,6 +34,7 @@ export default function CourseReport({
             size="small"
             label={data?.hasFinished ? 'sudah' : 'belum'}
             color={data?.hasFinished ? 'success' : 'default'}
+            icon={data?.hasFinished ? <Check /> : <Close />}
           />
         ) : (
           <CircularProgress size={16} />
@@ -50,9 +55,16 @@ export default function CourseReport({
         </Typography>
       </TableCell>
       <TableCell align="right">
-        <Typography>
-          {`${data?.progress?.totalFinishedExam} / ${data?.progress?.totalExam}`}
-        </Typography>
+        <Button
+          onClick={onClickExam}
+          variant="contained"
+          sx={{ minWidth: 96 }}
+          startIcon={<ArrowRightAlt />}
+        >
+          <Typography>
+            {`${data?.progress?.totalFinishedExam} / ${data?.progress?.totalExam}`}
+          </Typography>
+        </Button>
       </TableCell>
       <TableCell align="right">
         <Typography>{data?.submission.ongoing}</Typography>

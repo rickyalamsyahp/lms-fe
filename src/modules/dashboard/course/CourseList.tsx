@@ -5,8 +5,10 @@ import { Add, Delete, Edit, Menu, Replay } from '@mui/icons-material'
 import {
   Box,
   Button,
+  Chip,
   Divider,
   IconButton,
+  Link,
   ListItemIcon,
   ListItemText,
   MenuItem,
@@ -23,13 +25,9 @@ import Dropdown from '../../../components/shared/Dropdown'
 import InfiniteScroll from '../../../components/shared/InfiniteScroll'
 import { useSession } from '../../../context/session'
 // import UserCard from './__components/CourseCard'
+import FileViewer from '../../filemeta/__components/FileViewer'
 import UserForm from './__components/CourseForm'
-import {
-  changeStatus,
-  deleteUser,
-  downloadFile,
-  useCourseList,
-} from './__shared/api'
+import { changeStatus, deleteUser, useCourseList } from './__shared/api'
 import { Course } from './__shared/type'
 
 export default function UserList() {
@@ -40,6 +38,7 @@ export default function UserList() {
   const [showForm, setShowForm] = useState(false)
   const [selectedItem, setSelectedItem] = useState<Course | undefined>()
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
+  const [showFile, setShowFile] = useState(false)
 
   const query = {
     page,
@@ -53,6 +52,12 @@ export default function UserList() {
       'title:likeLower': search ? `%${search}%` : undefined,
     }
   )
+
+  function handleOpenCourse(d: Course) {
+    setSelectedItem(d)
+    setShowFile(true)
+  }
+
   useEffect(() => {
     refetch()
   }, [])
@@ -68,62 +73,45 @@ export default function UserList() {
   const columns = [
     {
       label: 'Title',
-      render: (item: Course) => <Typography>{item.title}</Typography>,
+      render: (item: Course) =>
+        item.fileMeta ? (
+          <Link
+            sx={{ cursor: 'pointer' }}
+            onClick={() => handleOpenCourse(item)}
+          >
+            <Typography>{item.title}</Typography>
+          </Link>
+        ) : (
+          <Typography>{item.title}</Typography>
+        ),
     },
     {
       label: 'Description',
-      render: (item: Course) => <Typography>{item.description}</Typography>,
+      render: (item: Course) => (
+        <Typography fontSize={12} sx={{ mt: 0.5 }} color="textSecondary">
+          {item.description}
+        </Typography>
+      ),
     },
     {
       label: 'Level',
       render: (item: Course) => <Typography>{item.level}</Typography>,
     },
     {
-      label: 'Publish',
+      label: 'Status',
       render: (item: any) => (
-        <Typography>{item.published ? 'Active' : 'Not Active'}</Typography>
+        <Chip
+          size="small"
+          label={item.published ? 'Published' : 'Unpublished'}
+          color={item?.published ? 'success' : 'default'}
+        />
       ),
     },
-    {
-      label: 'Download File',
-      render: (item: any) => (
-        <Button
-          onClick={async () => {
-            const response = await downloadFile(item?.id as string)
-            const url = window.URL.createObjectURL(
-              new Blob([response.data], {
-                type: response.headers['content-type'],
-              })
-            )
 
-            const link = document.createElement('a')
-            link.href = url
-
-            const contentDisposition = response.headers['content-disposition']
-            let fileName = 'course_Download'
-            if (contentDisposition) {
-              const matches = /filename="([^"]*)"/.exec(contentDisposition)
-              if (matches && matches[1]) {
-                fileName = matches[1]
-              }
-            }
-            link.setAttribute('download', fileName)
-
-            document.body.appendChild(link)
-            link.click()
-            document.body.removeChild(link)
-
-            window.URL.revokeObjectURL(url)
-          }}
-        >
-          Download File
-        </Button>
-      ),
-    },
-    {
-      label: 'Dibuat',
-      render: (item: Course) => <Typography>{item.createdBy}</Typography>,
-    },
+    // {
+    //   label: 'Dibuat',
+    //   render: (item: Course) => <Typography>{item.createdBy}</Typography>,
+    // },
     {
       label: 'Tanggal Dibuat',
       render: (item: Course) => (
@@ -134,7 +122,7 @@ export default function UserList() {
     },
   ]
 
-  if (state.isAdmin) {
+  if (state.isAdmin || state.isInstructor) {
     columns.push({
       label: 'Action',
       render: (item) => (
@@ -191,7 +179,7 @@ export default function UserList() {
     <>
       <Stack sx={{ flex: 1 }}>
         <Commandbar
-          title="Daftar Couse"
+          title="Daftar Pembelajaran"
           searchProps={{
             onSearch: (newSearch) => setSearch(newSearch),
             placeholder: 'Cari Course...',
@@ -199,12 +187,12 @@ export default function UserList() {
           breadcrumbsProps={{
             items: [
               {
-                label: 'Kategori',
+                label: 'Menu Utama',
               },
             ],
           }}
           rightAddon={
-            state.isAdmin && (
+            !state.isTrainee && (
               <>
                 <IconButton
                   onClick={() => refetch()}
@@ -279,8 +267,16 @@ export default function UserList() {
           setSelectedItem(undefined)
         }}
         title="Delete"
-        content={`Yakin menghapus course ini?`}
+        content={`Yakin menghapus modul pembelajaran ini?`}
         onSubmit={handleDelete}
+      />
+      <FileViewer
+        fileMeta={selectedItem?.fileMeta}
+        open={showFile}
+        onClose={() => {
+          setShowFile(false)
+          setSelectedItem(undefined)
+        }}
       />
     </>
   )

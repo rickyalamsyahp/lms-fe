@@ -1,16 +1,30 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 'use client'
 
-import { Box, Link, Stack, Typography } from '@mui/material'
+import { Add, Delete, Details, Edit, Menu, Replay } from '@mui/icons-material'
+import {
+  Box,
+  Button,
+  Divider,
+  IconButton,
+  Link,
+  ListItemIcon,
+  ListItemText,
+  MenuItem,
+  Stack,
+  Typography,
+} from '@mui/material'
 import dayjs from 'dayjs'
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import Commandbar from '../../../components/shared/Commandbar'
 import DataTable from '../../../components/shared/DataTable'
 import { DialogConfirm } from '../../../components/shared/Dialog/DialogConfirm'
+import Dropdown from '../../../components/shared/Dropdown'
 import InfiniteScroll from '../../../components/shared/InfiniteScroll'
 import { useSession } from '../../../context/session'
-import UserForm from './__components/CourseExamForm'
+import FileViewer from '../../filemeta/__components/FileViewer'
+import CourseExamForm from './__components/CourseExamForm'
 import { deleteExam, useCourseExamList } from './__shared/api'
 import { CourseExam } from './__shared/type'
 
@@ -23,6 +37,7 @@ export default function UserListExam() {
   const [showForm, setShowForm] = useState(false)
   const [selectedItem, setSelectedItem] = useState<CourseExam | undefined>()
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
+  const [showFile, setShowFile] = useState(false)
 
   const query = {
     page,
@@ -36,9 +51,12 @@ export default function UserListExam() {
       'title:likeLower': search ? `%${search}%` : undefined,
     }
   )
-  useEffect(() => {
-    refetch()
-  }, [])
+
+  function handleOpenCourseExam(d: CourseExam) {
+    setSelectedItem(d)
+    setShowFile(true)
+  }
+
   async function handleDelete() {
     try {
       await deleteExam(selectedItem?.id as string)
@@ -52,7 +70,7 @@ export default function UserListExam() {
     <>
       <Stack sx={{ flex: 1 }}>
         <Commandbar
-          title="Daftar Course Exam"
+          title="Daftar Pelatihan"
           searchProps={{
             onSearch: (newSearch) => setSearch(newSearch),
             placeholder: 'Cari Course Exam...',
@@ -60,10 +78,35 @@ export default function UserListExam() {
           breadcrumbsProps={{
             items: [
               {
-                label: 'Kategori',
+                label: 'Menu Utama',
               },
             ],
           }}
+          rightAddon={
+            !state.isTrainee && (
+              <>
+                <IconButton
+                  onClick={() => refetch()}
+                  sx={{ mr: isMobile ? 0 : 2 }}
+                >
+                  <Replay />
+                </IconButton>
+                {isMobile ? (
+                  <IconButton onClick={() => setShowForm(true)} color="primary">
+                    <Add />
+                  </IconButton>
+                ) : (
+                  <Button
+                    startIcon={<Add />}
+                    variant="contained"
+                    onClick={() => setShowForm(true)}
+                  >
+                    Tambah
+                  </Button>
+                )}
+              </>
+            )
+          }
         />
         <Box sx={{ flex: 1, px: 2 }}>
           {isMobile ? (
@@ -87,28 +130,41 @@ export default function UserListExam() {
               loading={!examList}
               columns={[
                 {
-                  label: 'Course ID',
-                  render: (item: any) => (
-                    <Typography>{item.courseId}</Typography>
-                  ),
-                },
-                {
                   label: 'Title',
-                  render: (item: CourseExam) => (
-                    <Link
-                      onClick={() =>
-                        navigate(`/dashboard/exam/${item.id}/overview`)
-                      }
-                    >
-                      <Typography color={'blue'}>{item.title}</Typography>
-                    </Link>
-                  ),
+                  render: (item: CourseExam) =>
+                    item.fileMeta ? (
+                      <Link
+                        sx={{ cursor: 'pointer' }}
+                        onClick={() => handleOpenCourseExam(item)}
+                      >
+                        <Typography sx={{ minWidth: 160 }}>
+                          {item.title}
+                        </Typography>
+                      </Link>
+                    ) : (
+                      <Typography sx={{ minWidth: 160 }}>
+                        {item.title}
+                      </Typography>
+                    ),
                 },
-
                 {
                   label: 'Description',
                   render: (item: CourseExam) => (
-                    <Typography>{item.description}</Typography>
+                    <Typography
+                      fontSize={12}
+                      sx={{ mt: 0.5 }}
+                      color="textSecondary"
+                    >
+                      {item.description}
+                    </Typography>
+                  ),
+                },
+                {
+                  label: 'Description',
+                  render: (item: CourseExam) => (
+                    <Typography sx={{ minWidth: 160 }}>
+                      {item.description}
+                    </Typography>
                   ),
                 },
                 {
@@ -118,9 +174,11 @@ export default function UserListExam() {
                   ),
                 },
                 {
-                  label: 'Dibuat',
-                  render: (item: CourseExam) => (
-                    <Typography>{item.createdBy}</Typography>
+                  label: 'Pembelajaran',
+                  render: (item: any) => (
+                    <Typography sx={{ minWidth: 120 }}>
+                      {item.course?.title}
+                    </Typography>
                   ),
                 },
                 {
@@ -129,6 +187,55 @@ export default function UserListExam() {
                     <Typography sx={{ minWidth: 160 }}>
                       {dayjs(item.createdAt).format('DD MMM YYYY HH:mm:ss')}
                     </Typography>
+                  ),
+                },
+                {
+                  label: 'Aksi',
+                  render: (item: CourseExam) => (
+                    <Dropdown
+                      trigger={
+                        <IconButton>
+                          <Menu />
+                        </IconButton>
+                      }
+                      menuList={
+                        <>
+                          <MenuItem
+                            onClick={() => {
+                              setSelectedItem(item)
+                              setShowForm(true)
+                            }}
+                          >
+                            <ListItemIcon>
+                              <Edit />
+                            </ListItemIcon>
+                            <ListItemText>Edit</ListItemText>
+                          </MenuItem>
+                          <MenuItem
+                            onClick={async () => {
+                              navigate(`/dashboard/exam/${item.id}/overview`)
+                            }}
+                          >
+                            <ListItemIcon>
+                              <Details />
+                            </ListItemIcon>
+                            <ListItemText>Detail</ListItemText>
+                          </MenuItem>
+                          <Divider />
+                          <MenuItem
+                            onClick={() => {
+                              setSelectedItem(item)
+                              setShowDeleteConfirm(true)
+                            }}
+                          >
+                            <ListItemIcon>
+                              <Delete />
+                            </ListItemIcon>
+                            <ListItemText>Delete</ListItemText>
+                          </MenuItem>
+                        </>
+                      }
+                    />
                   ),
                 },
               ]}
@@ -144,7 +251,7 @@ export default function UserListExam() {
           )}
         </Box>
       </Stack>
-      <UserForm
+      <CourseExamForm
         isOpen={showForm}
         initialData={selectedItem}
         onClose={() => {
@@ -160,8 +267,16 @@ export default function UserListExam() {
           setSelectedItem(undefined)
         }}
         title="Delete"
-        content={`Yakin menghapus course ini?`}
+        content={`Yakin menghapus pelatihan ini?`}
         onSubmit={handleDelete}
+      />
+      <FileViewer
+        fileMeta={selectedItem?.fileMeta}
+        open={showFile}
+        onClose={() => {
+          setShowFile(false)
+          setSelectedItem(undefined)
+        }}
       />
     </>
   )

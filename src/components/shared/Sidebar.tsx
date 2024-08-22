@@ -56,7 +56,7 @@ const menuList: MenuItemProps[] = [
   },
   {
     menuType: MenuItemType.LINK,
-    label: 'Modul Ujian',
+    label: 'Modul Pelatihan',
     icon: <ListAlt fontSize="small" />,
     href: '/dashboard/exam',
     activeRegex: /.*exam/gi,

@@ -11,6 +11,7 @@ import {
 } from '@mui/material'
 import { useState } from 'react'
 import { options } from '../../../../libs/http'
+import FileViewer from '../../../filemeta/__components/FileViewer'
 import CourseReport from '../../course/__components/CourseReport'
 import { useCourseList } from '../../course/__shared/api'
 import { Course } from '../../course/__shared/type'
@@ -23,6 +24,7 @@ type UserCourseListProps = {
 export default function UserCourseList({ userId }: UserCourseListProps) {
   const [selectedCourse, setSelectedCourse] = useState<Course>()
   const [showCourseExamList, setShowCourseExamList] = useState(false)
+  const [showFile, setShowFile] = useState(false)
   const { data: courseList } = useCourseList(options.scope, {
     page: 1,
     size: 50,
@@ -31,8 +33,13 @@ export default function UserCourseList({ userId }: UserCourseListProps) {
     'published:eq': true,
   })
 
+  function handleOpenCourse(d: Course) {
+    setSelectedCourse(d)
+    setShowFile(true)
+  }
+
   return (
-    <Box sx={{ width: '100%', height: 'auto' }}>
+    <Box sx={{ width: '100%', height: 'auto', mb: 2 }}>
       <Paper>
         <TableContainer>
           <TableHead>
@@ -45,7 +52,7 @@ export default function UserCourseList({ userId }: UserCourseListProps) {
               <TableCell rowSpan={2} align="center">
                 Nilai Terakhir
               </TableCell>
-              <TableCell rowSpan={2} align="right">
+              <TableCell rowSpan={2} align="center">
                 Exam
               </TableCell>
               <TableCell align="center" colSpan={4}>
@@ -63,20 +70,30 @@ export default function UserCourseList({ userId }: UserCourseListProps) {
             {courseList?.results.map((d) => (
               <TableRow key={d.id}>
                 <TableCell>
-                  <Link
-                    sx={{ cursor: 'pointer' }}
-                    onClick={() => {
-                      setSelectedCourse(d)
-                      setShowCourseExamList(true)
-                    }}
-                  >
-                    <Typography sx={{ minWidth: 240 }}>{d.title}</Typography>
-                  </Link>
+                  <>
+                    <Link
+                      sx={{ cursor: 'pointer' }}
+                      onClick={() => handleOpenCourse(d)}
+                    >
+                      <Typography sx={{ minWidth: 240 }}>{d.title}</Typography>
+                    </Link>
+                    <Typography
+                      fontSize={12}
+                      sx={{ mt: 0.5 }}
+                      color="textSecondary"
+                    >
+                      {d.description}
+                    </Typography>
+                  </>
                 </TableCell>
                 <CourseReport
                   userId={userId}
                   courseId={d.id as string}
                   asTableCell
+                  onClickExam={() => {
+                    setSelectedCourse(d)
+                    setShowCourseExamList(true)
+                  }}
                 />
               </TableRow>
             ))}
@@ -90,6 +107,14 @@ export default function UserCourseList({ userId }: UserCourseListProps) {
         onClose={() => {
           setShowCourseExamList(false)
           setTimeout(() => setSelectedCourse(undefined), 500)
+        }}
+      />
+      <FileViewer
+        fileMeta={selectedCourse?.fileMeta}
+        open={showFile}
+        onClose={() => {
+          setShowFile(false)
+          setSelectedCourse(undefined)
         }}
       />
     </Box>

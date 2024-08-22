@@ -7,21 +7,27 @@ type InputFileProps = {
   label?: string
   onChange?: (file?: File) => void
   defaultPreviewImage?: string
+  accept?: string
 }
 
 export default function InputFile({
   label = 'Select Image',
   onChange,
   defaultPreviewImage,
+  accept = 'image/*',
   ...props
 }: InputFileProps) {
   const [previewImage, setPreviewImage] = useState<any>(defaultPreviewImage)
+  const [filename, setFilename] = useState()
 
   async function handleChange(e: any) {
     const file = e.target.files[0]
-    if (onChange) onChange(file)
-    const preview = await getBase64(file)
-    setPreviewImage(preview)
+    setFilename(file?.name)
+    if (file.type.includes('image')) {
+      if (onChange) onChange(file)
+      const preview = await getBase64(file)
+      setPreviewImage(preview)
+    }
   }
 
   useEffect(() => {
@@ -40,7 +46,7 @@ export default function InputFile({
         maxWidth: 160,
       }}
     >
-      {previewImage && (
+      {previewImage ? (
         <>
           <IconButton
             onClick={() => {
@@ -64,9 +70,13 @@ export default function InputFile({
             }}
           />
         </>
-      )}
+      ) : filename ? (
+        <Typography fontSize={12} color={'textSecondary'} sx={{ mb: 1 }}>
+          {filename}
+        </Typography>
+      ) : null}
       <Button variant="contained" component="label" size="small" fullWidth>
-        <input type="file" hidden onChange={handleChange} accept="image/*" />
+        <input type="file" hidden onChange={handleChange} accept={accept} />
         <Typography>{label}</Typography>
       </Button>
     </Box>

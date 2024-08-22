@@ -20,7 +20,7 @@ import { useSession } from '../../../../context/session'
 import { createCoursExam, updateCoursExam } from '../__shared/api'
 import { CourseExam } from '../__shared/type'
 
-type UserFromProps = {
+type CourseExamFormProps = {
   initialData?: CourseExam
   isOpen?: boolean
   onClose?: () => void
@@ -36,7 +36,7 @@ const defaultValue: CourseExam = {
   level: '',
 }
 
-export default function CourseForm({
+export default function CourseExamForm({
   initialData,
   isOpen,
   onClose = () => {
@@ -45,7 +45,7 @@ export default function CourseForm({
   onSuccess,
   asDialog = true,
   ...boxProps
-}: UserFromProps) {
+}: CourseExamFormProps) {
   const { isMobile } = useSession()
   const [payload, setPayload] = useState<CourseExam>(defaultValue)
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -141,6 +141,7 @@ export default function CourseForm({
           />
           <InputFile
             label="File Upload"
+            accept="*/*"
             onChange={(file?: File) => {
               handlePayloadChange('file', file)
             }}
@@ -212,7 +213,7 @@ export default function CourseForm({
       fullWidth={true}
       maxWidth={'xs'}
     >
-      <DialogTitle>Form Course</DialogTitle>
+      <DialogTitle>Form Pelatihan</DialogTitle>
       <DialogContent>{content}</DialogContent>
       <DialogActions>{action}</DialogActions>
     </Dialog>

@@ -97,7 +97,7 @@ export default function UserList() {
           breadcrumbsProps={{
             items: [
               {
-                label: 'Kategori',
+                label: 'Menu Utama',
               },
             ],
           }}
@@ -186,6 +186,7 @@ export default function UserList() {
                   label: 'Username',
                   render: (item: User) => (
                     <Link
+                      sx={{ cursor: 'pointer' }}
                       onClick={() =>
                         navigate(`/dashboard/user/${item.id}/overview`)
                       }
