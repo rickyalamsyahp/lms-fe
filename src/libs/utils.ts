@@ -18,3 +18,7 @@ export function getBase64(file: File) {
 export const enumToArray = (en: object) => {
   return [...Object.keys(en).map((key: any) => en[key as keyof typeof en])]
 }
+
+export const roundDecimal = (num: number) => {
+  return (Math.round(num * 100) / 100).toFixed(2)
+}

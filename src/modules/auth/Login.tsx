@@ -43,7 +43,7 @@ export default function LoginPage() {
     try {
       const res = await login(payload)
       setAccessToken(cookieNames.USER_ACCESS_TOKEN, res.data)
-      navigate('/dashboard/report')
+      navigate('/dashboard')
       toast.remove(loadingId)
     } catch (error: any) {
       toast.error(error.message, { id: loadingId })

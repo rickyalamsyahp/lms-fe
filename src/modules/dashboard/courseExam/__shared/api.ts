@@ -57,6 +57,25 @@ export function downloadFile(id: string) {
   })
 }
 
+export function getCourseExamStats(id: string, userId?: string) {
+  return api.get<{
+    submission: {
+      total: number
+      ongoing: number
+      finished: number
+      canceled: number
+    }
+    avgScore: number
+    latestScore?: number
+    hasFinished?: boolean
+    progress?: {
+      totalExam: number
+      totalFinishedExam: number
+      percentage: number
+    }
+  }>(`/public/course-exam/${id}/stats${userId ? `/${userId}` : ''}`)
+}
+
 export function useCourseExamList(
   role: string,
   query: GetCourseListQuery,
@@ -76,20 +95,32 @@ export function useCourseExamSettingList(
   config?: Partial<SWRConfiguration>
 ) {
   return useSWRFetcher(
-    [role, id, query, 'get-Course-list'],
+    [role, id, query, 'get-course-exam-list'],
     ([role, id, query]) => getCourseExamSttingList(role, id, query),
     config
   )
 }
 
-export function useCours(
+export function useCourseExam(
   role: string,
   id: string,
   config?: Partial<SWRConfiguration>
 ) {
   return useSWRFetcher(
-    [role, id, 'get-user-by-id'],
+    [role, id, 'get-course-exam-by-id'],
     ([role, id]) => getCoursExamById(role, id),
+    config
+  )
+}
+
+export function useCourseExamStats(
+  id: string,
+  userId?: string,
+  config?: Partial<SWRConfiguration>
+) {
+  return useSWRFetcher(
+    [id, userId, `get-course-exam-stats${userId ? `-${userId}` : ''}`],
+    ([id, userId]) => getCourseExamStats(id, userId),
     config
   )
 }

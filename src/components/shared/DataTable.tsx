@@ -28,6 +28,7 @@ type DataTableProps = {
   data?: any[]
   hidePaper?: boolean
   tableProps?: TableProps
+  fit?: boolean
 }
 
 export default function DataTable({
@@ -37,20 +38,31 @@ export default function DataTable({
   data,
   hidePaper,
   tableProps,
+  fit = true,
 }: DataTableProps) {
   const renderTable = (
-    <Box sx={{ position: 'relative', width: '100%', height: '100%', flex: 1 }}>
+    <Box
+      sx={
+        fit
+          ? { position: 'relative', width: '100%', height: '100%', flex: 1 }
+          : {}
+      }
+    >
       <Stack
         sx={{
-          position: 'absolute',
+          position: fit ? 'absolute' : 'relative',
           width: '100%',
-          height: '100%',
+          height: fit ? '100%' : 'auto',
         }}
       >
-        <TableContainer sx={{ flex: 1, width: '100%' }} {...tableProps}>
+        <TableContainer
+          sx={fit ? { flex: 1, width: '100%' } : {}}
+          {...tableProps}
+        >
           <Table stickyHeader>
             <TableHead>
               <TableRow>
+                <TableCell>#</TableCell>
                 {columns?.map((col, i) => (
                   <TableCell key={`col-${i}`}>{col.label}</TableCell>
                 ))}
@@ -68,6 +80,14 @@ export default function DataTable({
               <TableBody>
                 {data?.map((d, di) => (
                   <TableRow key={`row-${di}`}>
+                    <TableCell>
+                      {di +
+                        1 +
+                        (paginationProps
+                          ? paginationProps?.rowsPerPage *
+                            (paginationProps?.page - 1)
+                          : 0)}
+                    </TableCell>
                     {columns?.map((col, ci) => (
                       <TableCell key={`row-${di}-col-${ci}`} style={col.style}>
                         {col.render(d)}
@@ -89,7 +109,6 @@ export default function DataTable({
       </Stack>
     </Box>
   )
-  console.log(hidePaper)
 
   return hidePaper ? (
     <Box sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>

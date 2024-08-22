@@ -1,11 +1,14 @@
 import axios from 'axios'
 import cookie from 'cookie-cutter'
 import { API_URL } from './env'
+import { ScopeSlug } from '../context/auth/__shared/type'
 
 class Options {
   headers: any
+  scope: ScopeSlug
   constructor() {
     this.headers = {}
+    this.scope = ScopeSlug.TRAINEE
   }
 
   setHeaders(key: string, value: string) {
@@ -14,6 +17,10 @@ class Options {
 
   deleteHeaders(key: string) {
     delete this.headers[key]
+  }
+
+  setScope(newScope: ScopeSlug) {
+    this.scope = newScope
   }
 }
 

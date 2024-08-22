@@ -7,7 +7,7 @@ import { DialogConfirm } from '../../../components/shared/Dialog/DialogConfirm'
 import Sidebar from '../../../components/shared/Sidebar'
 import { useSession } from '../../../context/session'
 import { ellipsis } from '../../../libs/utils'
-import { deleteExam, useCours } from './__shared/api'
+import { deleteExam, useCourseExam } from './__shared/api'
 
 export default function UserDtail() {
   const navigate = useNavigate()
@@ -15,7 +15,7 @@ export default function UserDtail() {
   const { examId } = useParams()
   const { isMobile, state } = useSession()
 
-  const { data: exam } = useCours(state.profile.scope, examId as string)
+  const { data: exam } = useCourseExam(state.profile.scope, examId as string)
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
   const [tab, setTab] = useState<string>(
     pathname.replace(`/dashboard/exam/${examId}/`, '')

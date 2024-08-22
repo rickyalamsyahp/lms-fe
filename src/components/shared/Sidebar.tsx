@@ -1,4 +1,4 @@
-import { AccountBalance, Groups, Person } from '@mui/icons-material'
+import { AccountBalance, ListAlt, Person, Report } from '@mui/icons-material'
 import {
   Box,
   Drawer,
@@ -29,7 +29,7 @@ type MenuItemProps = {
   label: string
   icon?: React.ReactNode
   href?: string
-  scope?: ScopeSlug
+  scopes?: ScopeSlug[]
   activeRegex?: RegExp
 }
 
@@ -44,63 +44,31 @@ const menuList: MenuItemProps[] = [
     icon: <Person fontSize="small" />,
     href: '/dashboard/user',
     activeRegex: /.*user/gi,
-    scope: ScopeSlug.ADMIN,
-  },
-  {
-    menuType: MenuItemType.LINK,
-    label: 'Pengguna',
-    icon: <Person fontSize="small" />,
-    href: '/dashboard/user',
-    activeRegex: /.*user/gi,
-    scope: ScopeSlug.INSTRUCTOR,
+    scopes: [ScopeSlug.ADMIN, ScopeSlug.INSTRUCTOR],
   },
   {
     menuType: MenuItemType.LINK,
     label: 'Modul Pembelajaran',
     icon: <AccountBalance fontSize="small" />,
     href: '/dashboard/course',
-    activeRegex: /.*faction/gi,
-    scope: ScopeSlug.ADMIN,
-  },
-  {
-    menuType: MenuItemType.LINK,
-    label: 'Modul Pembelajaran',
-    icon: <AccountBalance fontSize="small" />,
-    href: '/dashboard/course',
-    activeRegex: /.*faction/gi,
-    scope: ScopeSlug.INSTRUCTOR,
+    activeRegex: /.*course/gi,
+    scopes: [ScopeSlug.ADMIN, ScopeSlug.INSTRUCTOR],
   },
   {
     menuType: MenuItemType.LINK,
     label: 'Modul Ujian',
-    icon: <Person fontSize="small" />,
+    icon: <ListAlt fontSize="small" />,
     href: '/dashboard/exam',
-    activeRegex: /.*faction/gi,
-    scope: ScopeSlug.ADMIN,
-  },
-  {
-    menuType: MenuItemType.LINK,
-    label: 'Modul Ujian',
-    icon: <Person fontSize="small" />,
-    href: '/dashboard/exam',
-    activeRegex: /.*faction/gi,
-    scope: ScopeSlug.INSTRUCTOR,
+    activeRegex: /.*exam/gi,
+    scopes: [ScopeSlug.ADMIN, ScopeSlug.INSTRUCTOR],
   },
   {
     menuType: MenuItemType.LINK,
     label: 'Submission',
-    icon: <Groups fontSize="small" />,
+    icon: <Report fontSize="small" />,
     href: '/dashboard/submission',
-    activeRegex: /.*group/gi,
-    scope: ScopeSlug.ADMIN,
-  },
-  {
-    menuType: MenuItemType.LINK,
-    label: 'Submission',
-    icon: <Groups fontSize="small" />,
-    href: '/dashboard/submission',
-    activeRegex: /.*group/gi,
-    scope: ScopeSlug.INSTRUCTOR,
+    activeRegex: /.*submission/gi,
+    scopes: [ScopeSlug.ADMIN, ScopeSlug.INSTRUCTOR, ScopeSlug.TRAINEE],
   },
 ]
 
@@ -141,11 +109,9 @@ export default function Sidebar({ ...props }: SidebarProps) {
         <MenuList>
           {menuList
             .filter((each) => {
-              if (!each.scope) return true
+              if (!each.scopes) return true
               else
-                return (
-                  (each.scope as string) === (profile?.data?.scope as string)
-                )
+                return each.scopes.includes(profile?.data?.scope as ScopeSlug)
             })
             .map((d, i) => {
               const selected = String(pathname).match(

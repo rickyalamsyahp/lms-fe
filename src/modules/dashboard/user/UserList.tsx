@@ -59,7 +59,7 @@ export default function UserList() {
   }
 
   const { data: userList, mutate: refetch } = useUserList(
-    state.profile.scope,
+    state.profile?.scope,
     selectedScope,
     {
       ...query,

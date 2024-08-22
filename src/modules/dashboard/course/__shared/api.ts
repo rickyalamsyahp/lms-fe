@@ -43,6 +43,25 @@ export function downloadFile(id: string) {
   return api.get<any>(`/admin/course/${id}/download`, { responseType: 'blob' })
 }
 
+export function getCourseStats(id: string, userId?: string) {
+  return api.get<{
+    submission: {
+      total: number
+      ongoing: number
+      finished: number
+      canceled: number
+    }
+    avgScore: number
+    latestScore?: number
+    hasFinished?: boolean
+    progress?: {
+      totalExam: number
+      totalFinishedExam: number
+      percentage: number
+    }
+  }>(`/public/course/${id}/stats${userId ? `/${userId}` : ''}`)
+}
+
 export function useCourseList(
   role: string,
   query: GetCourseListQuery,
@@ -57,8 +76,20 @@ export function useCourseList(
 
 export function useCours(id: string, config?: Partial<SWRConfiguration>) {
   return useSWRFetcher(
-    [id, 'get-user-by-id'],
+    [id, 'get-course-by-id'],
     ([id]) => getCoursById(id),
+    config
+  )
+}
+
+export function useCourseStats(
+  id: string,
+  userId?: string,
+  config?: Partial<SWRConfiguration>
+) {
+  return useSWRFetcher(
+    [id, userId, `get-course-stats${userId ? `-${userId}` : ''}`],
+    ([id, userId]) => getCourseStats(id, userId),
     config
   )
 }

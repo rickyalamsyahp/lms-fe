@@ -5,6 +5,7 @@ import { Outlet, useLocation, useNavigate, useParams } from 'react-router-dom'
 import Commandbar from '../../../components/shared/Commandbar'
 import { DialogConfirm } from '../../../components/shared/Dialog/DialogConfirm'
 import Sidebar from '../../../components/shared/Sidebar'
+import { ScopeSlug } from '../../../context/auth/__shared/type'
 import { useSession } from '../../../context/session'
 import { ellipsis } from '../../../libs/utils'
 import { deleteUser, useUser } from './__shared/api'
@@ -79,6 +80,9 @@ export default function UserDtail() {
             >
               <Box sx={{ borderColor: 'thin solid divider' }} />
               <Tab label="Overview" value="overview" />
+              {user?.scope === ScopeSlug.TRAINEE && (
+                <Tab label="Report" value="report" />
+              )}
             </Tabs>
             <Box sx={{ flex: 1, position: 'relative' }}>
               <Box
