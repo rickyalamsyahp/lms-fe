@@ -39,7 +39,7 @@ export default function UserCourseList({ userId }: UserCourseListProps) {
   }
 
   return (
-    <Box sx={{ width: '100%', height: 'auto', mb: 2 }}>
+    <Box sx={{ width: '100%', height: 'auto' }}>
       <Paper>
         <TableContainer>
           <TableHead>

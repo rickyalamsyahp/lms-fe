@@ -1,4 +1,4 @@
-import { User } from './type'
+import { User } from '../../../auth/type'
 import qs from 'query-string'
 import { SWRConfiguration } from 'swr'
 import { useSWRFetcher } from '../../../../context/use-swr-fetcher'
@@ -92,11 +92,11 @@ export function useUserList(
 
 export function useUser(
   role: string,
-  id: string,
+  id?: string,
   config?: Partial<SWRConfiguration>
 ) {
   return useSWRFetcher(
-    [role, id, 'get-user-by-id'],
+    id ? [role, id, 'get-user-by-id'] : null,
     ([role, id]) => getUserById(role, id),
     config
   )

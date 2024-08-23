@@ -1,6 +1,6 @@
 import { Avatar, Box, BoxProps, Stack, Switch, Typography } from '@mui/material'
+import { User } from '../../../../context/auth/__shared/type'
 import { API_URL } from '../../../../libs/env'
-import { User } from '../__shared/type'
 
 type UserCardProps = BoxProps & {
   data: User

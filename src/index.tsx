@@ -19,7 +19,6 @@ import SubmissionDetail from './modules/dashboard/submission/SubmissionExamDetai
 import SubmissionDetailOverview from './modules/dashboard/submission/SubmissionExamDetailOverview'
 import SubmissionList from './modules/dashboard/submission/SubmissionList'
 import UserDetail from './modules/dashboard/user/UserDetail'
-import UserDetailOverview from './modules/dashboard/user/UserDetailOverview'
 import UserDetailReport from './modules/dashboard/user/UserDetailReport'
 import UserList from './modules/dashboard/user/UserList'
 import reportWebVitals from './reportWebVitals'
@@ -108,12 +107,12 @@ const router = createBrowserRouter([
         children: [
           {
             path: '/dashboard/user/:userId/overview',
-            element: <UserDetailOverview />,
-          },
-          {
-            path: '/dashboard/user/:userId/report',
             element: <UserDetailReport />,
           },
+          // {
+          //   path: '/dashboard/user/:userId/report',
+          //   element: <UserDetailReport />,
+          // },
         ],
       },
     ],

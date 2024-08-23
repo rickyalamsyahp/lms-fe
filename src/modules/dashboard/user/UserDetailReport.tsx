@@ -1,18 +1,34 @@
 import { Stack, Typography } from '@mui/material'
 import { useParams } from 'react-router-dom'
+import { User } from '../../../context/auth/__shared/type'
 import { useSession } from '../../../context/session'
+import { options } from '../../../libs/http'
 import SubmissionList from '../submission/SubmissionList'
 import UserCourseList from './__components/UserCourseList'
+import UserInfo from './__components/UserInfo'
+import { useUser } from './__shared/api'
 
-export default function UserDetailReport() {
-  const { userId } = useParams()
+type UserDetailReport = {
+  user?: User
+}
+
+export default function UserDetailReport({ user }: UserDetailReport) {
   const { state } = useSession()
+  const { userId } = useParams()
+  const { data } = useUser(options.scope, userId as string)
+
   return (
     <Stack sx={{ gap: 2, py: 2, px: 2 }}>
-      <Typography variant="h6">Riwayat Aktifitas</Typography>
-      <UserCourseList userId={userId || state.profile.id} />
-      <Typography variant="h6">Daftar Submission</Typography>
-      <SubmissionList asPage={false} owner={userId} />
+      <Typography variant="h6">Profil</Typography>
+      {(user || data) && <UserInfo user={(user || data) as User} />}
+      <Typography variant="h6" sx={{ mt: 2 }}>
+        Riwayat Aktifitas
+      </Typography>
+      <UserCourseList userId={user?.id || state.profile?.id} />
+      <Typography variant="h6" sx={{ mt: 2 }}>
+        Daftar Submission
+      </Typography>
+      <SubmissionList asPage={false} owner={user?.id} />
     </Stack>
   )
 }

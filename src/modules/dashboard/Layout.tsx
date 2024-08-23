@@ -1,4 +1,4 @@
-import { Box, Stack } from '@mui/material'
+import { Box, Container, Stack } from '@mui/material'
 import { Outlet } from 'react-router-dom'
 import Navbar from '../../components/shared/Navbar'
 import Sidebar from '../../components/shared/Sidebar'
@@ -31,7 +31,9 @@ export default function DashboardLayout() {
               {profile?.data?.scope !== ScopeSlug.TRAINEE && <Sidebar />}
               <Box sx={{ flex: 1, p: 2, overflow: 'auto', display: 'flex' }}>
                 {profile?.data?.scope === ScopeSlug.TRAINEE ? (
-                  <UserDetailReport />
+                  <Container maxWidth={'lg'}>
+                    <UserDetailReport user={profile?.data} />
+                  </Container>
                 ) : (
                   <Outlet />
                 )}

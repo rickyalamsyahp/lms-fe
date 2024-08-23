@@ -77,6 +77,7 @@ export default function UserDtail() {
               value={tab}
               variant={isMobile ? 'fullWidth' : undefined}
               onChange={handleTabChange}
+              sx={{ display: 'none' }}
             >
               <Box sx={{ borderColor: 'thin solid divider' }} />
               <Tab label="Overview" value="overview" />

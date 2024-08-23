@@ -9,8 +9,8 @@ import {
 } from '@mui/material'
 import { FormEvent, useEffect, useState } from 'react'
 import toast from 'react-hot-toast'
+import { User } from '../../../../context/auth/__shared/type'
 import { changePassword, ChangePasswordBody } from '../__shared/api'
-import { User } from '../__shared/type'
 import UserCard from './UserCard'
 
 type ChangePasswordProps = {

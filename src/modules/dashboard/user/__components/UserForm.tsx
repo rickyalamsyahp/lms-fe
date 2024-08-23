@@ -7,6 +7,10 @@ import {
   DialogContent,
   DialogTitle,
   Divider,
+  FormControl,
+  InputLabel,
+  MenuItem,
+  Select,
   Stack,
   TextField,
 } from '@mui/material'
@@ -17,15 +21,19 @@ import dayjs from 'dayjs'
 import { FormEvent, useEffect, useState } from 'react'
 import toast from 'react-hot-toast'
 import InputFile from '../../../../components/shared/InputFile'
-import { ScopeSlug } from '../../../../context/auth/__shared/type'
+import {
+  changeMyAvatar,
+  updateMyProfile,
+} from '../../../../context/auth/__shared/api'
+import { Gender, ScopeSlug, User } from '../../../../context/auth/__shared/type'
 import { useSession } from '../../../../context/session'
+import { enumToArray } from '../../../../libs/utils'
 import {
   changeAvatar,
   createUser,
   getUserAvatarUrl,
   updateUser,
 } from '../__shared/api'
-import { User } from '../__shared/type'
 
 type UserFromProps = {
   initialData?: User
@@ -41,6 +49,7 @@ const defaultValue: User = {
   email: '',
   username: '',
   scope: ScopeSlug.INSTRUCTOR,
+  bio: {},
 }
 
 export default function UserForm({
@@ -54,7 +63,7 @@ export default function UserForm({
   asDialog = true,
   ...boxProps
 }: UserFromProps) {
-  const { isMobile } = useSession()
+  const { isMobile, state } = useSession()
   const [payload, setPayload] = useState<User>(defaultValue)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [confirmPassword, setConfirmPassword] = useState<string>()
@@ -79,12 +88,18 @@ export default function UserForm({
       if (payload.password !== confirmPassword)
         throw new Error('Konsfirmasi password tidak sesuai')
 
+      const isOwned = initialData?.id === state?.profile?.id
+
       const res = await (initialData
-        ? updateUser(initialData?.id as string, payload)
+        ? isOwned
+          ? updateMyProfile(payload)
+          : updateUser(initialData?.id as string, payload)
         : createUser({ ...payload, scope }))
 
       if (avatarFile) {
-        await changeAvatar(payload.id as string, avatarFile)
+        await (isOwned
+          ? changeMyAvatar(avatarFile)
+          : changeAvatar(payload.id as string, avatarFile))
       }
 
       setIsSubmitting(false)
@@ -174,9 +189,45 @@ export default function UserForm({
                 handlePayloadChange('bio.born', e.format('YYYY-MM-DD'))
               }
               sx={{ width: '100%' }}
-              minDate={dayjs()}
+              maxDate={dayjs()}
             />
           </LocalizationProvider>
+          <FormControl fullWidth>
+            <InputLabel id="gender">Gender</InputLabel>
+            <Select
+              labelId="gender"
+              id="gender"
+              value={payload.bio?.gender}
+              label="Gender"
+              onChange={(e) => {
+                handlePayloadChange('bio.gender', e.target.value as Gender)
+              }}
+              required
+            >
+              {enumToArray(Gender).map((item) => (
+                <MenuItem key={item} value={item}>
+                  {item}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+          <TextField
+            label="Nomor Identitas"
+            value={payload.bio?.identityNumber}
+            onChange={(e) =>
+              handlePayloadChange('bio.identityNumber', e.target.value)
+            }
+          />
+          <TextField
+            label="Nomor Ponsel"
+            value={payload.bio?.phoneNumber}
+            onChange={(e) =>
+              handlePayloadChange(
+                'bio.phoneNumber',
+                e.target.value.replace(/\D/gi, '')
+              )
+            }
+          />
           {initialData ? (
             <>
               <TextField label="Dibuat" value={payload.createdBy} disabled />
@@ -255,7 +306,7 @@ export default function UserForm({
       }}
       fullScreen={isMobile}
       fullWidth={true}
-      maxWidth={'xs'}
+      maxWidth={'sm'}
     >
       <DialogTitle>Form Pengguna</DialogTitle>
       <DialogContent>{content}</DialogContent>

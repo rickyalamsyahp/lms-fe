@@ -26,7 +26,7 @@ import DataTable from '../../../components/shared/DataTable'
 import { DialogConfirm } from '../../../components/shared/Dialog/DialogConfirm'
 import Dropdown from '../../../components/shared/Dropdown'
 import InfiniteScroll from '../../../components/shared/InfiniteScroll'
-import { ScopeSlug } from '../../../context/auth/__shared/type'
+import { ScopeSlug, User } from '../../../context/auth/__shared/type'
 import { useSession } from '../../../context/session'
 import ChangePassword from './__components/ChangePassword'
 import UserCard from './__components/UserCard'
@@ -37,7 +37,6 @@ import {
   getUserAvatarUrl,
   useUserList,
 } from './__shared/api'
-import { User } from './__shared/type'
 
 export default function UserList() {
   const navigate = useNavigate()

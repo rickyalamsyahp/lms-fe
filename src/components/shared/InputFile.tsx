@@ -59,7 +59,7 @@ export default function InputFile({
           </IconButton>
           <img
             src={previewImage}
-            alt="previe-image"
+            alt="preview-image"
             width={300}
             height={300}
             style={{

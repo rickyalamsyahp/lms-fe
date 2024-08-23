@@ -10,11 +10,14 @@ import {
 } from '@mui/material'
 import { useState } from 'react'
 import { useAuth } from '../../../../context/auth'
+import { useProfile } from '../../../../context/auth/__shared/api'
 import { useSession } from '../../../../context/session'
+import { getUserAvatarUrl } from '../../../../modules/dashboard/user/__shared/api'
 
 export default function Profile() {
   const { isMobile } = useSession()
-  const { user, logout } = useAuth()
+  const { logout } = useAuth()
+  const profile = useProfile()
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null)
   const showMenu = Boolean(anchorEl)
 
@@ -35,10 +38,21 @@ export default function Profile() {
     <>
       <Stack flexDirection="row" alignItems="center">
         {!isMobile && (
-          <Typography sx={{ mr: 2 }}>{user?.name.split(' ')[0]}</Typography>
+          <Stack alignItems={'flex-end'} sx={{ mr: 2 }}>
+            <Typography>{profile?.data?.name.split(' ')[0]}</Typography>
+            <Typography color="GrayText" fontSize={12}>
+              {profile?.data?.bio?.identityNumber}
+            </Typography>
+          </Stack>
         )}
         <div onClick={(e: any) => handleClick(e)}>
-          <Avatar src="/image/default-avatar.png" />
+          <Avatar
+            src={
+              profile?.data?.avatar
+                ? getUserAvatarUrl(profile?.data.id as string)
+                : '/image/default-avatar.png'
+            }
+          />
         </div>
       </Stack>
       <Menu
