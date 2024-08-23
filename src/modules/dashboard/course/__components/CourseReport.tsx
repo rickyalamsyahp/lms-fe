@@ -42,13 +42,25 @@ export default function CourseReport({
       </TableCell>
       <TableCell align="right">
         <Typography>
-          {data ? roundDecimal(data?.avgScore) : <CircularProgress size={16} />}
+          {data ? (
+            !data?.avgScore ? (
+              '-'
+            ) : (
+              roundDecimal(data?.avgScore)
+            )
+          ) : (
+            <CircularProgress size={16} />
+          )}
         </Typography>
       </TableCell>
       <TableCell align="right">
         <Typography>
           {data ? (
-            roundDecimal(data?.latestScore as number)
+            !data?.latestScore ? (
+              '-'
+            ) : (
+              roundDecimal(data?.latestScore as number)
+            )
           ) : (
             <CircularProgress size={16} />
           )}

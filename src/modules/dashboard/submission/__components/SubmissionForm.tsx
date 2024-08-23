@@ -14,10 +14,10 @@ import { useEffect, useState } from 'react'
 import { ScopeSlug } from '../../../../context/auth/__shared/type'
 import { useSession } from '../../../../context/session'
 
-import { SubmissionExam } from '../__shared/type'
+import { Submission } from '../__shared/type'
 
 type UserFromProps = {
-  initialData?: SubmissionExam
+  initialData?: Submission
   isOpen?: boolean
   onClose?: () => void
   onSuccess?: () => void
@@ -25,7 +25,7 @@ type UserFromProps = {
   asDialog?: boolean
 } & BoxProps
 
-const defaultValue: SubmissionExam = {
+const defaultValue: Submission = {
   courseId: '',
   courseExamId: '',
   owner: '',
@@ -42,7 +42,7 @@ export default function CourseForm({
   ...boxProps
 }: UserFromProps) {
   const { isMobile } = useSession()
-  const [payload, setPayload] = useState<SubmissionExam>(defaultValue)
+  const [payload, setPayload] = useState<Submission>(defaultValue)
 
   useEffect(() => {
     if (isOpen || !asDialog) {

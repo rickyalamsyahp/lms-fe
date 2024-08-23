@@ -1,18 +1,29 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 'use client'
 
-import { Box, Stack, Typography } from '@mui/material'
+import { Menu, Report } from '@mui/icons-material'
+import {
+  Box,
+  IconButton,
+  ListItemIcon,
+  ListItemText,
+  MenuItem,
+  Stack,
+  Typography,
+} from '@mui/material'
 import dayjs from 'dayjs'
 import { useEffect, useState } from 'react'
 import Commandbar from '../../../components/shared/Commandbar'
 import DataTable from '../../../components/shared/DataTable'
 import { DialogConfirm } from '../../../components/shared/Dialog/DialogConfirm'
+import Dropdown from '../../../components/shared/Dropdown'
 import InfiniteScroll from '../../../components/shared/InfiniteScroll'
 import { useSession } from '../../../context/session'
 import { options } from '../../../libs/http'
 import UserForm from './__components/SubmissionForm'
+import SubmissionReportList from './__components/SubmissionReportList'
 import { deleteExam, useSubmissionList } from './__shared/api'
-import { SubmissionExam } from './__shared/type'
+import { Submission } from './__shared/type'
 
 type SubmissionListProps = {
   asPage?: boolean
@@ -28,8 +39,9 @@ export default function SubmissionList({
   const [size, setSize] = useState(10)
   const [search, setSearch] = useState<string>('')
   const [showForm, setShowForm] = useState(false)
-  const [selectedItem, setSelectedItem] = useState<SubmissionExam | undefined>()
+  const [selectedItem, setSelectedItem] = useState<Submission | undefined>()
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
+  const [showReport, setShowReport] = useState(false)
 
   const query = {
     page,
@@ -86,10 +98,37 @@ export default function SubmissionList({
         },
         {
           label: 'Tanggal Dibuat',
-          render: (item: SubmissionExam) => (
+          render: (item: Submission) => (
             <Typography sx={{ minWidth: 160 }}>
               {dayjs(item.createdAt).format('DD MMM YYYY HH:mm:ss')}
             </Typography>
+          ),
+        },
+        {
+          label: 'Aksi',
+          render: (item) => (
+            <Dropdown
+              trigger={
+                <IconButton>
+                  <Menu />
+                </IconButton>
+              }
+              menuList={
+                <>
+                  <MenuItem
+                    onClick={() => {
+                      setSelectedItem(item)
+                      setShowReport(true)
+                    }}
+                  >
+                    <ListItemIcon>
+                      <Report />
+                    </ListItemIcon>
+                    <ListItemText>Daftar Report</ListItemText>
+                  </MenuItem>
+                </>
+              }
+            />
           ),
         },
       ]}
@@ -104,28 +143,30 @@ export default function SubmissionList({
     />
   )
 
-  return asPage ? (
+  return (
     <>
-      <Stack sx={{ flex: 1 }}>
-        <Commandbar
-          title="Daftar Submission"
-          searchProps={{
-            onSearch: (newSearch) => setSearch(newSearch),
-            placeholder: 'Cari Trainee...',
-          }}
-          breadcrumbsProps={{
-            items: [
-              {
-                label: 'Menu Utama',
-              },
-            ],
-          }}
-        />
-        <Box sx={{ flex: 1, px: 2 }}>
-          {isMobile ? (
-            <InfiniteScroll>
-              <Stack sx={{ gap: 1, py: 2 }}>
-                {/* {userList?.results.map((d: Course) => (
+      {asPage ? (
+        <>
+          <Stack sx={{ flex: 1 }}>
+            <Commandbar
+              title="Daftar Submission"
+              searchProps={{
+                onSearch: (newSearch) => setSearch(newSearch),
+                placeholder: 'Cari Trainee...',
+              }}
+              breadcrumbsProps={{
+                items: [
+                  {
+                    label: 'Menu Utama',
+                  },
+                ],
+              }}
+            />
+            <Box sx={{ flex: 1, px: 2 }}>
+              {isMobile ? (
+                <InfiniteScroll>
+                  <Stack sx={{ gap: 1, py: 2 }}>
+                    {/* {userList?.results.map((d: Course) => (
                   <UserCard
                     key={d.id}
                     data={d}
@@ -135,34 +176,44 @@ export default function SubmissionList({
                     }}
                   />
                 ))} */}
-              </Stack>
-            </InfiniteScroll>
-          ) : (
-            renderContent
-          )}
-        </Box>
-      </Stack>
-      <UserForm
-        isOpen={showForm}
-        initialData={selectedItem}
+                  </Stack>
+                </InfiniteScroll>
+              ) : (
+                renderContent
+              )}
+            </Box>
+          </Stack>
+          <UserForm
+            isOpen={showForm}
+            initialData={selectedItem}
+            onClose={() => {
+              setShowForm(false)
+              setTimeout(() => setSelectedItem(undefined), 500)
+            }}
+            onSuccess={refetch}
+          />
+          <DialogConfirm
+            open={showDeleteConfirm}
+            onClose={() => {
+              setShowDeleteConfirm(false)
+              setSelectedItem(undefined)
+            }}
+            title="Delete"
+            content={`Yakin menghapus course ini?`}
+            onSubmit={handleDelete}
+          />
+        </>
+      ) : (
+        renderContent
+      )}
+      <SubmissionReportList
+        open={showReport}
         onClose={() => {
-          setShowForm(false)
-          setTimeout(() => setSelectedItem(undefined), 500)
-        }}
-        onSuccess={refetch}
-      />
-      <DialogConfirm
-        open={showDeleteConfirm}
-        onClose={() => {
-          setShowDeleteConfirm(false)
+          setShowReport(false)
           setSelectedItem(undefined)
         }}
-        title="Delete"
-        content={`Yakin menghapus course ini?`}
-        onSubmit={handleDelete}
+        submission={selectedItem}
       />
     </>
-  ) : (
-    renderContent
   )
 }

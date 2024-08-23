@@ -1,8 +1,8 @@
 import { Box, BoxProps, Stack, Typography } from '@mui/material'
-import { SubmissionExam } from '../__shared/type'
+import { Submission } from '../__shared/type'
 
 type UserCardProps = BoxProps & {
-  data: SubmissionExam
+  data: Submission
   onActivate?: () => void
 }
 

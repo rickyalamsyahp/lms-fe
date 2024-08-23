@@ -26,7 +26,7 @@ export default function FileViewer({
   return (
     <Dialog fullScreen onClose={onClose} {...props}>
       <DialogTitle>{fileMeta?.originalname}</DialogTitle>
-      <DialogContent>
+      <DialogContent sx={{ textAlign: 'center' }}>
         {fileMeta ? (
           fileMeta?.mimetype.includes('image') ? (
             <img src={getFileSrc()} alt={fileMeta.originalname} />

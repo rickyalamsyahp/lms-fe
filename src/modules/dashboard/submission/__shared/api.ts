@@ -1,40 +1,45 @@
-import { SubmissionExam } from './type'
+import { Submission, SubmissionReport } from './type'
 import qs from 'query-string'
 import { SWRConfiguration } from 'swr'
 import { useSWRFetcher } from '../../../../context/use-swr-fetcher'
 
 import { api } from '../../../../libs/http'
 
-type GetUserListResponse = {
-  results: SubmissionExam[]
+type GetSubmissionListResponse = {
+  results: Submission[]
   total: string
 }
 
-type GetCourseListQuery = {
+type GetSubmissionListQuery = {
   page: number
   size: number
 } & any
 
-export function getSubmissionList(role: string, query: GetCourseListQuery) {
-  return api.get<GetUserListResponse>(
+type GetSubmissionReportListResponse = {
+  results: SubmissionReport[]
+  total: string
+}
+
+export function getSubmissionList(role: string, query: GetSubmissionListQuery) {
+  return api.get<GetSubmissionListResponse>(
     `/${role}/submission?${qs.stringify(query)}`
   )
 }
 
 export function getSubmissionById(role: string, id: string) {
-  return api.get<SubmissionExam>(`/${role}/submission/${id}`)
+  return api.get<Submission>(`/${role}/submission/${id}`)
 }
 
 export function createSubmission(payload: any) {
-  return api.post<SubmissionExam>('/admin/submission', payload)
+  return api.post<Submission>('/admin/submission', payload)
 }
 
 export function updateSubmission(id: string, payload: any) {
-  return api.put<SubmissionExam>(`/admin/submission/${id}`, payload)
+  return api.put<Submission>(`/admin/submission/${id}`, payload)
 }
 
 export function changeStatusExam(id: string) {
-  return api.put<SubmissionExam>(`/admin/submission/${id}/activate`)
+  return api.put<Submission>(`/admin/submission/${id}/activate`)
 }
 
 export function deleteExam(id: string) {
@@ -47,9 +52,19 @@ export function downloadFile(id: string) {
   })
 }
 
+export function getSubmissionReportList(
+  role: string,
+  id: string,
+  query: GetSubmissionListQuery
+) {
+  return api.get<GetSubmissionReportListResponse>(
+    `/${role}/submission/${id}/report?${qs.stringify(query)}`
+  )
+}
+
 export function useSubmissionList(
   role: string,
-  query: GetCourseListQuery,
+  query: GetSubmissionListQuery,
   config?: Partial<SWRConfiguration>
 ) {
   return useSWRFetcher(
@@ -59,7 +74,7 @@ export function useSubmissionList(
   )
 }
 
-export function useCours(
+export function useSubmission(
   role: string,
   id: string,
   config?: Partial<SWRConfiguration>
@@ -67,6 +82,19 @@ export function useCours(
   return useSWRFetcher(
     [role, id, 'get-user-by-id'],
     ([role, id]) => getSubmissionById(role, id),
+    config
+  )
+}
+
+export function useSubmissionReportList(
+  role: string,
+  id: string | null | undefined,
+  query: GetSubmissionListQuery,
+  config?: Partial<SWRConfiguration>
+) {
+  return useSWRFetcher(
+    id ? [role, id, query, 'get-Submission-report-list'] : null,
+    ([role, id, query]) => getSubmissionReportList(role, id, query),
     config
   )
 }
