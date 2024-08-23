@@ -47,8 +47,15 @@ export default function UserDtail() {
           breadcrumbsProps={{
             items: [
               {
-                label: 'Course Exam',
-                path: '/dashboard/exam',
+                label: 'Menu Utama',
+              },
+              {
+                label: 'Modul Pembelajaran',
+                path: `/dashboard/course`,
+              },
+              {
+                label: 'Pelatihan',
+                path: `/dashboard/course/${exam?.courseId}/exam`,
               },
             ],
           }}

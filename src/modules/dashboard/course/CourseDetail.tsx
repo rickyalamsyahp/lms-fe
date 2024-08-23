@@ -4,30 +4,29 @@ import { SyntheticEvent, useState } from 'react'
 import { Outlet, useLocation, useNavigate, useParams } from 'react-router-dom'
 import Commandbar from '../../../components/shared/Commandbar'
 import { DialogConfirm } from '../../../components/shared/Dialog/DialogConfirm'
-import Sidebar from '../../../components/shared/Sidebar'
 import { useSession } from '../../../context/session'
 import { ellipsis } from '../../../libs/utils'
-import { deleteUser, useCours } from './__shared/api'
+import { deleteUser, useCourse } from './__shared/api'
 
-export default function UserDtail() {
+export default function CourseDetail() {
   const navigate = useNavigate()
   const { pathname } = useLocation()
-  const { userId } = useParams()
+  const { courseId } = useParams()
   const { isMobile, state } = useSession()
-  const { data: user } = useCours(userId as string)
+  const { data: user } = useCourse(courseId as string)
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
   const [tab, setTab] = useState<string>(
-    pathname.replace(`/dashboard/user/${userId}/`, '')
+    pathname.replace(`/dashboard/course/${courseId}/`, '')
   )
 
   function handleTabChange(e: SyntheticEvent, newTab: string) {
     setTab(newTab)
-    navigate(`/dashboard/user/${userId}/${newTab}`)
+    navigate(`/dashboard/course/${courseId}/${newTab}`)
   }
 
   async function handleDelete() {
     try {
-      await deleteUser(userId as string)
+      await deleteUser(courseId as string)
       navigate('/dashboard/user')
     } catch (error) {
       throw error
@@ -46,8 +45,11 @@ export default function UserDtail() {
           breadcrumbsProps={{
             items: [
               {
-                label: 'Pengguna',
-                path: '/dashboard/user',
+                label: 'Menu Utama',
+              },
+              {
+                label: 'Modul Pembelajaran',
+                path: '/dashboard/course',
               },
             ],
           }}
@@ -74,49 +76,29 @@ export default function UserDtail() {
             </>
           }
         />
-        {state.isAdmin ? (
-          <>
-            <Tabs
-              value={tab}
-              variant={isMobile ? 'fullWidth' : undefined}
-              onChange={handleTabChange}
-            >
-              <Box sx={{ borderColor: 'thin solid divider' }} />
-              <Tab label="Overview" value="overview" />
-            </Tabs>
-            <Box sx={{ flex: 1, position: 'relative' }}>
-              <Box
-                sx={{
-                  position: 'absolute',
-                  height: '100%',
-                  width: '100%',
-                  overflow: 'auto',
-                }}
-              >
-                <Outlet />
-              </Box>
-            </Box>
-          </>
-        ) : (
-          <Stack
-            flexDirection={'row'}
-            sx={{ flex: 1, borderTop: 'thin solid #0000001A' }}
+        <Tabs
+          value={tab}
+          variant={isMobile ? 'fullWidth' : undefined}
+          onChange={handleTabChange}
+        >
+          <Box sx={{ borderColor: 'thin solid divider' }} />
+          <Tab label="Overview" value="overview" />
+          <Tab label="Pelatihan" value="exam" />
+        </Tabs>
+        <Box sx={{ flex: 1, position: 'relative' }}>
+          <Box
+            sx={{
+              position: 'absolute',
+              height: '100%',
+              width: '100%',
+              overflow: 'auto',
+              display: 'flex',
+              flexDirection: 'column',
+            }}
           >
-            <Sidebar />
-            <Box sx={{ flex: 1, position: 'relative' }}>
-              <Box
-                sx={{
-                  position: 'absolute',
-                  height: '100%',
-                  width: '100%',
-                  overflow: 'auto',
-                }}
-              >
-                <Outlet />
-              </Box>
-            </Box>
-          </Stack>
-        )}
+            <Outlet />
+          </Box>
+        </Box>
       </Stack>
       <DialogConfirm
         open={showDeleteConfirm}

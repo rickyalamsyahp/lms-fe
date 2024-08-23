@@ -1,4 +1,4 @@
-import { AccountBalance, ListAlt, Person, Report } from '@mui/icons-material'
+import { Book, Person, Report } from '@mui/icons-material'
 import {
   Box,
   Drawer,
@@ -49,17 +49,9 @@ const menuList: MenuItemProps[] = [
   {
     menuType: MenuItemType.LINK,
     label: 'Modul Pembelajaran',
-    icon: <AccountBalance fontSize="small" />,
+    icon: <Book fontSize="small" />,
     href: '/dashboard/course',
     activeRegex: /.*course/gi,
-    scopes: [ScopeSlug.ADMIN, ScopeSlug.INSTRUCTOR],
-  },
-  {
-    menuType: MenuItemType.LINK,
-    label: 'Modul Pelatihan',
-    icon: <ListAlt fontSize="small" />,
-    href: '/dashboard/exam',
-    activeRegex: /.*exam/gi,
     scopes: [ScopeSlug.ADMIN, ScopeSlug.INSTRUCTOR],
   },
   {
@@ -141,15 +133,16 @@ export default function Sidebar({ ...props }: SidebarProps) {
                 >
                   <MenuItem
                     selected={selected}
-                    sx={
-                      selected
+                    sx={{
+                      height: 48,
+                      ...(selected
                         ? {
                             borderRight: '5px solid',
                             borderColor: 'primary.main',
                             // backgroundColor: 'transparent !important',
                           }
-                        : undefined
-                    }
+                        : undefined),
+                    }}
                   >
                     {d.icon && <ListItemIcon>{d.icon}</ListItemIcon>}
                     <ListItemText>{d.label}</ListItemText>

@@ -1,7 +1,15 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 'use client'
 
-import { Add, Delete, Edit, Menu, Replay } from '@mui/icons-material'
+import {
+  Add,
+  ArrowUpward,
+  Delete,
+  Details,
+  Edit,
+  Menu,
+  Replay,
+} from '@mui/icons-material'
 import {
   Box,
   Button,
@@ -25,12 +33,14 @@ import Dropdown from '../../../components/shared/Dropdown'
 import InfiniteScroll from '../../../components/shared/InfiniteScroll'
 import { useSession } from '../../../context/session'
 // import UserCard from './__components/CourseCard'
+import { useNavigate } from 'react-router-dom'
 import FileViewer from '../../filemeta/__components/FileViewer'
 import UserForm from './__components/CourseForm'
 import { changeStatus, deleteUser, useCourseList } from './__shared/api'
 import { Course } from './__shared/type'
 
 export default function UserList() {
+  const navigate = useNavigate()
   const { isMobile, state } = useSession()
   const [page, setPage] = useState(1)
   const [size, setSize] = useState(10)
@@ -135,6 +145,16 @@ export default function UserList() {
           menuList={
             <>
               <MenuItem
+                onClick={async () => {
+                  navigate(`/dashboard/course/${item?.id}/overview`)
+                }}
+              >
+                <ListItemIcon>
+                  <Details />
+                </ListItemIcon>
+                <ListItemText>Detail</ListItemText>
+              </MenuItem>
+              <MenuItem
                 onClick={() => {
                   setSelectedItem(item)
                   setShowForm(true)
@@ -152,7 +172,7 @@ export default function UserList() {
                 }}
               >
                 <ListItemIcon>
-                  <Edit />
+                  <ArrowUpward />
                 </ListItemIcon>
                 <ListItemText>Publish</ListItemText>
               </MenuItem>
@@ -182,7 +202,7 @@ export default function UserList() {
           title="Daftar Pembelajaran"
           searchProps={{
             onSearch: (newSearch) => setSearch(newSearch),
-            placeholder: 'Cari Course...',
+            placeholder: 'Cari Pembelajaran...',
           }}
           breadcrumbsProps={{
             items: [

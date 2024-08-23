@@ -82,7 +82,7 @@ export function useCourseExamList(
   config?: Partial<SWRConfiguration>
 ) {
   return useSWRFetcher(
-    [role, query, 'get-Course-list'],
+    [role, query, 'get-course-exam-list'],
     ([role, query]) => getCourseExamList(role, query),
     config
   )
@@ -95,7 +95,7 @@ export function useCourseExamSettingList(
   config?: Partial<SWRConfiguration>
 ) {
   return useSWRFetcher(
-    [role, id, query, 'get-course-exam-list'],
+    [role, id, query, 'get-course-exam-setting-list'],
     ([role, id, query]) => getCourseExamSttingList(role, id, query),
     config
   )

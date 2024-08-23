@@ -16,19 +16,24 @@ import {
 } from '@mui/material'
 import dayjs from 'dayjs'
 import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useParams } from 'react-router-dom'
 import Commandbar from '../../../components/shared/Commandbar'
 import DataTable from '../../../components/shared/DataTable'
 import { DialogConfirm } from '../../../components/shared/Dialog/DialogConfirm'
 import Dropdown from '../../../components/shared/Dropdown'
 import InfiniteScroll from '../../../components/shared/InfiniteScroll'
 import { useSession } from '../../../context/session'
+import { options } from '../../../libs/http'
 import FileViewer from '../../filemeta/__components/FileViewer'
 import CourseExamForm from './__components/CourseExamForm'
 import { deleteExam, useCourseExamList } from './__shared/api'
 import { CourseExam } from './__shared/type'
 
-export default function UserListExam() {
+type CourseExamListProps = {
+  asPage?: boolean
+}
+
+export default function CourseListExam({ asPage }: CourseExamListProps) {
   const navigate = useNavigate()
   const { isMobile, state } = useSession()
   const [page, setPage] = useState(1)
@@ -38,6 +43,7 @@ export default function UserListExam() {
   const [selectedItem, setSelectedItem] = useState<CourseExam | undefined>()
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
   const [showFile, setShowFile] = useState(false)
+  const { courseId } = useParams()
 
   const query = {
     page,
@@ -45,10 +51,11 @@ export default function UserListExam() {
   }
 
   const { data: examList, mutate: refetch } = useCourseExamList(
-    state.profile.scope,
+    options.publicScope,
     {
       ...query,
       'title:likeLower': search ? `%${search}%` : undefined,
+      'courseId:eq': courseId,
     }
   )
 
@@ -70,18 +77,22 @@ export default function UserListExam() {
     <>
       <Stack sx={{ flex: 1 }}>
         <Commandbar
-          title="Daftar Pelatihan"
+          title={asPage ? 'Daftar Pelatihan' : undefined}
           searchProps={{
             onSearch: (newSearch) => setSearch(newSearch),
-            placeholder: 'Cari Course Exam...',
+            placeholder: 'Cari Pelatihan...',
           }}
-          breadcrumbsProps={{
-            items: [
-              {
-                label: 'Menu Utama',
-              },
-            ],
-          }}
+          breadcrumbsProps={
+            asPage
+              ? {
+                  items: [
+                    {
+                      label: 'Menu Utama',
+                    },
+                  ],
+                }
+              : undefined
+          }
           rightAddon={
             !state.isTrainee && (
               <>
@@ -252,6 +263,7 @@ export default function UserListExam() {
         </Box>
       </Stack>
       <CourseExamForm
+        courseId={courseId as string}
         isOpen={showForm}
         initialData={selectedItem}
         onClose={() => {

@@ -25,7 +25,7 @@ export default function UserCourseList({ userId }: UserCourseListProps) {
   const [selectedCourse, setSelectedCourse] = useState<Course>()
   const [showCourseExamList, setShowCourseExamList] = useState(false)
   const [showFile, setShowFile] = useState(false)
-  const { data: courseList } = useCourseList(options.scope, {
+  const { data: courseList } = useCourseList(options.publicScope, {
     page: 1,
     size: 50,
     order: 'asc',

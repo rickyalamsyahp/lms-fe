@@ -9,6 +9,7 @@ import DataTable from '../../../components/shared/DataTable'
 import { DialogConfirm } from '../../../components/shared/Dialog/DialogConfirm'
 import InfiniteScroll from '../../../components/shared/InfiniteScroll'
 import { useSession } from '../../../context/session'
+import { options } from '../../../libs/http'
 import UserForm from './__components/SubmissionForm'
 import { deleteExam, useSubmissionList } from './__shared/api'
 import { SubmissionExam } from './__shared/type'
@@ -22,7 +23,7 @@ export default function SubmissionList({
   asPage = true,
   owner,
 }: SubmissionListProps) {
-  const { isMobile, state } = useSession()
+  const { isMobile } = useSession()
   const [page, setPage] = useState(1)
   const [size, setSize] = useState(10)
   const [search, setSearch] = useState<string>('')
@@ -37,10 +38,10 @@ export default function SubmissionList({
   }
 
   const { data: examList, mutate: refetch } = useSubmissionList(
-    state.profile.scope,
+    options.publicScope,
     {
       ...query,
-      'title:likeLower': search ? `%${search}%` : undefined,
+      'trainee.name:likeLower': search ? `%${search}%` : undefined,
     }
   )
   useEffect(() => {
@@ -61,6 +62,10 @@ export default function SubmissionList({
       data={examList?.results}
       loading={!examList}
       columns={[
+        {
+          label: 'Trainee',
+          render: (item: any) => <Typography>{item?.trainee?.name}</Typography>,
+        },
         {
           label: 'Modul',
           render: (item: any) => <Typography>{item?.course.title}</Typography>,
@@ -106,7 +111,7 @@ export default function SubmissionList({
           title="Daftar Submission"
           searchProps={{
             onSearch: (newSearch) => setSearch(newSearch),
-            placeholder: 'Cari Submission...',
+            placeholder: 'Cari Trainee...',
           }}
           breadcrumbsProps={{
             items: [

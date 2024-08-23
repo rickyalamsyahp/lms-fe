@@ -74,7 +74,7 @@ export function useCourseList(
   )
 }
 
-export function useCours(id: string, config?: Partial<SWRConfiguration>) {
+export function useCourse(id: string, config?: Partial<SWRConfiguration>) {
   return useSWRFetcher(
     [id, 'get-course-by-id'],
     ([id]) => getCoursById(id),

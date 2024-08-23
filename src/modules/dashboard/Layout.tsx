@@ -2,10 +2,14 @@ import { Box, Stack } from '@mui/material'
 import { Outlet } from 'react-router-dom'
 import Navbar from '../../components/shared/Navbar'
 import Sidebar from '../../components/shared/Sidebar'
+import { useProfile } from '../../context/auth/__shared/api'
+import { ScopeSlug } from '../../context/auth/__shared/type'
 import AuthProvider from '../../context/auth/Provider'
 import SessionProvider from '../../context/session/Provider'
+import UserDetailReport from './user/UserDetailReport'
 
 export default function DashboardLayout() {
+  const profile = useProfile()
   return (
     <AuthProvider>
       <SessionProvider>
@@ -24,9 +28,13 @@ export default function DashboardLayout() {
               flexDirection={'row'}
               sx={{ position: 'absolute', height: '100%', width: '100%' }}
             >
-              <Sidebar />
+              {profile?.data?.scope !== ScopeSlug.TRAINEE && <Sidebar />}
               <Box sx={{ flex: 1, p: 2, overflow: 'auto', display: 'flex' }}>
-                <Outlet />
+                {profile?.data?.scope === ScopeSlug.TRAINEE ? (
+                  <UserDetailReport />
+                ) : (
+                  <Outlet />
+                )}
               </Box>
             </Stack>
           </Box>

@@ -27,6 +27,7 @@ type CourseExamFormProps = {
   onSuccess?: () => void
   scope?: ScopeSlug
   asDialog?: boolean
+  courseId?: string
 } & BoxProps
 
 const defaultValue: CourseExam = {
@@ -44,6 +45,7 @@ export default function CourseExamForm({
   },
   onSuccess,
   asDialog = true,
+  courseId,
   ...boxProps
 }: CourseExamFormProps) {
   const { isMobile } = useSession()
@@ -68,6 +70,7 @@ export default function CourseExamForm({
     formData.append('title', payload.title || '')
     formData.append('description', payload.description || '')
     formData.append('level', payload.level || '')
+    if (courseId) formData.append('courseId', courseId)
     if (payload.file) {
       formData.append('file', payload.file)
     }

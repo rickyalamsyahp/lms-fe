@@ -1,17 +1,17 @@
 import { Box, Paper } from '@mui/material'
 import { useParams } from 'react-router-dom'
 import JumpingLoader from '../../../components/shared/JumpingLoader'
-import UserForm from './__components/CourseForm'
-import { useCours } from './__shared/api'
+import CourseForm from './__components/CourseForm'
+import { useCourse } from './__shared/api'
 
-export default function UserDetailOverview() {
-  const { userId } = useParams()
-  const { data: user } = useCours(userId as string)
+export default function CourseDetailOverview() {
+  const { courseId } = useParams()
+  const { data: course } = useCourse(courseId as string)
 
-  return user ? (
+  return course ? (
     <Box maxWidth={'sm'}>
       <Paper>
-        <UserForm initialData={user} asDialog={false} />
+        <CourseForm initialData={course} asDialog={false} />
       </Paper>
     </Box>
   ) : (

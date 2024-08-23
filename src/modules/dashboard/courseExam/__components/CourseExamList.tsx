@@ -44,7 +44,7 @@ export default function CoursetExamList({
   }>()
   async function fetchData() {
     try {
-      const res = await getCourseExamList(options.scope, {
+      const res = await getCourseExamList(options.publicScope, {
         page: 1,
         size: 50,
         'courseId:eq': course?.id,
