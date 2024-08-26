@@ -77,16 +77,16 @@ export default function CourseExamReport({
         </Typography>
       </TableCell>
       <TableCell align="right">
-        <Typography>{data?.submission.ongoing}</Typography>
+        <Typography>{data?.submission?.ongoing || 0}</Typography>
       </TableCell>
       <TableCell align="right">
-        <Typography>{data?.submission.finished}</Typography>
+        <Typography>{data?.submission?.finished || 0}</Typography>
       </TableCell>
       <TableCell align="right">
-        <Typography>{data?.submission.canceled}</Typography>
+        <Typography>{data?.submission?.canceled || 0}</Typography>
       </TableCell>
       <TableCell align="right">
-        <Typography>{data?.submission.total}</Typography>
+        <Typography>{data?.submission?.total || 0}</Typography>
       </TableCell>
     </>
   ) : (
