@@ -52,16 +52,12 @@ export default function UserList() {
     ScopeSlug.TRAINEE
   )
 
-  const query = {
-    page,
-    size,
-  }
-
   const { data: userList, mutate: refetch } = useUserList(
     state.profile?.scope,
     selectedScope,
     {
-      ...query,
+      page,
+      size,
       'name:likeLower': search ? `%${search}%` : undefined,
     }
   )
@@ -281,7 +277,9 @@ export default function UserList() {
                 rowsPerPage: size,
                 count: Number(userList?.total || 0),
                 page,
-                onPageChange: (e, value) => setPage(value),
+                onPageChange: (e, value) => {
+                  setPage(value + 1)
+                },
                 onRowsPerPageChange: (e) => setSize(Number(e.target.value)),
               }}
             />

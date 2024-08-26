@@ -3,7 +3,7 @@ import qs from 'query-string'
 import { SWRConfiguration } from 'swr'
 import { useSWRFetcher } from '../../../../context/use-swr-fetcher'
 import { API_URL } from '../../../../libs/env'
-import { api, generateFormData } from '../../../../libs/http'
+import { api, generateFormData, options } from '../../../../libs/http'
 import { ScopeSlug } from '../../../../context/auth/__shared/type'
 
 type GetUserListResponse = {
@@ -38,7 +38,7 @@ export function getUserById(role: string, id: string) {
 }
 
 export function createUser(payload: User) {
-  return api.post<User>('/admin/user-account', payload)
+  return api.post<User>(`/${options.scope}/user-account`, payload)
 }
 
 export function updateUser(id: string, payload: Partial<User>) {

@@ -109,7 +109,7 @@ export default function UserDetailOverview() {
                 rowsPerPage: size,
                 count: Number(userList?.total || 0),
                 page,
-                onPageChange: (e, value) => setPage(value),
+                onPageChange: (e, value) => setPage(value + 1),
                 onRowsPerPageChange: (e) => setSize(Number(e.target.value)),
               }}
             />

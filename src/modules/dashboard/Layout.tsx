@@ -1,5 +1,6 @@
 import { Box, Container, Stack } from '@mui/material'
-import { Outlet } from 'react-router-dom'
+import { useEffect } from 'react'
+import { Outlet, useLocation, useNavigate } from 'react-router-dom'
 import Navbar from '../../components/shared/Navbar'
 import Sidebar from '../../components/shared/Sidebar'
 import { useProfile } from '../../context/auth/__shared/api'
@@ -9,7 +10,19 @@ import SessionProvider from '../../context/session/Provider'
 import UserDetailReport from './user/UserDetailReport'
 
 export default function DashboardLayout() {
+  const navigate = useNavigate()
   const profile = useProfile()
+  const location = useLocation()
+
+  useEffect(() => {
+    if (
+      profile?.data?.scope !== ScopeSlug.TRAINEE &&
+      location.pathname === '/dashboard'
+    )
+      navigate('/dashboard/user')
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [profile])
+
   return (
     <AuthProvider>
       <SessionProvider>
