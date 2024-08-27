@@ -42,7 +42,7 @@ export function createUser(payload: User) {
 }
 
 export function updateUser(id: string, payload: Partial<User>) {
-  return api.put<User>(`/admin/user-account/${id}`, payload)
+  return api.put<User>(`/${options.scope}/user-account/${id}`, payload)
 }
 
 export function changeStatus(id: string) {

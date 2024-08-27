@@ -49,7 +49,11 @@ const defaultValue: User = {
   email: '',
   username: '',
   scope: ScopeSlug.INSTRUCTOR,
-  bio: {},
+  bio: {
+    phoneNumber: '',
+    identityNumber: '',
+    gender: undefined,
+  },
 }
 
 export default function UserForm({
@@ -72,7 +76,7 @@ export default function UserForm({
   useEffect(() => {
     if (isOpen || !asDialog) {
       setAvatarFile(undefined)
-      setPayload(initialData || defaultValue)
+      setPayload(initialData || { ...defaultValue })
     }
   }, [initialData, isOpen, asDialog])
 
@@ -192,25 +196,27 @@ export default function UserForm({
               maxDate={dayjs()}
             />
           </LocalizationProvider>
-          <FormControl fullWidth>
-            <InputLabel id="gender">Gender</InputLabel>
-            <Select
-              labelId="gender"
-              id="gender"
-              value={payload.bio?.gender}
-              label="Gender"
-              onChange={(e) => {
-                handlePayloadChange('bio.gender', e.target.value as Gender)
-              }}
-              required
-            >
-              {enumToArray(Gender).map((item) => (
-                <MenuItem key={item} value={item}>
-                  {item}
-                </MenuItem>
-              ))}
-            </Select>
-          </FormControl>
+          {payload && (
+            <FormControl fullWidth>
+              <InputLabel id="gender">Gender</InputLabel>
+              <Select
+                labelId="gender"
+                id="gender"
+                value={payload.bio?.gender || ''}
+                label="Gender"
+                onChange={(e) => {
+                  handlePayloadChange('bio.gender', e.target.value as Gender)
+                }}
+                required
+              >
+                {enumToArray(Gender).map((item) => (
+                  <MenuItem key={item} value={item}>
+                    {item}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+          )}
           <TextField
             label="Nomor Identitas"
             value={payload.bio?.identityNumber}

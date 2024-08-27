@@ -143,6 +143,7 @@ export default function CourseForm({
             label="File Upload"
             accept="*.*"
             onChange={(file?: File) => {
+              console.log(file)
               handlePayloadChange('file', file)
             }}
           />

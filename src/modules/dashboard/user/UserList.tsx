@@ -237,24 +237,29 @@ export default function UserList() {
                               setSelectedItem(item)
                               setShowForm(true)
                             }}
+                            sx={{ display: 'none' }}
                           >
                             <ListItemIcon>
                               <Edit />
                             </ListItemIcon>
                             <ListItemText>Edit</ListItemText>
                           </MenuItem>
-                          <MenuItem
-                            onClick={() => {
-                              setSelectedItem(item)
-                              setShowChangePassword(true)
-                            }}
-                          >
-                            <ListItemIcon>
-                              <Lock />
-                            </ListItemIcon>
-                            <ListItemText>Ubah Password</ListItemText>
-                          </MenuItem>
-                          <Divider />
+                          {state.isAdmin && (
+                            <>
+                              <MenuItem
+                                onClick={() => {
+                                  setSelectedItem(item)
+                                  setShowChangePassword(true)
+                                }}
+                              >
+                                <ListItemIcon>
+                                  <Lock />
+                                </ListItemIcon>
+                                <ListItemText>Ubah Password</ListItemText>
+                              </MenuItem>
+                              <Divider />
+                            </>
+                          )}
                           <MenuItem
                             onClick={() => {
                               setSelectedItem(item)

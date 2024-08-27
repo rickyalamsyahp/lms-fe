@@ -23,8 +23,8 @@ export default function InputFile({
   async function handleChange(e: any) {
     const file = e.target.files[0]
     setFilename(file?.name)
+    if (onChange) onChange(file)
     if (file.type.includes('image')) {
-      if (onChange) onChange(file)
       const preview = await getBase64(file)
       setPreviewImage(preview)
     }

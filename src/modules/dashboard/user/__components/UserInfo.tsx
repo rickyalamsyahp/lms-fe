@@ -50,7 +50,7 @@ export default function UserInfo({ user }: UserInfoProps) {
     },
     {
       label: 'Nomor Identitas',
-      value: user.bio?.identityNumber,
+      value: user.bio?.identityNumber || '-',
       fullWidth: true,
       variant: 'standard',
     },
