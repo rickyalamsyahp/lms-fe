@@ -1,3 +1,4 @@
+import { Worker } from '@react-pdf-viewer/core'
 import React from 'react'
 import ReactDOM from 'react-dom/client'
 import { Toaster } from 'react-hot-toast'
@@ -123,8 +124,10 @@ const root = ReactDOM.createRoot(document.getElementById('root') as HTMLElement)
 
 root.render(
   <React.StrictMode>
-    <Toaster />
-    <RouterProvider router={router} />
+    <Worker workerUrl="https://unpkg.com/pdfjs-dist@3.4.120/build/pdf.worker.min.js">
+      <Toaster />
+      <RouterProvider router={router} />
+    </Worker>
   </React.StrictMode>
 )
 

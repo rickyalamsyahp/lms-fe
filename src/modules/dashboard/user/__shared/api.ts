@@ -46,7 +46,7 @@ export function updateUser(id: string, payload: Partial<User>) {
 }
 
 export function changeStatus(id: string) {
-  return api.put<User>(`/admin/user-account/${id}/activate`)
+  return api.put<User>(`/${options.scope}/user-account/${id}/activate`)
 }
 
 export async function changePassword(

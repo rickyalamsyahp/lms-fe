@@ -6,6 +6,8 @@ import {
   DialogProps,
   DialogTitle,
 } from '@mui/material'
+import { Viewer } from '@react-pdf-viewer/core'
+import '@react-pdf-viewer/core/lib/styles/index.css'
 import { API_URL } from '../../../libs/env'
 import { FileMeta } from '../__shared/type'
 
@@ -38,6 +40,8 @@ export default function FileViewer({
             >
               <source src={getFileSrc()} type={fileMeta.mimetype} />
             </video>
+          ) : fileMeta?.mimetype.includes('pdf') ? (
+            <Viewer fileUrl={getFileSrc()} />
           ) : (
             <object
               data={getFileSrc()}
