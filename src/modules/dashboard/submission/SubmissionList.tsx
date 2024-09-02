@@ -80,7 +80,9 @@ export default function SubmissionList({
         },
         {
           label: 'Modul',
-          render: (item: any) => <Typography>{item?.course.title}</Typography>,
+          render: (item: any) => (
+            <Typography>{item?.course?.title || '-'}</Typography>
+          ),
         },
         {
           label: 'Exam/Pelatihan',

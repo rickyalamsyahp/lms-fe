@@ -1,3 +1,4 @@
+import { Close } from '@mui/icons-material'
 import {
   Button,
   Dialog,
@@ -58,7 +59,9 @@ export default function FileViewer({
         ) : null}
       </DialogContent>
       <DialogActions>
-        <Button onClick={onClose}>Tutup</Button>
+        <Button onClick={onClose} variant="contained" startIcon={<Close />}>
+          Tutup
+        </Button>
       </DialogActions>
     </Dialog>
   )
