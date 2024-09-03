@@ -48,6 +48,8 @@ export default function CoursetExamList({
         page: 1,
         size: 50,
         'courseId:eq': course?.id,
+        orderBy: 'level',
+        order: 'asc',
       })
       setExamList(res.data)
     } catch (error: any) {
@@ -82,6 +84,7 @@ export default function CoursetExamList({
               <TableHead>
                 <TableRow>
                   <TableCell rowSpan={2}>Judul Exam</TableCell>
+                  <TableCell rowSpan={2}>Level</TableCell>
                   <TableCell rowSpan={2}>Menyelesaikan</TableCell>
                   <TableCell rowSpan={2} align="center">
                     Nilai (Avg)
@@ -127,6 +130,9 @@ export default function CoursetExamList({
                           {d.description}
                         </Typography>
                       </>
+                    </TableCell>
+                    <TableCell align="right">
+                      <Typography>{d.level}</Typography>
                     </TableCell>
                     <CourseExamReport
                       userId={userId}

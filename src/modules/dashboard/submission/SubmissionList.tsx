@@ -88,7 +88,7 @@ export default function SubmissionList({
         {
           label: 'Exam/Pelatihan',
           render: (item: any) => (
-            <Typography>{item?.courseExam.title}</Typography>
+            <Typography>{item?.courseExam?.title}</Typography>
           ),
         },
         {

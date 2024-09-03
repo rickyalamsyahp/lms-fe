@@ -45,6 +45,7 @@ export default function UserCourseList({ userId }: UserCourseListProps) {
           <TableHead>
             <TableRow>
               <TableCell rowSpan={2}>Judul Pembelajaran</TableCell>
+              <TableCell rowSpan={2}>Level</TableCell>
               <TableCell rowSpan={2}>Menyelesaikan</TableCell>
               <TableCell rowSpan={2} align="center">
                 Nilai (Avg)
@@ -85,6 +86,9 @@ export default function UserCourseList({ userId }: UserCourseListProps) {
                       {d.description}
                     </Typography>
                   </>
+                </TableCell>
+                <TableCell align="right">
+                  <Typography>{d.level}</Typography>
                 </TableCell>
                 <CourseReport
                   userId={userId}
