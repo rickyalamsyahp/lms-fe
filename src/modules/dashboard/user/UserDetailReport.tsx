@@ -23,11 +23,11 @@ export default function UserDetailReport({ user }: UserDetailReport) {
       <Typography variant="h6" sx={{ mt: 2 }}>
         Riwayat Aktifitas
       </Typography>
-      <UserCourseList userId={user?.id || state.profile?.id} />
+      <UserCourseList userId={userId || state.profile?.id} />
       <Typography variant="h6" sx={{ mt: 2 }}>
         Daftar Submission
       </Typography>
-      <SubmissionList asPage={false} owner={user?.id} />
+      <SubmissionList asPage={false} owner={userId} />
     </Stack>
   )
 }
