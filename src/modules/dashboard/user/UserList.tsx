@@ -210,7 +210,9 @@ export default function UserList() {
                 },
                 {
                   label: 'Dibuat',
-                  render: (item: User) => <UserById id={item.id as string} />,
+                  render: (item: User) => (
+                    <UserById id={item.createdBy as string} />
+                  ),
                 },
                 {
                   label: 'Tanggal Dibuat',
