@@ -34,7 +34,7 @@ const defaultValue: CourseExam = {
   description: '',
   title: '',
   file: null,
-  level: '',
+  level: '1',
 }
 
 export default function CourseExamForm({
@@ -138,8 +138,15 @@ export default function CourseExamForm({
           <TextField
             label="Level"
             value={payload.level}
-            onChange={(e) => handlePayloadChange('level', e.target.value)}
+            onChange={(e) => {
+              const newLevel = Number(e.target.value)
+              handlePayloadChange(
+                'level',
+                String(newLevel < 1 ? 1 : e.target.value)
+              )
+            }}
             inputProps={{ required: true }}
+            type="number"
             required
           />
           <InputFile
