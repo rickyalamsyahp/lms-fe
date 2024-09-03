@@ -35,6 +35,7 @@ import { useSession } from '../../../context/session'
 // import UserCard from './__components/CourseCard'
 import { useNavigate } from 'react-router-dom'
 import FileViewer from '../../filemeta/__components/FileViewer'
+import UserById from '../user/__components/UserById'
 import UserForm from './__components/CourseForm'
 import { changeStatus, deleteUser, useCourseList } from './__shared/api'
 import { Course } from './__shared/type'
@@ -118,10 +119,10 @@ export default function UserList() {
       ),
     },
 
-    // {
-    //   label: 'Dibuat',
-    //   render: (item: Course) => <Typography>{item.createdBy}</Typography>,
-    // },
+    {
+      label: 'Dibuat',
+      render: (item: Course) => <UserById id={item.createdBy as string} />,
+    },
     {
       label: 'Tanggal Dibuat',
       render: (item: Course) => (

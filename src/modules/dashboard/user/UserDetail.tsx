@@ -15,7 +15,7 @@ export default function UserDtail() {
   const { pathname } = useLocation()
   const { userId } = useParams()
   const { isMobile, state } = useSession()
-  const { data: user } = useUser(state.profile.scope, userId as string)
+  const { data: user } = useUser(userId as string)
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
   const [tab, setTab] = useState<string>(
     pathname.replace(`/dashboard/user/${userId}/`, '')

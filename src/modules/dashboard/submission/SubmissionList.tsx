@@ -20,6 +20,7 @@ import Dropdown from '../../../components/shared/Dropdown'
 import InfiniteScroll from '../../../components/shared/InfiniteScroll'
 import { useSession } from '../../../context/session'
 import { options } from '../../../libs/http'
+import UserById from '../user/__components/UserById'
 import UserForm from './__components/SubmissionForm'
 import SubmissionReportList from './__components/SubmissionReportList'
 import { deleteExam, useSubmissionList } from './__shared/api'
@@ -97,6 +98,12 @@ export default function SubmissionList({
         {
           label: 'Nilai/Skor',
           render: (item: any) => <Typography>{item.score || '-'}</Typography>,
+        },
+        {
+          label: 'Dibuat',
+          render: (item: Submission) => (
+            <UserById id={item.createdBy as string} />
+          ),
         },
         {
           label: 'Tanggal Dibuat',

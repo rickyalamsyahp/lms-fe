@@ -25,6 +25,7 @@ import InfiniteScroll from '../../../components/shared/InfiniteScroll'
 import { useSession } from '../../../context/session'
 import { options } from '../../../libs/http'
 import FileViewer from '../../filemeta/__components/FileViewer'
+import UserById from '../user/__components/UserById'
 import CourseExamForm from './__components/CourseExamForm'
 import { deleteExam, useCourseExamList } from './__shared/api'
 import { CourseExam } from './__shared/type'
@@ -190,6 +191,12 @@ export default function CourseListExam({ asPage }: CourseExamListProps) {
                     <Typography sx={{ minWidth: 120 }}>
                       {item.course?.title}
                     </Typography>
+                  ),
+                },
+                {
+                  label: 'Dibuat',
+                  render: (item: CourseExam) => (
+                    <UserById id={item.createdBy as string} />
                   ),
                 },
                 {

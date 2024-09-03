@@ -29,6 +29,7 @@ import InfiniteScroll from '../../../components/shared/InfiniteScroll'
 import { ScopeSlug, User } from '../../../context/auth/__shared/type'
 import { useSession } from '../../../context/session'
 import ChangePassword from './__components/ChangePassword'
+import UserById from './__components/UserById'
 import UserCard from './__components/UserCard'
 import UserForm from './__components/UserForm'
 import {
@@ -209,9 +210,7 @@ export default function UserList() {
                 },
                 {
                   label: 'Dibuat',
-                  render: (item: User) => (
-                    <Typography>{item.createdBy}</Typography>
-                  ),
+                  render: (item: User) => <UserById id={item.id as string} />,
                 },
                 {
                   label: 'Tanggal Dibuat',

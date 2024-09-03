@@ -33,8 +33,8 @@ export function getUserListInstruktur(query: GetUserListQuery) {
   )
 }
 
-export function getUserById(role: string, id: string) {
-  return api.get<User>(`/${role}/user-account/${id}`)
+export function getUserById(id: string) {
+  return api.get<User>(`/public/user-account/${id}`)
 }
 
 export function createUser(payload: User) {
@@ -90,14 +90,10 @@ export function useUserList(
   )
 }
 
-export function useUser(
-  role: string,
-  id?: string,
-  config?: Partial<SWRConfiguration>
-) {
+export function useUser(id?: string, config?: Partial<SWRConfiguration>) {
   return useSWRFetcher(
-    id ? [role, id, 'get-user-by-id'] : null,
-    ([role, id]) => getUserById(role, id),
+    id ? [id, 'get-user-by-id'] : null,
+    ([id]) => getUserById(id),
     config
   )
 }

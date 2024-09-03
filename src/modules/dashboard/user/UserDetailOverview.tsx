@@ -8,7 +8,7 @@ import { useUser } from './__shared/api'
 export default function UserDetailOverview() {
   const { userId } = useParams()
   const { state } = useSession()
-  const { data: user } = useUser(state.profile.scope, userId as string)
+  const { data: user } = useUser(userId as string)
 
   return user ? (
     <Box maxWidth={'sm'}>
