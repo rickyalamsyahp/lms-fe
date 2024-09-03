@@ -3,7 +3,7 @@ import qs from 'query-string'
 import { SWRConfiguration } from 'swr'
 import { useSWRFetcher } from '../../../../context/use-swr-fetcher'
 
-import { api } from '../../../../libs/http'
+import { api, options } from '../../../../libs/http'
 
 type GetUserListResponse = {
   results: CourseExam[]
@@ -36,23 +36,23 @@ export function getCoursExamById(role: string, id: string) {
 }
 
 export function createCoursExam(payload: any) {
-  return api.post<CourseExam>('/admin/course-exam', payload)
+  return api.post<CourseExam>(`/${options.scope}/course-exam`, payload)
 }
 
 export function updateCoursExam(id: string, payload: any) {
-  return api.put<CourseExam>(`/admin/course-exam/${id}`, payload)
+  return api.put<CourseExam>(`/${options.scope}/course-exam/${id}`, payload)
 }
 
 export function changeStatusExam(id: string) {
-  return api.put<CourseExam>(`/admin/course-exam/${id}/activate`)
+  return api.put<CourseExam>(`/${options.scope}/course-exam/${id}/activate`)
 }
 
 export function deleteExam(id: string) {
-  return api.delete(`/admin/course-exam/${id}`)
+  return api.delete(`/${options.scope}/course-exam/${id}`)
 }
 
 export function downloadFile(id: string) {
-  return api.get<any>(`/admin/course-exam/${id}/download`, {
+  return api.get<any>(`/${options.scope}/course-exam/${id}/download`, {
     responseType: 'blob',
   })
 }

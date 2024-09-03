@@ -11,4 +11,5 @@ export type Course = {
   modifiedBy?: string
   modifiedAt?: Date
   fileMeta?: FileMeta
+  published?: boolean
 }

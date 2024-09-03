@@ -3,7 +3,7 @@ import qs from 'query-string'
 import { SWRConfiguration } from 'swr'
 import { useSWRFetcher } from '../../../../context/use-swr-fetcher'
 
-import { api } from '../../../../libs/http'
+import { api, options } from '../../../../libs/http'
 
 type GetUserListResponse = {
   results: Course[]
@@ -20,7 +20,7 @@ export function getCourseList(role: string, query: GetCourseListQuery) {
 }
 
 export function getCoursById(id: string) {
-  return api.get<Course>(`/admin/course/${id}`)
+  return api.get<Course>(`/${options.scope}/course/${id}`)
 }
 
 export function createCours(payload: any) {
@@ -31,7 +31,7 @@ export function updateCours(id: string, payload: any) {
   return api.put<Course>(`/admin/course/${id}`, payload)
 }
 
-export function changeStatus(id: string) {
+export function togglePublish(id: string) {
   return api.put<Course>(`/admin/course/${id}/publish`)
 }
 

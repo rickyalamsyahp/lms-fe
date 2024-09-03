@@ -33,11 +33,12 @@ import Dropdown from '../../../components/shared/Dropdown'
 import InfiniteScroll from '../../../components/shared/InfiniteScroll'
 import { useSession } from '../../../context/session'
 // import UserCard from './__components/CourseCard'
+import toast from 'react-hot-toast'
 import { useNavigate } from 'react-router-dom'
 import FileViewer from '../../filemeta/__components/FileViewer'
 import UserById from '../user/__components/UserById'
 import UserForm from './__components/CourseForm'
-import { changeStatus, deleteUser, useCourseList } from './__shared/api'
+import { deleteUser, togglePublish, useCourseList } from './__shared/api'
 import { Course } from './__shared/type'
 
 export default function UserList() {
@@ -57,7 +58,7 @@ export default function UserList() {
   }
 
   const { data: userList, mutate: refetch } = useCourseList(
-    state.profile.scope,
+    state.profile?.scope,
     {
       ...query,
       'title:likeLower': search ? `%${search}%` : undefined,
@@ -67,6 +68,15 @@ export default function UserList() {
   function handleOpenCourse(d: Course) {
     setSelectedItem(d)
     setShowFile(true)
+  }
+
+  async function handleTogglePublish(course: Course) {
+    try {
+      await togglePublish(course?.id as string)
+      refetch()
+    } catch (error: any) {
+      toast.error(error.message)
+    }
   }
 
   useEffect(() => {
@@ -110,11 +120,13 @@ export default function UserList() {
     },
     {
       label: 'Status',
-      render: (item: any) => (
+      render: (item: Course) => (
         <Chip
           size="small"
           label={item.published ? 'Published' : 'Unpublished'}
           color={item?.published ? 'success' : 'default'}
+          onClick={state.isAdmin ? () => handleTogglePublish(item) : undefined}
+          sx={state.isAdmin ? { cursor: 'pointer' } : undefined}
         />
       ),
     },
@@ -166,17 +178,19 @@ export default function UserList() {
                 </ListItemIcon>
                 <ListItemText>Edit</ListItemText>
               </MenuItem>
-              <MenuItem
-                onClick={async () => {
-                  await changeStatus(item?.id as string)
-                  refetch()
-                }}
-              >
-                <ListItemIcon>
-                  <ArrowUpward />
-                </ListItemIcon>
-                <ListItemText>Publish</ListItemText>
-              </MenuItem>
+              {state.isAdmin && (
+                <MenuItem
+                  onClick={async () => {
+                    await togglePublish(item?.id as string)
+                    refetch()
+                  }}
+                >
+                  <ListItemIcon>
+                    <ArrowUpward />
+                  </ListItemIcon>
+                  <ListItemText>Publish</ListItemText>
+                </MenuItem>
+              )}
               <Divider />
               <MenuItem
                 onClick={() => {
@@ -221,19 +235,23 @@ export default function UserList() {
                 >
                   <Replay />
                 </IconButton>
-                {isMobile ? (
-                  <IconButton onClick={() => setShowForm(true)} color="primary">
-                    <Add />
-                  </IconButton>
-                ) : (
-                  <Button
-                    startIcon={<Add />}
-                    variant="contained"
-                    onClick={() => setShowForm(true)}
-                  >
-                    Tambah
-                  </Button>
-                )}
+                {state.isAdmin &&
+                  (isMobile ? (
+                    <IconButton
+                      onClick={() => setShowForm(true)}
+                      color="primary"
+                    >
+                      <Add />
+                    </IconButton>
+                  ) : (
+                    <Button
+                      startIcon={<Add />}
+                      variant="contained"
+                      onClick={() => setShowForm(true)}
+                    >
+                      Tambah
+                    </Button>
+                  ))}
               </>
             )
           }

@@ -134,6 +134,7 @@ export default function CourseExamForm({
             multiline
             rows={4}
             inputProps={{ required: true }}
+            required
           />
           <TextField
             label="Level"

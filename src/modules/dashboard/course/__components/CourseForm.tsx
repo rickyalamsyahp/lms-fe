@@ -46,7 +46,7 @@ export default function CourseForm({
   asDialog = true,
   ...boxProps
 }: UserFromProps) {
-  const { isMobile } = useSession()
+  const { isMobile, state } = useSession()
   const [payload, setPayload] = useState<Course>(defaultValue)
   const [isSubmitting, setIsSubmitting] = useState(false)
 
@@ -113,6 +113,8 @@ export default function CourseForm({
     })
   }
 
+  const editable = state.isAdmin
+
   const content = (
     <>
       <form onSubmit={handleSubmit}>
@@ -121,7 +123,7 @@ export default function CourseForm({
             label="Judul"
             value={payload.title}
             onChange={(e) => handlePayloadChange('title', e.target.value)}
-            inputProps={{ required: true }}
+            inputProps={{ required: true, readOnly: !editable }}
             required
           />
           <TextField
@@ -130,7 +132,8 @@ export default function CourseForm({
             onChange={(e) => handlePayloadChange('description', e.target.value)}
             multiline
             rows={4}
-            inputProps={{ required: true }}
+            inputProps={{ required: true, readOnly: !editable }}
+            required
           />
           <TextField
             label="Level"
@@ -142,18 +145,20 @@ export default function CourseForm({
                 String(newLevel < 1 ? 1 : e.target.value)
               )
             }}
-            inputProps={{ required: true }}
+            inputProps={{ required: true, readOnly: !editable }}
             type="number"
             required
           />
-          <InputFile
-            label="File Upload"
-            accept="*.*"
-            onChange={(file?: File) => {
-              console.log(file)
-              handlePayloadChange('file', file)
-            }}
-          />
+          {editable && (
+            <InputFile
+              label="File Upload"
+              accept="*.*"
+              onChange={(file?: File) => {
+                console.log(file)
+                handlePayloadChange('file', file)
+              }}
+            />
+          )}
           {/* <TextField
             label="File"
             value={payload.username}
@@ -235,19 +240,21 @@ export default function CourseForm({
     >
       <DialogTitle>Form Modul Pembelajaran</DialogTitle>
       <DialogContent>{content}</DialogContent>
-      <DialogActions>{action}</DialogActions>
+      {editable && <DialogActions>{action}</DialogActions>}
     </Dialog>
   ) : (
     <Box sx={{ p: 2 }} maxWidth={'xs'} {...boxProps}>
       {content}
-      <Stack
-        flexDirection={'row'}
-        alignItems={'center'}
-        justifyContent={'flex-end'}
-        sx={{ gap: 2, mt: 4 }}
-      >
-        {action}
-      </Stack>
+      {editable && (
+        <Stack
+          flexDirection={'row'}
+          alignItems={'center'}
+          justifyContent={'flex-end'}
+          sx={{ gap: 2, mt: 4 }}
+        >
+          {action}
+        </Stack>
+      )}
     </Box>
   )
 }
