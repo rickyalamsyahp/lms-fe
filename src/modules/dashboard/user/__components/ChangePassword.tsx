@@ -58,6 +58,8 @@ export default function ChangePassword({
         throw new Error('Konfirmasi password tidak sesuai!')
       await changePassword(payload, user?.id)
       toast.success(`Berhasil merubah password`, { id: loadingId })
+      setPayload(resetPayload())
+      setIsSubmitting(false)
       onClose()
     } catch (error: any) {
       setIsSubmitting(false)

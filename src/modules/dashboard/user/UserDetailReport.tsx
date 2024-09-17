@@ -14,12 +14,14 @@ type UserDetailReport = {
 export default function UserDetailReport({ user }: UserDetailReport) {
   const { state } = useSession()
   const { userId } = useParams()
-  const { data } = useUser(userId as string)
+  const { data, mutate: refetch } = useUser(userId as string)
 
   return (
     <Stack sx={{ gap: 2, py: 2, px: 2 }}>
       <Typography variant="h6">Profil</Typography>
-      {(user || data) && <UserInfo user={(user || data) as User} />}
+      {(user || data) && (
+        <UserInfo user={(user || data) as User} refetch={refetch} />
+      )}
       <Typography variant="h6" sx={{ mt: 2 }}>
         Riwayat Aktifitas
       </Typography>

@@ -17,9 +17,10 @@ type FieldProps = TextFieldProps
 
 type UserInfoProps = {
   user: User
+  refetch: any
 }
 
-export default function UserInfo({ user }: UserInfoProps) {
+export default function UserInfo({ user, refetch }: UserInfoProps) {
   const [showForm, setShowForm] = useState(false)
   // const { userId } = useParams()
 
@@ -117,7 +118,10 @@ export default function UserInfo({ user }: UserInfoProps) {
       <UserForm
         initialData={user}
         isOpen={showForm}
-        onClose={() => setShowForm(false)}
+        onClose={() => {
+          setShowForm(false)
+          refetch()
+        }}
       />
     </>
   )
