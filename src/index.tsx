@@ -15,6 +15,7 @@ import CourseExamListPenilaian from './modules/dashboard/courseExam/CourseExamDe
 import CourseExamListSetting from './modules/dashboard/courseExam/CourseExamDetailSetting'
 import CourseExamList from './modules/dashboard/courseExam/CourseExamList'
 import DashboardLayout from './modules/dashboard/Layout'
+import LessonList from './modules/dashboard/lesson/LessonList'
 import Report from './modules/dashboard/report/Report'
 import SubmissionDetail from './modules/dashboard/submission/SubmissionExamDetail'
 import SubmissionDetailOverview from './modules/dashboard/submission/SubmissionExamDetailOverview'
@@ -53,6 +54,10 @@ const router = createBrowserRouter([
             element: <SubmissionDetailOverview />,
           },
         ],
+      },
+      {
+        path: '/dashboard/lesson',
+        element: <LessonList />,
       },
       {
         path: '/dashboard/course',

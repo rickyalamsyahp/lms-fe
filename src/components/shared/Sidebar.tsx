@@ -48,6 +48,14 @@ const menuList: MenuItemProps[] = [
   },
   {
     menuType: MenuItemType.LINK,
+    label: 'Modul Materi',
+    icon: <Book fontSize="small" />,
+    href: '/dashboard/lesson',
+    activeRegex: /.*lesson/gi,
+    scopes: [ScopeSlug.ADMIN, ScopeSlug.INSTRUCTOR, ScopeSlug.TRAINEE],
+  },
+  {
+    menuType: MenuItemType.LINK,
     label: 'Modul Pembelajaran',
     icon: <Book fontSize="small" />,
     href: '/dashboard/course',
