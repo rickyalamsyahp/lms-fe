@@ -1,4 +1,4 @@
-import { Submission, SubmissionReport } from './type'
+import { Submission, SubmissionLog, SubmissionReport } from './type'
 import qs from 'query-string'
 import { SWRConfiguration } from 'swr'
 import { useSWRFetcher } from '../../../../context/use-swr-fetcher'
@@ -17,6 +17,11 @@ type GetSubmissionListQuery = {
 
 type GetSubmissionReportListResponse = {
   results: SubmissionReport[]
+  total: string
+}
+
+type GetSubmissionLogListResponse = {
+  results: SubmissionLog[]
   total: string
 }
 
@@ -62,6 +67,16 @@ export function getSubmissionReportList(
   )
 }
 
+export function getSubmissionLogList(
+  role: string,
+  id: string,
+  query: GetSubmissionListQuery
+) {
+  return api.get<GetSubmissionLogListResponse>(
+    `/${role}/submission/${id}/log?${qs.stringify(query)}`
+  )
+}
+
 export function useSubmissionList(
   role: string,
   query: GetSubmissionListQuery,
@@ -95,6 +110,19 @@ export function useSubmissionReportList(
   return useSWRFetcher(
     id ? [role, id, query, 'get-Submission-report-list'] : null,
     ([role, id, query]) => getSubmissionReportList(role, id, query),
+    config
+  )
+}
+
+export function useSubmissionLogList(
+  role: string,
+  id: string | null | undefined,
+  query: GetSubmissionListQuery,
+  config?: Partial<SWRConfiguration>
+) {
+  return useSWRFetcher(
+    id ? [role, id, query, 'get-Submission-log-list'] : null,
+    ([role, id, query]) => getSubmissionLogList(role, id, query),
     config
   )
 }

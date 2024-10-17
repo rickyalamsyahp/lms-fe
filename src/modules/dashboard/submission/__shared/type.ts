@@ -24,3 +24,13 @@ export type SubmissionReport = {
   modifiedBy?: string
   modifiedAt?: Date
 }
+
+export type SubmissionLog = {
+  id?: string
+  tag: string
+  fileMeta: FileMeta
+  createdBy?: string
+  createdAt?: Date
+  modifiedBy?: string
+  modifiedAt?: Date
+}

@@ -1,7 +1,7 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 'use client'
 
-import { Menu, Report } from '@mui/icons-material'
+import { ListAlt, Menu, Report } from '@mui/icons-material'
 import {
   Box,
   IconButton,
@@ -22,6 +22,7 @@ import { useSession } from '../../../context/session'
 import { options } from '../../../libs/http'
 import UserById from '../user/__components/UserById'
 import UserForm from './__components/SubmissionForm'
+import SubmissionLogList from './__components/SubmissionLogList'
 import SubmissionReportList from './__components/SubmissionReportList'
 import { deleteExam, useSubmissionList } from './__shared/api'
 import { Submission } from './__shared/type'
@@ -43,6 +44,7 @@ export default function SubmissionList({
   const [selectedItem, setSelectedItem] = useState<Submission | undefined>()
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
   const [showReport, setShowReport] = useState(false)
+  const [showLog, setShowLog] = useState(false)
 
   const query = {
     page,
@@ -135,6 +137,17 @@ export default function SubmissionList({
                     </ListItemIcon>
                     <ListItemText>Daftar Report</ListItemText>
                   </MenuItem>
+                  <MenuItem
+                    onClick={() => {
+                      setSelectedItem(item)
+                      setShowLog(true)
+                    }}
+                  >
+                    <ListItemIcon>
+                      <ListAlt />
+                    </ListItemIcon>
+                    <ListItemText>Daftar Log</ListItemText>
+                  </MenuItem>
                 </>
               }
             />
@@ -219,6 +232,14 @@ export default function SubmissionList({
         open={showReport}
         onClose={() => {
           setShowReport(false)
+          setSelectedItem(undefined)
+        }}
+        submission={selectedItem}
+      />
+      <SubmissionLogList
+        open={showLog}
+        onClose={() => {
+          setShowLog(false)
           setSelectedItem(undefined)
         }}
         submission={selectedItem}
