@@ -106,9 +106,9 @@ export default function LoginPage() {
               </Stack>
             </form>
           </Paper>
-          <Typography sx={{ mt: 2 }}>
+          {/* <Typography sx={{ mt: 2 }}>
             Powered by <b>AVS</b> Simulator
-          </Typography>
+          </Typography> */}
         </Container>
       </Stack>
     </>
