@@ -26,23 +26,25 @@ export function getLessonById(id: string) {
 }
 
 export function createLesson(payload: any) {
-  return api.post<Lesson>('/${role}/lesson', payload)
+  return api.post<Lesson>(`/${options.publicScope}/lesson`, payload)
 }
 
 export function updateLesson(id: string, payload: any) {
-  return api.put<Lesson>(`/admin/lesson/${id}`, payload)
+  return api.put<Lesson>(`/${options.publicScope}/lesson/${id}`, payload)
 }
 
 export function togglePublish(id: string) {
-  return api.put<Lesson>(`/admin/lesson/${id}/publish`)
+  return api.put<Lesson>(`/${options.publicScope}/lesson/${id}/publish`)
 }
 
 export function deleteLesson(id: string) {
-  return api.delete(`/admin/lesson/${id}`)
+  return api.delete(`/${options.publicScope}/lesson/${id}`)
 }
 
 export function downloadFile(id: string) {
-  return api.get<any>(`/admin/lesson/${id}/download`, { responseType: 'blob' })
+  return api.get<any>(`/${options.publicScope}/lesson/${id}/download`, {
+    responseType: 'blob',
+  })
 }
 
 export function getLessonStats(id: string, userId?: string) {
