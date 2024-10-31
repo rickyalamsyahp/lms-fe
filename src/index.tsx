@@ -129,7 +129,7 @@ const root = ReactDOM.createRoot(document.getElementById('root') as HTMLElement)
 
 root.render(
   <React.StrictMode>
-    <Worker workerUrl="https://unpkg.com/pdfjs-dist@3.4.120/build/pdf.worker.min.js">
+    <Worker workerUrl={`${process.env.PUBLIC_URL}/src/pdfjs/pdf.worker.min.js`}>
       <Toaster />
       <RouterProvider router={router} />
     </Worker>
