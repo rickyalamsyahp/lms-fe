@@ -1,7 +1,7 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 'use client'
 
-import { ListAlt, Menu, Report } from '@mui/icons-material'
+import { Menu, Report } from '@mui/icons-material'
 import {
   Box,
   IconButton,
@@ -137,7 +137,7 @@ export default function SubmissionList({
                     </ListItemIcon>
                     <ListItemText>Daftar Report</ListItemText>
                   </MenuItem>
-                  <MenuItem
+                  {/* <MenuItem
                     onClick={() => {
                       setSelectedItem(item)
                       setShowLog(true)
@@ -147,7 +147,7 @@ export default function SubmissionList({
                       <ListAlt />
                     </ListItemIcon>
                     <ListItemText>Daftar Log</ListItemText>
-                  </MenuItem>
+                  </MenuItem> */}
                 </>
               }
             />
