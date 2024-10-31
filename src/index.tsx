@@ -129,7 +129,9 @@ const root = ReactDOM.createRoot(document.getElementById('root') as HTMLElement)
 
 root.render(
   <React.StrictMode>
-    <Worker workerUrl={`${process.env.PUBLIC_URL}/src/pdfjs/pdf.worker.min.js`}>
+    <Worker
+      workerUrl={`${process.env.PUBLIC_URL}/public/pdfjs/pdf.worker.min.js`}
+    >
       <Toaster />
       <RouterProvider router={router} />
     </Worker>
