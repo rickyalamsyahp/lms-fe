@@ -56,7 +56,9 @@ export default function SubmissionLogList({
                     sx={{ cursor: 'pointer' }}
                     onClick={() => handleOpenFile(item)}
                   >
-                    <Typography>{item.fileMeta.originalname}</Typography>
+                    <Typography>
+                      {item.fileMeta?.originalname || item.fileMeta?.filename}
+                    </Typography>
                   </Link>
                 ),
               },
