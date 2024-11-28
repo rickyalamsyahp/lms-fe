@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable react-hooks/exhaustive-deps */
 'use client'
 
@@ -5,7 +6,6 @@ import {
   Add,
   ArrowUpward,
   Delete,
-  Details,
   Edit,
   Menu,
   Replay,
@@ -142,7 +142,7 @@ export default function LessonList({ asPage = true }: LessonListProps) {
     },
   ]
 
-  if (state.isAdmin || state.isInstructor) {
+  if (state.isAdmin) {
     columns.push({
       label: 'Action',
       render: (item) => (
@@ -154,7 +154,7 @@ export default function LessonList({ asPage = true }: LessonListProps) {
           }
           menuList={
             <>
-              <MenuItem
+              {/* <MenuItem
                 onClick={async () => {
                   navigate(`/dashboard/lesson/${item?.id}/overview`)
                 }}
@@ -163,7 +163,7 @@ export default function LessonList({ asPage = true }: LessonListProps) {
                   <Details />
                 </ListItemIcon>
                 <ListItemText>Detail</ListItemText>
-              </MenuItem>
+              </MenuItem> */}
               <MenuItem
                 onClick={() => {
                   setSelectedItem(item)

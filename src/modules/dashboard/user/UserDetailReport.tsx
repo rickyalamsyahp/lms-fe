@@ -35,12 +35,13 @@ export default function UserDetailReport({ user }: UserDetailReport) {
             Daftar Materi
           </Typography>
           <LessonList asPage={false} />
+
+          <Typography variant="h6" sx={{ mt: 2 }}>
+            Daftar Submission
+          </Typography>
+          <SubmissionList asPage={false} owner={userId} />
         </>
       )}
-      <Typography variant="h6" sx={{ mt: 2 }}>
-        Daftar Submission
-      </Typography>
-      <SubmissionList asPage={false} owner={userId} />
     </Stack>
   )
 }

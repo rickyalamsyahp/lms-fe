@@ -167,42 +167,46 @@ export default function UserList() {
                 </ListItemIcon>
                 <ListItemText>Detail</ListItemText>
               </MenuItem>
-              <MenuItem
-                onClick={() => {
-                  setSelectedItem(item)
-                  setShowForm(true)
-                }}
-              >
-                <ListItemIcon>
-                  <Edit />
-                </ListItemIcon>
-                <ListItemText>Edit</ListItemText>
-              </MenuItem>
-              {state.isAdmin && (
-                <MenuItem
-                  onClick={async () => {
-                    await togglePublish(item?.id as string)
-                    refetch()
-                  }}
-                >
-                  <ListItemIcon>
-                    <ArrowUpward />
-                  </ListItemIcon>
-                  <ListItemText>Publish</ListItemText>
-                </MenuItem>
+              {state.isInstructor && (
+                <>
+                  <MenuItem
+                    onClick={() => {
+                      setSelectedItem(item)
+                      setShowForm(true)
+                    }}
+                  >
+                    <ListItemIcon>
+                      <Edit />
+                    </ListItemIcon>
+                    <ListItemText>Edit</ListItemText>
+                  </MenuItem>
+
+                  <MenuItem
+                    onClick={async () => {
+                      await togglePublish(item?.id as string)
+                      refetch()
+                    }}
+                  >
+                    <ListItemIcon>
+                      <ArrowUpward />
+                    </ListItemIcon>
+                    <ListItemText>Publish</ListItemText>
+                  </MenuItem>
+
+                  <Divider />
+                  <MenuItem
+                    onClick={() => {
+                      setSelectedItem(item)
+                      setShowDeleteConfirm(true)
+                    }}
+                  >
+                    <ListItemIcon>
+                      <Delete />
+                    </ListItemIcon>
+                    <ListItemText>Delete</ListItemText>
+                  </MenuItem>
+                </>
               )}
-              <Divider />
-              <MenuItem
-                onClick={() => {
-                  setSelectedItem(item)
-                  setShowDeleteConfirm(true)
-                }}
-              >
-                <ListItemIcon>
-                  <Delete />
-                </ListItemIcon>
-                <ListItemText>Delete</ListItemText>
-              </MenuItem>
             </>
           }
         />
@@ -235,7 +239,7 @@ export default function UserList() {
                 >
                   <Replay />
                 </IconButton>
-                {state.isAdmin &&
+                {state.isInstructor &&
                   (isMobile ? (
                     <IconButton
                       onClick={() => setShowForm(true)}

@@ -70,6 +70,7 @@ export default function SubmissionList({
       throw error
     }
   }
+  console.log(examList?.results)
 
   const renderContent = (
     <DataTable
@@ -99,7 +100,13 @@ export default function SubmissionList({
         },
         {
           label: 'Nilai/Skor',
-          render: (item: any) => <Typography>{item.score || '-'}</Typography>,
+          render: (item: any) => (
+            <Typography>
+              {item.score !== undefined && item.score !== null
+                ? item.score
+                : '-'}
+            </Typography>
+          ),
         },
         {
           label: 'Dibuat',
