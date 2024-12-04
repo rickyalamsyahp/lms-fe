@@ -31,7 +31,7 @@ export default function UserDetailReport({ user }: UserDetailReport) {
       {scope === ScopeSlug.TRAINEE && (
         <>
           <Typography variant="h6" sx={{ mt: 2 }}>
-            Riwayat Aktifitas
+            Riwayat Aktivitas
           </Typography>
           <UserCourseList userId={userId || state.profile?.id} />
           <Typography variant="h6" sx={{ mt: 2 }}>
