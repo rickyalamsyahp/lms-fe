@@ -19,18 +19,25 @@ export default function UserDetailReport({ user }: UserDetailReport) {
   const { data, mutate: refetch } = useUser(userId as string)
   const profile = useProfile()
 
+  const scope = profile?.data?.scope !== ScopeSlug.TRAINEE ? data?.scope : profile.data?.scope;
+
+  console.log("profile", profile);
+  console.log("scope", profile?.data?.scope);
+  console.log("data", data);
+
   return (
     <Stack sx={{ gap: 2, py: 2, px: 2 }}>
       <Typography variant="h6">Profil</Typography>
       {(user || data) && (
         <UserInfo user={(user || data) as User} refetch={refetch} />
       )}
-      <Typography variant="h6" sx={{ mt: 2 }}>
-        Riwayat Aktifitas
-      </Typography>
-      <UserCourseList userId={userId || state.profile?.id} />
-      {profile?.data?.scope === ScopeSlug.TRAINEE && (
+      
+      {scope === ScopeSlug.TRAINEE && (
         <>
+          <Typography variant="h6" sx={{ mt: 2 }}>
+            Riwayat Aktifitas
+          </Typography>
+          <UserCourseList userId={userId || state.profile?.id} />
           <Typography variant="h6" sx={{ mt: 2 }}>
             Daftar Materi
           </Typography>
