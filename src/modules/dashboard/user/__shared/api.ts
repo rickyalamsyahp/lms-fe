@@ -61,8 +61,41 @@ export async function changePassword(
   )
 }
 
-export function deleteUser(id: string) {
-  return api.delete(`/admin/user-account/${id}`)
+export async function deleteUser(id: string) {
+  try {
+    // First, delete the submission for the user
+    const sub = await api.get(`/admin/submission?owner:eq=${id}`);
+    console.log("TES0");
+    if (sub.data.results.length > 0) {
+      console.log("TES1");
+      const resSub = await api.delete(`/admin/submission/user/${id}`);
+      console.log("TES2");
+
+      // Once the submission is deleted, delete the user account
+      if (resSub.status === 200) {
+        // Ensure the submission was successfully deleted
+        console.log("TES3");
+
+        const res = await api.delete(`/admin/user-account/${id}`);
+        console.log("TES4");
+
+        return res.data;
+      } else {
+        throw new Error(
+          "Failed to delete submission. User account deletion aborted."
+        );
+      }
+    } else {
+      console.log("TES5");
+      const res = await api.delete(`/admin/user-account/${id}`);
+      return res.data;
+    }
+  } catch (error) {
+    console.error("Error during deletion process:", error);
+    throw error;
+  }
+  // return api.delete(`/admin/submission/user/${id}`)
+  // return api.delete(`/admin/user-account/${id}`)
 }
 
 export function changeAvatar(id: string, file: File) {
