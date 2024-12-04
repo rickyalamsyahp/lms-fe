@@ -65,19 +65,19 @@ export async function deleteUser(id: string) {
   try {
     // First, delete the submission for the user
     const sub = await api.get(`/admin/submission?owner:eq=${id}`);
-    console.log("TES0");
+    // console.log("TES0");
     if (sub.data.results.length > 0) {
-      console.log("TES1");
+      // console.log("TES1");
       const resSub = await api.delete(`/admin/submission/user/${id}`);
-      console.log("TES2");
+      // console.log("TES2");
 
       // Once the submission is deleted, delete the user account
       if (resSub.status === 200) {
         // Ensure the submission was successfully deleted
-        console.log("TES3");
+        // console.log("TES3");
 
         const res = await api.delete(`/admin/user-account/${id}`);
-        console.log("TES4");
+        // console.log("TES4");
 
         return res.data;
       } else {
@@ -86,7 +86,7 @@ export async function deleteUser(id: string) {
         );
       }
     } else {
-      console.log("TES5");
+      // console.log("TES5");
       const res = await api.delete(`/admin/user-account/${id}`);
       return res.data;
     }

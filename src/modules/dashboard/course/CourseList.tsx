@@ -3,25 +3,21 @@
 
 import {
   Add,
-  ArrowUpward,
-  Delete,
   Details,
-  Edit,
   Menu,
-  Replay,
+  Replay
 } from '@mui/icons-material'
 import {
   Box,
   Button,
   Chip,
-  Divider,
   IconButton,
   Link,
   ListItemIcon,
   ListItemText,
   MenuItem,
   Stack,
-  Typography,
+  Typography
 } from '@mui/material'
 import dayjs from 'dayjs'
 import { useEffect, useState } from 'react'
@@ -167,7 +163,7 @@ export default function UserList() {
                 </ListItemIcon>
                 <ListItemText>Detail</ListItemText>
               </MenuItem>
-              {state.isInstructor && (
+              {/* {state.isInstructor && (
                 <>
                   <MenuItem
                     onClick={() => {
@@ -206,7 +202,7 @@ export default function UserList() {
                     <ListItemText>Delete</ListItemText>
                   </MenuItem>
                 </>
-              )}
+              )} */}
             </>
           }
         />

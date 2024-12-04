@@ -1,18 +1,17 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 'use client'
 
-import { Add, Delete, Details, Edit, Menu, Replay } from '@mui/icons-material'
+import { Add, Details, Edit, Menu, Replay } from '@mui/icons-material'
 import {
   Box,
   Button,
-  Divider,
   IconButton,
   Link,
   ListItemIcon,
   ListItemText,
   MenuItem,
   Stack,
-  Typography,
+  Typography
 } from '@mui/material'
 import dayjs from 'dayjs'
 import { useState } from 'react'
@@ -239,7 +238,7 @@ export default function CourseListExam({ asPage }: CourseExamListProps) {
                             </ListItemIcon>
                             <ListItemText>Detail</ListItemText>
                           </MenuItem>
-                          <Divider />
+                          {/* <Divider />
                           <MenuItem
                             onClick={() => {
                               setSelectedItem(item)
@@ -250,7 +249,7 @@ export default function CourseListExam({ asPage }: CourseExamListProps) {
                               <Delete />
                             </ListItemIcon>
                             <ListItemText>Delete</ListItemText>
-                          </MenuItem>
+                          </MenuItem> */}
                         </>
                       }
                     />
