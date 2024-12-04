@@ -21,10 +21,6 @@ export default function UserDetailReport({ user }: UserDetailReport) {
 
   const scope = profile?.data?.scope !== ScopeSlug.TRAINEE ? data?.scope : profile.data?.scope;
 
-  console.log("profile", profile);
-  console.log("scope", profile?.data?.scope);
-  console.log("data", data);
-
   return (
     <Stack sx={{ gap: 2, py: 2, px: 2 }}>
       <Typography variant="h6">Profil</Typography>
