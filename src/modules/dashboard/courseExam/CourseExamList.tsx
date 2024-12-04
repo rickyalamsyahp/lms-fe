@@ -1,10 +1,9 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 'use client'
 
-import { Add, Details, Edit, Menu, Replay } from '@mui/icons-material'
+import { Details, Edit, Menu, Replay } from '@mui/icons-material'
 import {
   Box,
-  Button,
   IconButton,
   Link,
   ListItemIcon,
@@ -102,7 +101,7 @@ export default function CourseListExam({ asPage }: CourseExamListProps) {
                 >
                   <Replay />
                 </IconButton>
-                {isMobile ? (
+                {/* {isMobile ? (
                   <IconButton onClick={() => setShowForm(true)} color="primary">
                     <Add />
                   </IconButton>
@@ -114,7 +113,7 @@ export default function CourseListExam({ asPage }: CourseExamListProps) {
                   >
                     Tambah
                   </Button>
-                )}
+                )} */}
               </>
             )
           }
