@@ -25,6 +25,20 @@ export default function FileViewer({
   function getFileSrc() {
     return `${API_URL}/file/${fileMeta?.filename}`
   }
+  function getFileSrcs(path: string) {
+    console.log(path)
+
+    if (path.startsWith('./tmp')) {
+      console.log('masuk sini')
+
+      // Jika path mengandung './temp', panggil getFileSrc()
+      return `${API_URL}/file/${fileMeta?.filename}`
+    } else {
+      const datas = `http://localhost:9000/Replays${path}.mp4`
+      // Jika tidak, ambil file dari folder yang ditentukan dalam path
+      return datas
+    }
+  }
 
   return (
     <Dialog fullScreen onClose={onClose} {...props}>
@@ -39,7 +53,10 @@ export default function FileViewer({
               controls
               style={{ width: '100%', height: '100%' }}
             >
-              <source src={getFileSrc()} type={fileMeta.mimetype} />
+              <source
+                src={getFileSrcs(fileMeta.path)}
+                type={fileMeta.mimetype}
+              />
             </video>
           ) : fileMeta?.mimetype.includes('pdf') ? (
             <Viewer fileUrl={getFileSrc()} />

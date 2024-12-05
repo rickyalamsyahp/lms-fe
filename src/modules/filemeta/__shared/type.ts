@@ -5,4 +5,5 @@ export type FileMeta = {
   encoding: string
   mimetype: string
   size: number
+  path: string
 }
