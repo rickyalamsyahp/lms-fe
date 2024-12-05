@@ -19,7 +19,10 @@ export default function UserDetailReport({ user }: UserDetailReport) {
   const { data, mutate: refetch } = useUser(userId as string)
   const profile = useProfile()
 
-  const scope = profile?.data?.scope !== ScopeSlug.TRAINEE ? data?.scope : profile.data?.scope;
+  const scope =
+    profile?.data?.scope !== ScopeSlug.TRAINEE
+      ? data?.scope
+      : profile.data?.scope
 
   return (
     <Stack sx={{ gap: 2, py: 2, px: 2 }}>
@@ -27,11 +30,11 @@ export default function UserDetailReport({ user }: UserDetailReport) {
       {(user || data) && (
         <UserInfo user={(user || data) as User} refetch={refetch} />
       )}
-      
+
       {scope === ScopeSlug.TRAINEE && (
         <>
           <Typography variant="h6" sx={{ mt: 2 }}>
-            Riwayat Aktivitas
+            Aktivitas
           </Typography>
           <UserCourseList userId={userId || state.profile?.id} />
           <Typography variant="h6" sx={{ mt: 2 }}>

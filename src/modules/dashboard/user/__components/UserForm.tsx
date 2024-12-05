@@ -75,7 +75,7 @@ export default function UserForm({
 
   useEffect(() => {
     if (isOpen || !asDialog) {
-      setAvatarFile(undefined)
+      // setAvatarFile(undefined)
       setPayload(initialData || { ...defaultValue })
     }
   }, [initialData, isOpen, asDialog])
@@ -84,6 +84,7 @@ export default function UserForm({
     event.stopPropagation()
     event.preventDefault()
     setIsSubmitting(true)
+    console.log(avatarFile)
 
     const loadingId = toast.loading(
       initialData ? 'memperbaharui akun pengguna' : 'mendaftarkan akun pengguna'

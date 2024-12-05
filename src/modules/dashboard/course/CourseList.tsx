@@ -1,12 +1,7 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 'use client'
 
-import {
-  Add,
-  Details,
-  Menu,
-  Replay
-} from '@mui/icons-material'
+import { Add, Details, Menu, Replay } from '@mui/icons-material'
 import {
   Box,
   Button,
@@ -17,7 +12,7 @@ import {
   ListItemText,
   MenuItem,
   Stack,
-  Typography
+  Typography,
 } from '@mui/material'
 import dayjs from 'dayjs'
 import { useEffect, useState } from 'react'
@@ -68,8 +63,10 @@ export default function UserList() {
 
   async function handleTogglePublish(course: Course) {
     try {
-      await togglePublish(course?.id as string)
-      refetch()
+      if (course.published == false) {
+        await togglePublish(course?.id as string)
+        refetch()
+      }
     } catch (error: any) {
       toast.error(error.message)
     }
@@ -235,7 +232,7 @@ export default function UserList() {
                 >
                   <Replay />
                 </IconButton>
-                {state.isInstructor &&
+                {state.isAdmin &&
                   (isMobile ? (
                     <IconButton
                       onClick={() => setShowForm(true)}

@@ -28,7 +28,7 @@ export default function UserDtail() {
 
   async function handleDelete() {
     try {
-      await deleteUser(userId as string)
+      await deleteUser(userId as string, state as any)
       navigate('/dashboard/user')
     } catch (error) {
       throw error

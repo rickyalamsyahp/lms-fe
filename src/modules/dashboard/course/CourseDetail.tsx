@@ -56,6 +56,7 @@ export default function CourseDetail() {
           rightAddon={
             <>
               {state.isAdmin &&
+                tab == 'overview' &&
                 (isMobile ? (
                   <IconButton
                     color="warning"

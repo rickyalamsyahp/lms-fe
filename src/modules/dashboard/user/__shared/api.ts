@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { User } from '../../../auth/type'
 import qs from 'query-string'
 import { SWRConfiguration } from 'swr'
@@ -61,14 +62,17 @@ export async function changePassword(
   )
 }
 
-export async function deleteUser(id: string) {
+export async function deleteUser(id: string, state: any) {
   try {
+    const linked =
+      state.profile?.scope === 'instructor' ? 'instructor' : 'admin'
+
     // First, delete the submission for the user
-    const sub = await api.get(`/admin/submission?owner:eq=${id}`);
-    // console.log("TES0");
+    const sub = await api.get(`/${linked}/submission?owner:eq=${id}`)
+    // // console.log("TES0");
     if (sub.data.results.length > 0) {
       // console.log("TES1");
-      const resSub = await api.delete(`/admin/submission/user/${id}`);
+      const resSub = await api.delete(`/${linked}/submission/user/${id}`)
       // console.log("TES2");
 
       // Once the submission is deleted, delete the user account
@@ -76,23 +80,23 @@ export async function deleteUser(id: string) {
         // Ensure the submission was successfully deleted
         // console.log("TES3");
 
-        const res = await api.delete(`/admin/user-account/${id}`);
+        const res = await api.delete(`/${linked}/user-account/${id}`)
         // console.log("TES4");
 
-        return res.data;
+        return res.data
       } else {
         throw new Error(
-          "Failed to delete submission. User account deletion aborted."
-        );
+          'Failed to delete submission. User account deletion aborted.'
+        )
       }
     } else {
       // console.log("TES5");
-      const res = await api.delete(`/admin/user-account/${id}`);
-      return res.data;
+      const res = await api.delete(`/${linked}/user-account/${id}`)
+      return res.data
     }
   } catch (error) {
-    console.error("Error during deletion process:", error);
-    throw error;
+    console.error('Error during deletion process:', error)
+    throw error
   }
   // return api.delete(`/admin/submission/user/${id}`)
   // return api.delete(`/admin/user-account/${id}`)

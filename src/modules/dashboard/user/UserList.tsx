@@ -65,7 +65,7 @@ export default function UserList() {
 
   async function handleDelete() {
     try {
-      await deleteUser(selectedItem?.id as string)
+      await deleteUser(selectedItem?.id as string, state as any)
       refetch()
     } catch (error) {
       throw error
