@@ -1,5 +1,5 @@
-import { Delete } from '@mui/icons-material'
-import { Box, Button, IconButton, Stack, Tab, Tabs } from '@mui/material'
+/* eslint-disable @typescript-eslint/no-unused-vars */
+import { Box, Stack, Tab, Tabs } from '@mui/material'
 import { SyntheticEvent, useState } from 'react'
 import { Outlet, useLocation, useNavigate, useParams } from 'react-router-dom'
 import Commandbar from '../../../components/shared/Commandbar'
@@ -53,29 +53,29 @@ export default function CourseDetail() {
               },
             ],
           }}
-          rightAddon={
-            <>
-              {state.isAdmin &&
-                tab == 'overview' &&
-                (isMobile ? (
-                  <IconButton
-                    color="warning"
-                    onClick={() => setShowDeleteConfirm(true)}
-                  >
-                    <Delete />
-                  </IconButton>
-                ) : (
-                  <Button
-                    startIcon={<Delete />}
-                    color="warning"
-                    variant="contained"
-                    onClick={() => setShowDeleteConfirm(true)}
-                  >
-                    Hapus
-                  </Button>
-                ))}
-            </>
-          }
+          // rightAddon={
+          //   <>
+          //     {(state.isAdmin || state.isInstructor) &&
+          //       tab == 'overview' &&
+          //       (isMobile ? (
+          //         <IconButton
+          //           color="warning"
+          //           onClick={() => setShowDeleteConfirm(true)}
+          //         >
+          //           <Delete />
+          //         </IconButton>
+          //       ) : (
+          //         <Button
+          //           startIcon={<Delete />}
+          //           color="warning"
+          //           variant="contained"
+          //           onClick={() => setShowDeleteConfirm(true)}
+          //         >
+          //           Hapus
+          //         </Button>
+          //       ))}
+          //   </>
+          // }
         />
         <Tabs
           value={tab}

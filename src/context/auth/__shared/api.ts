@@ -15,7 +15,7 @@ export function updateMyProfile(payload: Partial<User>) {
   return api.put<User>(`/my-profile`, payload)
 }
 
-export function changeMyAvatar(file: File) {
+export function changeMyAvatar(file: any) {
   const formData = generateFormData([{ key: 'file', file }])
   return api.put(`/my-profile/avatar`, formData)
 }

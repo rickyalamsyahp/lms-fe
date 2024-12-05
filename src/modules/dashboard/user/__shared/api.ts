@@ -102,7 +102,7 @@ export async function deleteUser(id: string, state: any) {
   // return api.delete(`/admin/user-account/${id}`)
 }
 
-export function changeAvatar(id: string, file: File) {
+export function changeAvatar(id: string, file: any) {
   const formData = generateFormData([{ key: 'file', file }])
   return api.put(`/admin/user-account/${id}/avatar`, formData)
 }

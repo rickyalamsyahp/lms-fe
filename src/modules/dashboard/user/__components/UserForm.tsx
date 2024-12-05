@@ -84,7 +84,6 @@ export default function UserForm({
     event.stopPropagation()
     event.preventDefault()
     setIsSubmitting(true)
-    console.log(avatarFile)
 
     const loadingId = toast.loading(
       initialData ? 'memperbaharui akun pengguna' : 'mendaftarkan akun pengguna'
@@ -106,7 +105,6 @@ export default function UserForm({
           ? changeMyAvatar(avatarFile)
           : changeAvatar(payload.id as string, avatarFile))
       }
-
       setIsSubmitting(false)
       setPayload({ ...res.data })
       toast.success(
