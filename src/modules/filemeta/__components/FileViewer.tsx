@@ -26,15 +26,11 @@ export default function FileViewer({
     return `${API_URL}/file/${fileMeta?.filename}`
   }
   function getFileSrcs(path: string) {
-    console.log(path)
-
     if (path.startsWith('./tmp')) {
-      console.log('masuk sini')
-
       // Jika path mengandung './temp', panggil getFileSrc()
       return `${API_URL}/file/${fileMeta?.filename}`
     } else {
-      const datas = `http://localhost:9000/Replays${path}.mp4`
+      const datas = `${API_URL}/Replays${path}.mp4`
       // Jika tidak, ambil file dari folder yang ditentukan dalam path
       return datas
     }
