@@ -23,6 +23,7 @@ import toast from 'react-hot-toast'
 import InputFile from '../../../../components/shared/InputFile'
 import {
   changeMyAvatar,
+  deleteMyAvatar,
   updateMyProfile,
 } from '../../../../context/auth/__shared/api'
 import { Gender, ScopeSlug, User } from '../../../../context/auth/__shared/type'
@@ -31,6 +32,7 @@ import { enumToArray } from '../../../../libs/utils'
 import {
   changeAvatar,
   createUser,
+  deleteAvatar,
   getUserAvatarUrl,
   updateUser,
 } from '../__shared/api'
@@ -105,6 +107,10 @@ export default function UserForm({
           ? changeMyAvatar(avatarFile)
           : changeAvatar(payload.id as string, avatarFile))
       }
+
+      if (avatarFile === undefined) {
+        await (isOwned ? deleteMyAvatar() : deleteAvatar(payload.id as string))
+      }
       setIsSubmitting(false)
       setPayload({ ...res.data })
       toast.success(
@@ -112,6 +118,7 @@ export default function UserForm({
         { id: loadingId }
       )
       if (onSuccess) onSuccess()
+      window.location.reload()
       onClose()
     } catch (error: any) {
       setIsSubmitting(false)

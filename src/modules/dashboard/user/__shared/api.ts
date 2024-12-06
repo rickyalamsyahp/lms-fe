@@ -104,7 +104,10 @@ export async function deleteUser(id: string, state: any) {
 
 export function changeAvatar(id: string, file: any) {
   const formData = generateFormData([{ key: 'file', file }])
-  return api.put(`/admin/user-account/${id}/avatar`, formData)
+  return api.put(`/${options.scope}/user-account/${id}/avatar`, formData)
+}
+export function deleteAvatar(id: string) {
+  return api.delete(`/${options.scope}/user-account/${id}/avatar`)
 }
 
 export function getUserAvatarUrl(id: string) {

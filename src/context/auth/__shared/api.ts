@@ -20,6 +20,10 @@ export function changeMyAvatar(file: any) {
   return api.put(`/my-profile/avatar`, formData)
 }
 
+export function deleteMyAvatar() {
+  return api.delete(`/my-profile/avatar`)
+}
+
 export function useProfile(config?: Partial<SWRConfiguration>, isReady = true) {
   return useSWRFetcher(
     isReady ? ['get-my-profile'] : null,
