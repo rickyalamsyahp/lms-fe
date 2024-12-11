@@ -108,7 +108,7 @@ export default function UserForm({
           : changeAvatar(payload.id as string, avatarFile))
       }
 
-      if (avatarFile === undefined) {
+      if (avatarFile === undefined && initialData) {
         await (isOwned ? deleteMyAvatar() : deleteAvatar(payload.id as string))
       }
       setIsSubmitting(false)
