@@ -30,7 +30,7 @@ export default function FileViewer({
       // Jika path mengandung './temp', panggil getFileSrc()
       return `${API_URL}/file/${fileMeta?.filename}`
     } else {
-      const datas = `${API_URL}/Replays${fileMeta?.filename}.mp4`
+      const datas = `${API_URL}/Replays/${fileMeta?.filename}.mp4`
       // Jika tidak, ambil file dari folder yang ditentukan dalam path
       return datas
     }
