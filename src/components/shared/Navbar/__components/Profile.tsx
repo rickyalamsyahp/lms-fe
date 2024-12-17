@@ -35,7 +35,9 @@ export default function Profile() {
   }
 
   return (
-    <>
+    <div  style={{ cursor: 'pointer' }} // Untuk kursor tangan
+    onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = 'lightgray')}
+    onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = 'transparent')}>
       <Stack flexDirection="row" alignItems="center">
         {!isMobile && (
           <Stack alignItems={'flex-end'} sx={{ mr: 2 }}>
@@ -45,7 +47,7 @@ export default function Profile() {
             </Typography>
           </Stack>
         )}
-        <div onClick={(e: any) => handleClick(e)}>
+        <div onClick={(e: any) => handleClick(e)} >
           <Avatar
             src={
               profile?.data?.avatar
@@ -63,14 +65,15 @@ export default function Profile() {
         MenuListProps={{
           'aria-labelledby': 'basic-button',
         }}
+       
       >
-        <MenuItem onClick={handleLogout}>
+        <MenuItem onClick={handleLogout} >
           <ListItemIcon>
             <Logout />
           </ListItemIcon>
           <ListItemText>Logout</ListItemText>
         </MenuItem>
       </Menu>
-    </>
+    </div>
   )
 }
