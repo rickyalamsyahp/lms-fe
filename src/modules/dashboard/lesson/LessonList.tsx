@@ -219,7 +219,10 @@ export default function LessonList({ asPage = true }: LessonListProps) {
         count: Number(LessonList?.total || 0),
         page,
         onPageChange: (e, value) => setPage(value + 1),
-        onRowsPerPageChange: (e) => setSize(Number(e.target.value)),
+        onRowsPerPageChange: (e) => {
+          setSize(Number(e.target.value))
+          setPage(1)
+      },
       }}
     />
   )
@@ -231,7 +234,15 @@ export default function LessonList({ asPage = true }: LessonListProps) {
           <Commandbar
             title="Daftar Materi"
             searchProps={{
-              onSearch: (newSearch) => setSearch(newSearch),
+              onSearch: (newSearch) => {
+                if (!newSearch) setSearch('') // Jika input kosong
+                else setSearch(newSearch)     // Jika input ada
+                setPage(1)
+              },
+              // onSearch: (newSearch) => {
+              //   setSearch(newSearch) // Update search keyword
+              //   setPage(1) // Reset page to 1
+              // },
               placeholder: 'Cari Materi...',
             }}
             breadcrumbsProps={{
@@ -303,7 +314,12 @@ export default function LessonList({ asPage = true }: LessonListProps) {
           setShowForm(false)
           setTimeout(() => setSelectedItem(undefined), 500)
         }}
-        onSuccess={refetch}
+        onSuccess={()=>{
+          refetch()
+          setPage(1)
+          setSearch("")
+        }}
+
       />
       <DialogConfirm
         open={showDeleteConfirm}

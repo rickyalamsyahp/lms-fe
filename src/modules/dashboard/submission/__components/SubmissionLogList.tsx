@@ -83,7 +83,10 @@ export default function SubmissionLogList({
               count: Number(data?.total || 0),
               page,
               onPageChange: (e, value) => setPage(value + 1),
-              onRowsPerPageChange: (e) => setSize(Number(e.target.value)),
+              onRowsPerPageChange: (e) => {
+                setSize(Number(e.target.value))
+                setPage(1)
+            },
             }}
           />
         </DialogContent>

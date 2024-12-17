@@ -87,7 +87,10 @@ export default function UserList() {
         <Commandbar
           title="Daftar Pengguna"
           searchProps={{
-            onSearch: (newSearch) => setSearch(newSearch),
+            onSearch: (newSearch) => {
+              setSearch(newSearch) // Update search keyword
+              setPage(1) // Reset page to 1
+            },
             placeholder: 'Cari Nama...',
           }}
           breadcrumbsProps={{
@@ -124,7 +127,10 @@ export default function UserList() {
         <Tabs
           value={selectedScope}
           sx={{ px: isMobile ? 0 : 2 }}
-          onChange={(e, newValue) => setSelectedScope(newValue)}
+          onChange={(e, newValue) =>{ 
+            setSelectedScope(newValue)
+            setPage(1)
+          }}
           variant={isMobile ? 'fullWidth' : undefined}
         >
           <Tab value={ScopeSlug.TRAINEE} label="Pelajar" />
@@ -286,7 +292,10 @@ export default function UserList() {
                 onPageChange: (e, value) => {
                   setPage(value + 1)
                 },
-                onRowsPerPageChange: (e) => setSize(Number(e.target.value)),
+                onRowsPerPageChange: (e) => {
+                  setSize(Number(e.target.value))
+                  setPage(1)
+              },
               }}
             />
           )}
