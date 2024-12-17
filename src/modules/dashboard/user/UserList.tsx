@@ -308,7 +308,11 @@ export default function UserList() {
           setShowForm(false)
           setTimeout(() => setSelectedItem(undefined), 500)
         }}
-        onSuccess={refetch}
+        onSuccess={()=>{
+          refetch()
+          setPage(1)
+          setSearch("")
+        }}
         scope={selectedScope}
       />
       <DialogConfirm

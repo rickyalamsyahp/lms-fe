@@ -124,10 +124,11 @@ export default function UserForm({
 
  
       if (onSuccess) onSuccess()
-        setTimeout(() => {
-          onClose()
-          window.location.reload()
-        }, 500);
+        onClose()
+        // setTimeout(() => {
+        //   onClose()
+        //   window.location.reload()
+        // }, 500);
       
     } catch (error: any) {
       setIsSubmitting(false)
