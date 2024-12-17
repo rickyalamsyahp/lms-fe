@@ -51,7 +51,16 @@ export default function LessonForm({
 
   useEffect(() => {
     if (isOpen || !asDialog) {
-      setPayload(initialData || defaultValue)
+      if (initialData) {       
+        setPayload(initialData )
+      } else{
+        setPayload({
+          description: '',
+          title: '',
+          file: null,
+        })
+      }
+     
     }
   }, [initialData, isOpen, asDialog])
 
@@ -70,16 +79,20 @@ export default function LessonForm({
       formData.append('file', payload.file)
     }
     try {
-      const res = await (initialData
+       await (initialData
         ? updateLesson(initialData?.id as string, formData)
         : createLesson(formData))
 
       // if (avatarFile) {
       //   await changeAvatar(payload.id as string, avatarFile)
       // }
-
+      
       setIsSubmitting(false)
-      setPayload({ ...res.data })
+      setPayload({
+        description: '',
+        title: '',
+        file: null,
+      })
       toast.success(
         `Berhasil ${initialData ? 'data materi berhasil diperbaharui' : 'mendaftarkan materi'}`,
         { id: loadingId }
