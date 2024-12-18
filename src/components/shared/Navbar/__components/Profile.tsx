@@ -35,9 +35,21 @@ export default function Profile() {
   }
 
   return (
-    <div  style={{ cursor: 'pointer' }} // Untuk kursor tangan
-    onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = 'lightgray')}
-    onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = 'transparent')}>
+    <div
+      style={{
+        cursor: 'pointer',
+        padding: '8px', // Default padding
+        transition: 'background-color 0.3s, padding 0.3s', // Smooth transition for background and padding
+      }}
+      onMouseEnter={(e) => {
+        e.currentTarget.style.backgroundColor = 'lightgray'
+        e.currentTarget.style.padding = '12px' // Add more padding on hover
+      }}
+      onMouseLeave={(e) => {
+        e.currentTarget.style.backgroundColor = 'transparent'
+        e.currentTarget.style.padding = '8px' // Reset padding when not hovering
+      }}
+    >
       <Stack flexDirection="row" alignItems="center">
         {!isMobile && (
           <Stack alignItems={'flex-end'} sx={{ mr: 2 }}>
@@ -47,7 +59,7 @@ export default function Profile() {
             </Typography>
           </Stack>
         )}
-        <div onClick={(e: any) => handleClick(e)} >
+        <div onClick={(e: any) => handleClick(e)}>
           <Avatar
             src={
               profile?.data?.avatar
@@ -65,9 +77,8 @@ export default function Profile() {
         MenuListProps={{
           'aria-labelledby': 'basic-button',
         }}
-       
       >
-        <MenuItem onClick={handleLogout} >
+        <MenuItem onClick={handleLogout}>
           <ListItemIcon>
             <Logout />
           </ListItemIcon>
