@@ -112,7 +112,7 @@ export default function UserForm({
         if (initialData.avatar !== null) {
           await (isOwned ? deleteMyAvatar() : deleteAvatar(payload.id as string))
         }
-        
+
       }
       setIsSubmitting(false)
       setPayload({ ...res.data })
@@ -120,16 +120,16 @@ export default function UserForm({
         `Berhasil ${initialData ? 'data akun pengguna berhasil diperbaharui' : 'mendaftarkan akun pengguna'}`,
         { id: loadingId }
       )
-   
 
- 
+
+
       if (onSuccess) onSuccess()
+      // onClose()
+      setTimeout(() => {
         onClose()
-        // setTimeout(() => {
-        //   onClose()
-        //   window.location.reload()
-        // }, 500);
-      
+        window.location.reload()
+      }, 500);
+
     } catch (error: any) {
       setIsSubmitting(false)
       toast.error(error.message, { id: loadingId })
