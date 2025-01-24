@@ -6,6 +6,7 @@ import { createBrowserRouter, RouterProvider } from 'react-router-dom'
 import ErrorPage from './ErrorPage'
 import './index.css'
 import LoginPage from './modules/auth/Login'
+import CategoryList from './modules/dashboard/category/CategoryList'
 import CourseDetail from './modules/dashboard/course/CourseDetail'
 import CourseDetailOverview from './modules/dashboard/course/CourseDetailOverview'
 import CourseList from './modules/dashboard/course/CourseList'
@@ -58,6 +59,10 @@ const router = createBrowserRouter([
       {
         path: '/dashboard/lesson',
         element: <LessonList />,
+      },
+      {
+        path: '/dashboard/category',
+        element: <CategoryList />,
       },
       {
         path: '/dashboard/course',

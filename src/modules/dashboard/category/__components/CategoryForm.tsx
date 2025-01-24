@@ -1,5 +1,4 @@
 import {
-  Autocomplete,
   Box,
   BoxProps,
   Button,
@@ -14,15 +13,14 @@ import {
 import dayjs from 'dayjs'
 import { FormEvent, useEffect, useState } from 'react'
 import toast from 'react-hot-toast'
-import InputFile from '../../../../components/shared/InputFile'
 
 import { ScopeSlug } from '../../../../context/auth/__shared/type'
 import { useSession } from '../../../../context/session'
-import { createLesson, updateLesson } from '../__shared/api'
-import { Lesson } from '../__shared/type'
+import { createCategory, updateCategory } from '../__shared/api'
+import { Category } from '../__shared/type'
 
-type LessonFormProps = {
-  initialData?: Lesson
+type CategoryFormProps = {
+  initialData?: Category
   isOpen?: boolean
   onClose?: () => void
   onSuccess?: () => void
@@ -31,16 +29,12 @@ type LessonFormProps = {
   category?: any
 } & BoxProps
 
-const defaultValue: Lesson = {
-  description: '',
-  title: '',
-  file: null,
-  category: ''
+const defaultValue: Category = {
+  name: ''
 }
 
 export default function LessonForm({
   initialData,
-  category,
   isOpen,
   onClose = () => {
     return
@@ -48,9 +42,9 @@ export default function LessonForm({
   onSuccess,
   asDialog = true,
   ...boxProps
-}: LessonFormProps) {
+}: CategoryFormProps) {
   const { isMobile, state } = useSession()
-  const [payload, setPayload] = useState<Lesson>(defaultValue)
+  const [payload, setPayload] = useState<Category>(defaultValue)
   const [isSubmitting, setIsSubmitting] = useState(false)
 
   useEffect(() => {
@@ -59,10 +53,7 @@ export default function LessonForm({
         setPayload(initialData)
       } else {
         setPayload({
-          description: '',
-          title: '',
-          file: null,
-          category: ''
+          name: ''
         })
       }
 
@@ -75,19 +66,13 @@ export default function LessonForm({
     setIsSubmitting(true)
 
     const loadingId = toast.loading(
-      initialData ? 'memperbaharui materi' : 'mendaftarkan materi'
+      initialData ? 'memperbaharui category' : 'mendaftarkan category'
     )
-    const formData = new FormData()
-    formData.append('title', payload.title || '')
-    formData.append('description', payload.description || '')
-    if (payload.file) {
-      formData.append('file', payload.file)
-    }
-    formData.append('category', payload.category || '')
+
     try {
       await (initialData
-        ? updateLesson(initialData?.id as string, formData)
-        : createLesson(formData))
+        ? updateCategory(initialData?.id as string, payload)
+        : createCategory(payload))
 
       // if (avatarFile) {
       //   await changeAvatar(payload.id as string, avatarFile)
@@ -95,12 +80,10 @@ export default function LessonForm({
 
       setIsSubmitting(false)
       setPayload({
-        description: '',
-        title: '',
-        file: null,
+        name: '',
       })
       toast.success(
-        `Berhasil ${initialData ? 'data materi berhasil diperbaharui' : 'mendaftarkan materi'}`,
+        `Berhasil ${initialData ? 'data category berhasil diperbaharui' : 'mendaftarkan category'}`,
         { id: loadingId }
       )
       if (onSuccess) onSuccess()
@@ -115,7 +98,7 @@ export default function LessonForm({
     const keys = key.split('.')
     const newKey = keys.length > 1 ? keys[1] : keys[0]
     const parentKey = keys.length > 1 ? keys[0] : undefined
-    setPayload((prevPayload: Lesson & any) => {
+    setPayload((prevPayload: Category & any) => {
       if (parentKey) {
         prevPayload[parentKey as keyof typeof prevPayload] =
           prevPayload[parentKey as keyof typeof prevPayload] || {}
@@ -137,51 +120,12 @@ export default function LessonForm({
       <form onSubmit={handleSubmit}>
         <Stack sx={{ gap: 3, mt: 1 }}>
           <TextField
-            label="Judul"
-            value={payload.title}
-            onChange={(e) => handlePayloadChange('title', e.target.value)}
+            label="Nama"
+            value={payload.name}
+            onChange={(e) => handlePayloadChange('name', e.target.value)}
             inputProps={{ required: true, readOnly: !editable }}
             required
           />
-          <TextField
-            label="Deskripsi"
-            value={payload.description}
-            onChange={(e) => handlePayloadChange('description', e.target.value)}
-            multiline
-            rows={4}
-            inputProps={{ required: true, readOnly: !editable }}
-            required
-          />
-          <Autocomplete
-            options={category || []} // Data kategori dari props
-            getOptionLabel={(option: any) => option.name || ''} // Ambil label dari properti `name`
-            value={category?.find((cat: any) => cat.name === payload.category) || null}
-            onChange={(event, newValue) => {
-              handlePayloadChange('category', newValue ? newValue.name : '') // Kirim hanya nilai `name`
-            }}
-            renderInput={(params) => (
-              <TextField
-                {...params}
-                label="Kategori"
-                required
-                inputProps={{
-                  ...params.inputProps,
-                  readOnly: !editable,
-                }}
-              />
-            )}
-            isOptionEqualToValue={(option, value) => option.name === value}
-          />
-          {editable && (
-            <InputFile
-              label="File Upload"
-              accept="*.*"
-              onChange={(file?: File) => {
-                console.log(file)
-                handlePayloadChange('file', file)
-              }}
-            />
-          )}
           {/* <TextField
             label="File"
             value={payload.username}
@@ -261,7 +205,7 @@ export default function LessonForm({
       fullWidth={true}
       maxWidth={'xs'}
     >
-      <DialogTitle>Form Modul Materi</DialogTitle>
+      <DialogTitle>Form Modul Category</DialogTitle>
       <DialogContent>{content}</DialogContent>
       {editable && <DialogActions>{action}</DialogActions>}
     </Dialog>

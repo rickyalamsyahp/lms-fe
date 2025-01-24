@@ -5,6 +5,7 @@ export type Lesson = {
   description?: string
   title?: string
   file?: File | null
+  category?: string
   createdBy?: string
   createdAt?: Date
   modifiedBy?: string

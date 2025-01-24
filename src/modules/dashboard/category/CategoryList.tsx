@@ -4,24 +4,21 @@
 
 import {
   Add,
-  ArrowUpward,
   Delete,
   Edit,
   Menu,
-  Replay,
+  Replay
 } from '@mui/icons-material'
 import {
   Box,
   Button,
-  Chip,
   Divider,
   IconButton,
-  Link,
   ListItemIcon,
   ListItemText,
   MenuItem,
   Stack,
-  Typography,
+  Typography
 } from '@mui/material'
 import dayjs from 'dayjs'
 import { useEffect, useState } from 'react'
@@ -33,19 +30,16 @@ import Dropdown from '../../../components/shared/Dropdown'
 import InfiniteScroll from '../../../components/shared/InfiniteScroll'
 import { useSession } from '../../../context/session'
 // import UserCard from './__components/LessonCard'
-import toast from 'react-hot-toast'
 import { useNavigate } from 'react-router-dom'
-import FileViewer from '../../filemeta/__components/FileViewer'
-import UserById from '../user/__components/UserById'
-import LessonForm from './__components/LessonForm'
-import { deleteLesson, getCategory, togglePublish, useLessonList } from './__shared/api'
-import { Lesson } from './__shared/type'
+import LessonForm from './__components/CategoryForm'
+import { deleteCategory, useCategoryList } from './__shared/api'
+import { Category } from './__shared/type'
 
 type LessonListProps = {
   asPage?: boolean
 }
 
-export default function LessonList({ asPage = true }: LessonListProps) {
+export default function CategoryList({ asPage = true }: LessonListProps) {
   const navigate = useNavigate()
   const { isMobile, state } = useSession()
   const [page, setPage] = useState(1)
@@ -53,7 +47,7 @@ export default function LessonList({ asPage = true }: LessonListProps) {
   const [search, setSearch] = useState<string>('')
   const [category, setCategory] = useState<any>([])
   const [showForm, setShowForm] = useState(false)
-  const [selectedItem, setSelectedItem] = useState<Lesson | undefined>()
+  const [selectedItem, setSelectedItem] = useState<Category | undefined>()
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
   const [showFile, setShowFile] = useState(false)
 
@@ -62,40 +56,25 @@ export default function LessonList({ asPage = true }: LessonListProps) {
     size,
   }
 
-  const { data: LessonList, mutate: refetch } = useLessonList({
+  const { data: CategoryList, mutate: refetch } = useCategoryList({
     ...query,
-    'title:likeLower': search ? `%${search}%` : undefined,
+    'name:likeLower': search ? `%${search}%` : undefined,
   })
 
-  function handleOpenLesson(d: Lesson) {
+  function handleOpenLesson(d: Category) {
     setSelectedItem(d)
     setShowFile(true)
   }
 
-  async function handleTogglePublish(lesson: Lesson) {
-    try {
-      await togglePublish(lesson?.id as string)
-      refetch()
-    } catch (error: any) {
-      toast.error(error.message)
-    }
-  }
-  async function getCategorys() {
-    try {
-      const res = await getCategory()
-      setCategory(res.data.results)
-    } catch (error) {
-      console.error(error);
 
-    }
-  }
+
   useEffect(() => {
     refetch()
-    getCategorys()
+
   }, [])
   async function handleDelete() {
     try {
-      await deleteLesson(selectedItem?.id as string)
+      await deleteCategory(selectedItem?.id as string)
       refetch()
     } catch (error) {
       throw error
@@ -103,56 +82,18 @@ export default function LessonList({ asPage = true }: LessonListProps) {
   }
 
   const columns = [
-    {
-      label: 'Title',
-      render: (item: Lesson) =>
-        item.fileMeta ? (
-          <Link
-            sx={{ cursor: 'pointer' }}
-            onClick={() => handleOpenLesson(item)}
-          >
-            <Typography>{item.title}</Typography>
-          </Link>
-        ) : (
-          <Typography>{item.title}</Typography>
-        ),
-    },
-    {
-      label: 'Description',
-      render: (item: Lesson) => (
-        <Typography fontSize={12} sx={{ mt: 0.5 }} color="textSecondary">
-          {item.description}
-        </Typography>
-      ),
-    },
-    {
-      label: 'Category',
-      render: (item: Lesson) => (
-        <Typography fontSize={12} sx={{ mt: 0.5 }} color="textSecondary">
-          {item.category}
-        </Typography>
-      ),
-    },
-    {
-      label: 'Status',
-      render: (item: Lesson) => (
-        <Chip
-          size="small"
-          label={item.published ? 'Published' : 'Unpublished'}
-          color={item?.published ? 'success' : 'default'}
-          onClick={state.isAdmin ? () => handleTogglePublish(item) : undefined}
-          sx={state.isAdmin ? { cursor: 'pointer' } : undefined}
-        />
-      ),
-    },
 
     {
-      label: 'Dibuat',
-      render: (item: Lesson) => <UserById id={item.createdBy as string} />,
+      label: 'Name',
+      render: (item: Category) => (
+        <Typography fontSize={12} sx={{ mt: 0.5 }} color="textSecondary">
+          {item.name}
+        </Typography>
+      ),
     },
     {
       label: 'Tanggal Dibuat',
-      render: (item: Lesson) => (
+      render: (item: Category) => (
         <Typography sx={{ minWidth: 160 }}>
           {dayjs(item.createdAt).format('DD MMM YYYY HH:mm:ss')}
         </Typography>
@@ -193,19 +134,6 @@ export default function LessonList({ asPage = true }: LessonListProps) {
                 </ListItemIcon>
                 <ListItemText>Edit</ListItemText>
               </MenuItem>
-              {state.isAdmin && (
-                <MenuItem
-                  onClick={async () => {
-                    await togglePublish(item?.id as string)
-                    refetch()
-                  }}
-                >
-                  <ListItemIcon>
-                    <ArrowUpward />
-                  </ListItemIcon>
-                  <ListItemText>Publish</ListItemText>
-                </MenuItem>
-              )}
               <Divider />
               <MenuItem
                 onClick={() => {
@@ -228,13 +156,13 @@ export default function LessonList({ asPage = true }: LessonListProps) {
   const renderContent = (
     <DataTable
       fit={asPage}
-      data={LessonList?.results}
-      loading={!LessonList}
+      data={CategoryList?.results}
+      loading={!CategoryList}
       columns={columns}
       paginationProps={{
         rowsPerPageOptions: [10, 25, 50],
         rowsPerPage: size,
-        count: Number(LessonList?.total || 0),
+        count: Number(CategoryList?.total || 0),
         page,
         onPageChange: (e, value) => setPage(value + 1),
         onRowsPerPageChange: (e) => {
@@ -250,7 +178,7 @@ export default function LessonList({ asPage = true }: LessonListProps) {
       {asPage ? (
         <Stack sx={{ flex: 1 }}>
           <Commandbar
-            title="Daftar Materi"
+            title="Daftar Category"
             searchProps={{
               onSearch: (newSearch) => {
                 if (!newSearch) setSearch('') // Jika input kosong
@@ -349,14 +277,6 @@ export default function LessonList({ asPage = true }: LessonListProps) {
         title="Delete"
         content={`Yakin menghapus modul pembelajaran ini?`}
         onSubmit={handleDelete}
-      />
-      <FileViewer
-        fileMeta={selectedItem?.fileMeta}
-        open={showFile}
-        onClose={() => {
-          setShowFile(false)
-          setSelectedItem(undefined)
-        }}
       />
     </>
   )

@@ -70,6 +70,15 @@ const menuList: MenuItemProps[] = [
     activeRegex: /.*submission/gi,
     scopes: [ScopeSlug.ADMIN, ScopeSlug.INSTRUCTOR, ScopeSlug.TRAINEE],
   },
+
+  {
+    menuType: MenuItemType.LINK,
+    label: 'Category',
+    icon: <Book fontSize="small" />,
+    href: '/dashboard/category',
+    activeRegex: /.*category/gi,
+    scopes: [ScopeSlug.ADMIN],
+  },
 ]
 
 export default function Sidebar({ ...props }: SidebarProps) {
@@ -145,10 +154,10 @@ export default function Sidebar({ ...props }: SidebarProps) {
                       height: 48,
                       ...(selected
                         ? {
-                            borderRight: '5px solid',
-                            borderColor: 'primary.main',
-                            // backgroundColor: 'transparent !important',
-                          }
+                          borderRight: '5px solid',
+                          borderColor: 'primary.main',
+                          // backgroundColor: 'transparent !important',
+                        }
                         : undefined),
                     }}
                   >

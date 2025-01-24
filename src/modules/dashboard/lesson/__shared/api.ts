@@ -25,6 +25,11 @@ export function getLessonById(id: string) {
   return api.get<Lesson>(`/${options.publicScope}/lesson/${id}`)
 }
 
+export function getCategory() {
+  return api.get<any>(`/${options.publicScope}/category`)
+}
+
+
 export function createLesson(payload: any) {
   return api.post<Lesson>(`/${options.publicScope}/lesson`, payload)
 }
