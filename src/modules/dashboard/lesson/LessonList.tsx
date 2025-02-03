@@ -21,6 +21,8 @@ import {
   ListItemText,
   MenuItem,
   Stack,
+  Tab,
+  Tabs,
   Typography,
 } from '@mui/material'
 import dayjs from 'dayjs'
@@ -36,6 +38,7 @@ import { useSession } from '../../../context/session'
 import toast from 'react-hot-toast'
 import { useNavigate } from 'react-router-dom'
 import FileViewer from '../../filemeta/__components/FileViewer'
+import { useCategoryList } from '../category/__shared/api'
 import UserById from '../user/__components/UserById'
 import LessonForm from './__components/LessonForm'
 import { deleteLesson, getCategory, togglePublish, useLessonList } from './__shared/api'
@@ -56,7 +59,7 @@ export default function LessonList({ asPage = true }: LessonListProps) {
   const [selectedItem, setSelectedItem] = useState<Lesson | undefined>()
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
   const [showFile, setShowFile] = useState(false)
-
+  const [tabValue, setTabValue] = useState('all')
   const query = {
     page,
     size,
@@ -65,8 +68,12 @@ export default function LessonList({ asPage = true }: LessonListProps) {
   const { data: LessonList, mutate: refetch } = useLessonList({
     ...query,
     'title:likeLower': search ? `%${search}%` : undefined,
+    'category:eq': tabValue !== 'all'? `${tabValue}` : undefined,
   })
+ const { data: CategoryList, mutate: refetch2 } = useCategoryList({
+    undefined})
 
+    
   function handleOpenLesson(d: Lesson) {
     setSelectedItem(d)
     setShowFile(true)
@@ -126,7 +133,7 @@ export default function LessonList({ asPage = true }: LessonListProps) {
       ),
     },
     {
-      label: 'Category',
+      label: 'Kategori',
       render: (item: Lesson) => (
         <Typography fontSize={12} sx={{ mt: 0.5 }} color="textSecondary">
           {item.category}
@@ -300,6 +307,21 @@ export default function LessonList({ asPage = true }: LessonListProps) {
               )
             }
           />
+               <Tabs
+          value={tabValue}
+          sx={{ px: isMobile ? 0 : 2 }}
+          onChange={(e, newValue) =>{ 
+            setTabValue(newValue)
+            setPage(1)
+          }}
+          variant={isMobile ? 'fullWidth' : undefined}
+        >
+            <Tab value={'all'} label="All Kategori" />
+          {CategoryList?.results.map((a, b) =>(
+              <Tab key={b} value={a.name} label={a.name} />
+          ))}
+         
+        </Tabs>
           <Box sx={{ flex: 1, px: 2 }}>
             {isMobile ? (
               <InfiniteScroll>

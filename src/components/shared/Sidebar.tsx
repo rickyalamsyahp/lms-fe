@@ -73,7 +73,7 @@ const menuList: MenuItemProps[] = [
 
   {
     menuType: MenuItemType.LINK,
-    label: 'Category',
+    label: 'Kategori',
     icon: <Book fontSize="small" />,
     href: '/dashboard/category',
     activeRegex: /.*category/gi,
