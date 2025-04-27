@@ -1,5 +1,5 @@
 export type LoginPayload = {
-  username: string
+  email: string
   password: string
 }
 
@@ -9,20 +9,41 @@ export type User = {
   username: string
   email: string
   avatar?: string
-  scope: ScopeSlug
+  role?: ScopeSlug
   isActive?: boolean
   password?: string
   createdBy?: string
   createdAt?: Date
   modifiedBy?: string
   modifiedAt?: Date
-  bio?: {
-    userId?: string
-    gender?: Gender & null
-    born?: string
-    phoneNumber?: string
-    identityNumber?: string
-  }
+}
+
+export type Teacher = {
+  id?: string
+  name: string
+  userId: string
+  classroomId: string
+  address: string
+  gender: string
+  nip: string
+  createdBy?: string
+  createdAt?: Date
+  modifiedBy?: string
+  modifiedAt?: Date
+}
+
+export type Student = {
+  id?: string
+  name: string
+  userId: string
+  classroomId: string
+  address: string
+  gender: string
+  nis: string
+  createdBy?: string
+  createdAt?: Date
+  modifiedBy?: string
+  modifiedAt?: Date
 }
 
 export enum Gender {
@@ -32,6 +53,6 @@ export enum Gender {
 
 export enum ScopeSlug {
   ADMIN = 'admin',
-  INSTRUCTOR = 'instructor',
-  TRAINEE = 'trainee',
+  TEACHER = 'guru',
+  STUDENT = 'siswa',
 }

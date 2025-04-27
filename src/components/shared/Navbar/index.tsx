@@ -1,12 +1,7 @@
 import { Menu } from '@mui/icons-material'
-import { IconButton, Stack, Typography } from '@mui/material'
+import { IconButton, Stack } from '@mui/material'
 import { useSession } from '../../../context/session/context'
-import {
-  LOGO,
-  NAVBAR_LOGO_HEIGHT,
-  NAVBAR_LOGO_WIDTH,
-  TITLE,
-} from '../../../libs/env'
+import { LOGO2 } from '../../../libs/env'
 import Profile from './__components/Profile'
 
 export default function Navbar() {
@@ -36,17 +31,12 @@ export default function Navbar() {
             <Menu />
           </IconButton>
         )}
-        <img
-          src={LOGO}
-          width={NAVBAR_LOGO_WIDTH}
-          height={NAVBAR_LOGO_HEIGHT}
-          alt="logo"
-        />
-        {!isMobile && (
+        <img src={LOGO2} width={200} height={200} alt="logo" />
+        {/* {!isMobile && (
           <Typography variant="h6" sx={{ ml: 1, fontWeight: 500 }}>
             {TITLE}
           </Typography>
-        )}
+        )} */}
       </Stack>
       <Profile />
     </Stack>

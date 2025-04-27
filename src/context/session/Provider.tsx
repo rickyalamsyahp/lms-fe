@@ -1,10 +1,12 @@
+import { useMediaQuery, useTheme } from '@mui/material'
 import { useEffect, useState } from 'react'
 import { useProfile } from '../auth/__shared/api'
-import { ScopeSlug, User } from '../auth/__shared/type'
+import { User } from '../auth/__shared/type'
 import { Context } from './context'
 
 export default function SessionProvider(props: any) {
-  const isMobile = false //useMediaQuery((theme: Theme) => theme.breakpoints.down('md'))
+  const theme = useTheme()
+  const isMobile = useMediaQuery(theme.breakpoints.down('md'))
   const [state, setState] = useState<
     {
       profile?: User
@@ -24,16 +26,10 @@ export default function SessionProvider(props: any) {
 
   useEffect(() => {
     if (profile.data && !state.profile) {
-      const { scope } = profile.data
+      const { role } = profile.data
+
       handleChangeState('profile', profile.data)
-      handleChangeState(
-        scope === ScopeSlug.ADMIN
-          ? 'isAdmin'
-          : scope === ScopeSlug.INSTRUCTOR
-            ? 'isInstructor'
-            : 'isTrainee',
-        true
-      )
+      handleChangeState(role === 'guru' ? 'isInstructor' : 'isTrainee', true)
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [profile])

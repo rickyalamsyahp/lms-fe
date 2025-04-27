@@ -24,7 +24,7 @@ export default function AuthProvider(props: any) {
           setReady(true)
           const { scope } = res.data
           options.setScope(scope as ScopeSlug)
-          if (scope === ScopeSlug.ADMIN) navigate(`/dashboard/user`)
+          navigate(`/dashboard/user`)
         }
       },
     },

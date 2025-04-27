@@ -9,8 +9,8 @@ class Options {
   publicScope: string
   constructor() {
     this.headers = {}
-    this.scope = ScopeSlug.TRAINEE
-    this.publicScope = this.scope === ScopeSlug.TRAINEE ? 'public' : this.scope
+    this.scope = ScopeSlug.STUDENT
+    this.publicScope = this.scope === ScopeSlug.STUDENT ? 'public' : this.scope
   }
 
   setHeaders(key: string, value: string) {
@@ -23,7 +23,7 @@ class Options {
 
   setScope(newScope: ScopeSlug) {
     this.scope = newScope
-    this.publicScope = this.scope === ScopeSlug.TRAINEE ? 'public' : this.scope
+    this.publicScope = this.scope === ScopeSlug.STUDENT ? 'public' : this.scope
   }
 }
 

@@ -23,10 +23,8 @@ export type ChangePasswordBody = {
   newPasswordConfirmation: string
 }
 
-export function getUserList(scope: ScopeSlug, query: GetUserListQuery) {
-  return api.get<GetUserListResponse>(
-    `/admin/user-account/scope/${scope}?${qs.stringify(query)}`
-  )
+export function getExamList(query: GetUserListQuery) {
+  return api.get<GetUserListResponse>(`/soal/banksoal?${qs.stringify(query)}`)
 }
 export function getUserListInstruktur(query: GetUserListQuery) {
   return api.get<GetUserListResponse>(
@@ -115,17 +113,12 @@ export function getUserAvatarUrl(id: string) {
 }
 
 export function useUserList(
-  role: string,
-  scope: ScopeSlug,
   query: GetUserListQuery,
   config?: Partial<SWRConfiguration>
 ) {
   return useSWRFetcher(
-    [role, scope, query, 'get-User-list'],
-    ([role, scope, query]) =>
-      role === 'instructor'
-        ? getUserListInstruktur(query)
-        : getUserList(scope, query),
+    [query, 'get-User-list'],
+    ([query]) => getExamList(query),
     config
   )
 }

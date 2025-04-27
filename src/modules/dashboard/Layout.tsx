@@ -1,4 +1,4 @@
-import { Box, Container, Stack } from '@mui/material'
+import { Box, Stack } from '@mui/material'
 import { useEffect } from 'react'
 import { Outlet, useLocation, useNavigate } from 'react-router-dom'
 import Navbar from '../../components/shared/Navbar'
@@ -7,7 +7,6 @@ import { useProfile } from '../../context/auth/__shared/api'
 import { ScopeSlug } from '../../context/auth/__shared/type'
 import AuthProvider from '../../context/auth/Provider'
 import SessionProvider from '../../context/session/Provider'
-import UserDetailReport from './user/UserDetailReport'
 
 export default function DashboardLayout() {
   const navigate = useNavigate()
@@ -16,7 +15,7 @@ export default function DashboardLayout() {
 
   useEffect(() => {
     if (
-      profile?.data?.scope !== ScopeSlug.TRAINEE &&
+      profile?.data?.role !== ScopeSlug.STUDENT &&
       location.pathname === '/dashboard'
     )
       navigate('/dashboard/user')
@@ -41,15 +40,17 @@ export default function DashboardLayout() {
               flexDirection={'row'}
               sx={{ position: 'absolute', height: '100%', width: '100%' }}
             >
-              {profile?.data?.scope !== ScopeSlug.TRAINEE && <Sidebar />}
+              {/* {profile?.data?.role !== ScopeSlug.STUDENT && <Sidebar />} */}
+              <Sidebar />
               <Box sx={{ flex: 1, p: 2, overflow: 'auto', display: 'flex' }}>
-                {profile?.data?.scope === ScopeSlug.TRAINEE ? (
+                <Outlet />
+                {/* {profile?.data?.role === ScopeSlug.STUDENT ? (
                   <Container maxWidth={'lg'}>
                     <UserDetailReport user={profile?.data} />
                   </Container>
                 ) : (
                   <Outlet />
-                )}
+                )} */}
               </Box>
             </Stack>
           </Box>

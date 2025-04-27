@@ -15,7 +15,7 @@ type DialogConfirmProps = DialogProps & {
   content: string
   okText?: string
   cancelText?: string
-  onSubmit: () => Promise<void>
+  onSubmit: any
   onClose: () => void
 }
 

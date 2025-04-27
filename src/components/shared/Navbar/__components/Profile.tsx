@@ -55,7 +55,7 @@ export default function Profile() {
           <Stack alignItems={'flex-end'} sx={{ mr: 2 }}>
             <Typography>{profile?.data?.name.split(' ')[0]}</Typography>
             <Typography color="GrayText" fontSize={12}>
-              {profile?.data?.bio?.identityNumber}
+              {profile?.data?.email}
             </Typography>
           </Stack>
         )}

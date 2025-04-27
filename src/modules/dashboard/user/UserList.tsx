@@ -1,338 +1,147 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 'use client'
 
-import { Add, Delete, Edit, Lock, Menu, Replay } from '@mui/icons-material'
-import {
-  Avatar,
-  Box,
-  Button,
-  Chip,
-  Divider,
-  IconButton,
-  Link,
-  ListItemIcon,
-  ListItemText,
-  MenuItem,
-  Stack,
-  Tab,
-  Tabs,
-  Typography,
-} from '@mui/material'
-import dayjs from 'dayjs'
-import { useState } from 'react'
-import toast from 'react-hot-toast'
-import { useNavigate } from 'react-router-dom'
+import { Box, Card, Grid, Stack, Typography } from '@mui/material'
 import Commandbar from '../../../components/shared/Commandbar'
-import DataTable from '../../../components/shared/DataTable'
-import { DialogConfirm } from '../../../components/shared/Dialog/DialogConfirm'
-import Dropdown from '../../../components/shared/Dropdown'
-import InfiniteScroll from '../../../components/shared/InfiniteScroll'
-import { ScopeSlug, User } from '../../../context/auth/__shared/type'
 import { useSession } from '../../../context/session'
-import ChangePassword from './__components/ChangePassword'
-import UserById from './__components/UserById'
-import UserCard from './__components/UserCard'
-import UserForm from './__components/UserForm'
-import {
-  changeStatus,
-  deleteUser,
-  getUserAvatarUrl,
-  useUserList,
-} from './__shared/api'
+
+import dayGridPlugin from '@fullcalendar/daygrid'
+import FullCalendar from '@fullcalendar/react'
+import { useCourseList } from '../course/__shared/api'
 
 export default function UserList() {
-  const navigate = useNavigate()
   const { isMobile, state } = useSession()
-  const [page, setPage] = useState(1)
-  const [size, setSize] = useState(10)
-  const [search, setSearch] = useState<string>('')
-  const [showForm, setShowForm] = useState(false)
-  const [showChangePassword, setShowChangePassword] = useState(false)
-  const [selectedItem, setSelectedItem] = useState<User | undefined>()
-  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
-  const [selectedScope, setSelectedScope] = useState<ScopeSlug>(
-    ScopeSlug.TRAINEE
-  )
 
-  const { data: userList, mutate: refetch } = useUserList(
-    state.profile?.scope,
-    selectedScope,
-    {
-      page,
-      size,
-      'name:likeLower': search ? `%${search}%` : undefined,
-    }
-  )
+  const { data: courseList, mutate: refetch } = useCourseList({
+    page: 1,
+    size: 50,
+    ...(state.isTrainee && { kodeKelas: state.profile?.kodeKelas }),
+    ...(state.isInstructor && { teacherId: state.profile?.kode }),
+    // order: 'asc',
+    // orderBy: 'level',
+    // 'published:eq': true,
+  })
+  const examData =
+    courseList?.results?.map((course: any) => ({
+      subject: course.subject?.nama || '',
+      date: new Date(course.scheduledAt).toLocaleDateString('id-ID', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+      }),
+      time: course.jamUjian || 'TBD',
+    })) || []
 
-  async function handleDelete() {
-    try {
-      await deleteUser(selectedItem?.id as string, state as any)
-      refetch()
-    } catch (error) {
-      throw error
-    }
-  }
-
-  async function handleToggleActive(user: User) {
-    try {
-      await changeStatus(user?.id as string)
-      refetch()
-    } catch (error: any) {
-      toast.error(error.message)
-    }
-  }
+  // Menyiapkan events untuk kalender
+  const events =
+    courseList?.results?.map((course: any) => ({
+      title: course.subject?.nama || '',
+      date: course.scheduledAt,
+    })) || []
 
   return (
     <>
       <Stack sx={{ flex: 1 }}>
-        <Commandbar
-          title="Daftar Pengguna"
-          searchProps={{
-            onSearch: (newSearch) => {
-              setSearch(newSearch) // Update search keyword
-              setPage(1) // Reset page to 1
-            },
-            placeholder: 'Cari Nama...',
-          }}
-          breadcrumbsProps={{
-            items: [
-              {
-                label: 'Menu Utama',
-              },
-            ],
-          }}
-          rightAddon={
-            <>
-              <IconButton
-                onClick={() => refetch()}
-                sx={{ mr: isMobile ? 0 : 2 }}
-              >
-                <Replay />
-              </IconButton>
-              {isMobile ? (
-                <IconButton onClick={() => setShowForm(true)} color="primary">
-                  <Add />
-                </IconButton>
-              ) : (
-                <Button
-                  startIcon={<Add />}
-                  variant="contained"
-                  onClick={() => setShowForm(true)}
-                >
-                  Tambah
-                </Button>
-              )}
-            </>
-          }
-        />
-        <Tabs
-          value={selectedScope}
-          sx={{ px: isMobile ? 0 : 2 }}
-          onChange={(e, newValue) =>{ 
-            setSelectedScope(newValue)
-            setPage(1)
-          }}
-          variant={isMobile ? 'fullWidth' : undefined}
-        >
-          <Tab value={ScopeSlug.TRAINEE} label="Pelajar" />
-          <Tab
-            value={ScopeSlug.INSTRUCTOR}
-            label="Instruktur"
-            sx={!state.isAdmin ? { display: 'none' } : {}}
-          />
-          <Tab
-            value={ScopeSlug.ADMIN}
-            label="Admin"
-            sx={!state.isAdmin ? { display: 'none' } : {}}
-          />
-        </Tabs>
-        <Box sx={{ flex: 1, px: 2 }}>
-          {isMobile ? (
-            <InfiniteScroll>
-              <Stack sx={{ gap: 1, py: 2 }}>
-                {userList?.results.map((d: User) => (
-                  <UserCard
-                    key={d.id}
-                    data={d}
-                    onClick={() => {
-                      setSelectedItem(d)
-                      setShowForm(true)
+        <Commandbar />
+
+        <Box sx={{ flex: 1, px: isMobile ? 1 : 2 }}>
+          <Box sx={{ p: isMobile ? 2 : 4 }}>
+            <Typography
+              variant={isMobile ? 'subtitle1' : 'h6'}
+              gutterBottom
+              sx={{ textAlign: isMobile ? 'center' : 'left' }}
+            >
+              Selamat datang di Learning management system SMKN57 Jakarta
+            </Typography>
+
+            <Grid
+              container
+              spacing={isMobile ? 1 : 2}
+              sx={{ mb: isMobile ? 2 : 4 }}
+            >
+              {examData.map((exam: any, i: any) => (
+                <Grid item xs={12} sm={6} md={4} key={i}>
+                  <Card
+                    sx={{
+                      p: isMobile ? 1.5 : 2,
+                      backgroundColor: '#ff7043',
+                      color: 'white',
+                      borderRadius: 2,
                     }}
-                    onActivate={() => handleToggleActive(d)}
-                  />
-                ))}
-              </Stack>
-            </InfiniteScroll>
-          ) : (
-            <DataTable
-              data={userList?.results}
-              loading={!userList}
-              columns={[
-                {
-                  label: 'Avatar',
-                  render: (item: User) => (
-                    <Avatar
-                      sx={{ mr: 2 }}
-                      src={
-                        item.avatar
-                          ? getUserAvatarUrl(item.id as string)
-                          : undefined
-                      }
-                    >
-                      <Typography textTransform={'capitalize'}>
-                        {item.name.charAt(0)}
-                      </Typography>
-                    </Avatar>
-                  ),
-                },
-                {
-                  label: 'Username',
-                  render: (item: User) => (
-                    <Link
-                      sx={{ cursor: 'pointer' }}
-                      onClick={() =>
-                        navigate(`/dashboard/user/${item.id}/overview`)
-                      }
-                    >
-                      <Typography color={'blue'}>{item.username}</Typography>
-                    </Link>
-                  ),
-                },
-                {
-                  label: 'Nama',
-                  render: (item: User) => <Typography>{item.name}</Typography>,
-                },
-                {
-                  label: 'Status',
-                  render: (item: User) => (
-                    <Chip
-                      label={item.isActive ? 'Aktif' : 'Inaktif'}
-                      onClick={() => handleToggleActive(item)}
-                      variant={item.isActive ? 'filled' : 'outlined'}
-                      size="small"
-                      color={item.isActive ? 'success' : 'default'}
-                      sx={{ width: '100%', maxWidth: 96 }}
-                    />
-                  ),
-                },
-                {
-                  label: 'Dibuat',
-                  render: (item: User) => (
-                    <UserById id={item.createdBy as string} />
-                  ),
-                },
-                {
-                  label: 'Tanggal Dibuat',
-                  render: (item: User) => (
-                    <Typography sx={{ minWidth: 160 }}>
-                      {dayjs(item.createdAt).format('DD MMM YYYY HH:mm:ss')}
+                  >
+                    <Typography variant={isMobile ? 'body1' : 'subtitle1'}>
+                      {exam.subject}
                     </Typography>
-                  ),
+                    <Typography variant="body2" mt={0.5}>
+                      📅 {exam.date}
+                    </Typography>
+                    <Typography variant="body2">⏰ {exam.time}</Typography>
+                  </Card>
+                </Grid>
+              ))}
+            </Grid>
+
+            {/* Kalender */}
+            <Box
+              className="bg-white p-4 rounded-xl shadow-md"
+              sx={{
+                p: isMobile ? 1 : 4,
+                '.fc .fc-toolbar': {
+                  flexDirection: isMobile ? 'column' : 'row',
+                  gap: isMobile ? 1 : 0,
                 },
-                {
-                  label: 'Action',
-                  render: (item) => (
-                    <Dropdown
-                      trigger={
-                        <IconButton>
-                          <Menu />
-                        </IconButton>
-                      }
-                      menuList={
-                        <>
-                          <MenuItem
-                            onClick={() => {
-                              setSelectedItem(item)
-                              setShowForm(true)
-                            }}
-                            sx={{ display: 'none' }}
-                          >
-                            <ListItemIcon>
-                              <Edit />
-                            </ListItemIcon>
-                            <ListItemText>Edit</ListItemText>
-                          </MenuItem>
-                          {state.isAdmin && (
-                            <>
-                              <MenuItem
-                                onClick={() => {
-                                  setSelectedItem(item)
-                                  setShowChangePassword(true)
-                                }}
-                              >
-                                <ListItemIcon>
-                                  <Lock />
-                                </ListItemIcon>
-                                <ListItemText>Ubah Password</ListItemText>
-                              </MenuItem>
-                              <Divider />
-                            </>
-                          )}
-                          <MenuItem
-                            onClick={() => {
-                              setSelectedItem(item)
-                              setShowDeleteConfirm(true)
-                            }}
-                          >
-                            <ListItemIcon>
-                              <Delete />
-                            </ListItemIcon>
-                            <ListItemText>Delete</ListItemText>
-                          </MenuItem>
-                        </>
-                      }
-                    />
-                  ),
+                '.fc .fc-toolbar-title': {
+                  fontSize: isMobile ? '1rem' : '1.25rem',
                 },
-              ]}
-              paginationProps={{
-                rowsPerPageOptions: [10, 25, 50],
-                rowsPerPage: size,
-                count: Number(userList?.total || 0),
-                page,
-                onPageChange: (e, value) => {
-                  setPage(value + 1)
+                '.fc .fc-button': {
+                  padding: isMobile ? '0.2rem 0.4rem' : '0.4rem 0.65rem',
+                  fontSize: isMobile ? '0.7rem' : '0.8rem',
                 },
-                onRowsPerPageChange: (e) => {
-                  setSize(Number(e.target.value))
-                  setPage(1)
-              },
+                '.fc .fc-daygrid-day-number': {
+                  fontSize: isMobile ? '0.7rem' : '0.9rem',
+                },
+                '.fc-event-title': {
+                  fontSize: isMobile ? '0.7rem' : '0.9rem',
+                },
               }}
-            />
-          )}
+            >
+              <FullCalendar
+                plugins={[dayGridPlugin]}
+                initialView={isMobile ? 'dayGridMonth' : 'dayGridMonth'}
+                headerToolbar={
+                  isMobile
+                    ? {
+                        left: 'title',
+                        center: '',
+                        right: 'prev,next',
+                      }
+                    : {
+                        left: 'prev,next today',
+                        center: 'title',
+                        right: 'dayGridMonth,dayGridWeek',
+                      }
+                }
+                height={isMobile ? 'auto' : undefined}
+                events={events}
+              />
+
+              {/* Info tambahan */}
+              <Box sx={{ mt: 2, px: isMobile ? 1 : 2 }}>
+                {examData.map((exam: any, i: any) => (
+                  <Typography
+                    key={i}
+                    variant="body2"
+                    mt={1}
+                    sx={{ fontSize: isMobile ? '0.75rem' : '0.875rem' }}
+                  >
+                    <strong>{exam.date}</strong> = Ujian online {exam.subject}
+                  </Typography>
+                ))}
+              </Box>
+            </Box>
+          </Box>
         </Box>
       </Stack>
-      <UserForm
-        isOpen={showForm}
-        initialData={selectedItem}
-        onClose={() => {
-          setShowForm(false)
-          setTimeout(() => setSelectedItem(undefined), 500)
-        }}
-        onSuccess={()=>{
-          refetch()
-          setPage(1)
-          setSearch("")
-        }}
-        scope={selectedScope}
-      />
-      <DialogConfirm
-        open={showDeleteConfirm}
-        onClose={() => {
-          setShowDeleteConfirm(false)
-          setSelectedItem(undefined)
-        }}
-        title="Delete"
-        content={`Yakin menghapus akun dengan email ${selectedItem?.email}?`}
-        onSubmit={handleDelete}
-      />
-      <ChangePassword
-        isOpen={showChangePassword}
-        user={selectedItem}
-        onClose={() => {
-          setShowChangePassword(false)
-          setSelectedItem(undefined)
-        }}
-      />
     </>
   )
 }

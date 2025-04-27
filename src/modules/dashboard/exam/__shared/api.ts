@@ -35,8 +35,15 @@ export function getJurusan(query: any) {
   return api.get<any>(`/guru/jurusan?${qs.stringify(query)}`)
 }
 
-export function getCoursById(id: string) {
-  return api.get<Course>(`/${options.scope}/course/${id}`)
+export function getCoursById(id: any) {
+  return api.get<any>(`/soal/banksoal/${id}`)
+}
+
+export function getExamQuestions(id: any) {
+  return api.get<any>(`/siswa/question/${id}`)
+}
+export function postExamQuestions(payload: any) {
+  return api.post<any>(`/siswa/question`, payload)
 }
 
 export function createCours(payload: any) {

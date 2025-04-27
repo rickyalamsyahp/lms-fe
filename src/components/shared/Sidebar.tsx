@@ -40,44 +40,36 @@ const menuList: MenuItemProps[] = [
   },
   {
     menuType: MenuItemType.LINK,
-    label: 'Pengguna',
+    label: 'Dashboard',
     icon: <Person fontSize="small" />,
     href: '/dashboard/user',
     activeRegex: /.*user/gi,
-    scopes: [ScopeSlug.ADMIN, ScopeSlug.INSTRUCTOR],
+    scopes: [ScopeSlug.STUDENT, ScopeSlug.TEACHER],
   },
   {
     menuType: MenuItemType.LINK,
-    label: 'Modul Materi',
-    icon: <Book fontSize="small" />,
-    href: '/dashboard/lesson',
-    activeRegex: /.*lesson/gi,
-    scopes: [ScopeSlug.ADMIN, ScopeSlug.INSTRUCTOR, ScopeSlug.TRAINEE],
-  },
-  {
-    menuType: MenuItemType.LINK,
-    label: 'Modul Pembelajaran',
+    label: 'Bank Soal',
     icon: <Book fontSize="small" />,
     href: '/dashboard/course',
     activeRegex: /.*course/gi,
-    scopes: [ScopeSlug.ADMIN, ScopeSlug.INSTRUCTOR],
-  },
-  {
-    menuType: MenuItemType.LINK,
-    label: 'Submission',
-    icon: <Report fontSize="small" />,
-    href: '/dashboard/submission',
-    activeRegex: /.*submission/gi,
-    scopes: [ScopeSlug.ADMIN, ScopeSlug.INSTRUCTOR, ScopeSlug.TRAINEE],
+    scopes: [ScopeSlug.ADMIN, ScopeSlug.TEACHER],
   },
 
   {
     menuType: MenuItemType.LINK,
-    label: 'Kategori',
+    label: 'Ujian',
     icon: <Book fontSize="small" />,
-    href: '/dashboard/category',
-    activeRegex: /.*category/gi,
-    scopes: [ScopeSlug.ADMIN],
+    href: '/dashboard/exam',
+    activeRegex: /.*exam/gi,
+    scopes: [ScopeSlug.STUDENT],
+  },
+  {
+    menuType: MenuItemType.LINK,
+    label: 'Hasil Ujian',
+    icon: <Report fontSize="small" />,
+    href: '/dashboard/result',
+    activeRegex: /.*result/gi,
+    scopes: [ScopeSlug.STUDENT, ScopeSlug.TEACHER],
   },
 ]
 
@@ -119,8 +111,7 @@ export default function Sidebar({ ...props }: SidebarProps) {
           {menuList
             .filter((each) => {
               if (!each.scopes) return true
-              else
-                return each.scopes.includes(profile?.data?.scope as ScopeSlug)
+              else return each.scopes.includes(profile?.data?.role as ScopeSlug)
             })
             .map((d, i) => {
               const selected = String(pathname).match(
@@ -154,10 +145,10 @@ export default function Sidebar({ ...props }: SidebarProps) {
                       height: 48,
                       ...(selected
                         ? {
-                          borderRight: '5px solid',
-                          borderColor: 'primary.main',
-                          // backgroundColor: 'transparent !important',
-                        }
+                            borderRight: '5px solid',
+                            borderColor: 'primary.main',
+                            // backgroundColor: 'transparent !important',
+                          }
                         : undefined),
                     }}
                   >

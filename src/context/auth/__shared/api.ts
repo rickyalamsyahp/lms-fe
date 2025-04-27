@@ -1,14 +1,14 @@
-import { LoginPayload, User } from './type'
+import { User } from './type'
 import { SWRConfiguration } from 'swr'
 import { api, generateFormData } from '../../../libs/http'
 import { useSWRFetcher } from '../../use-swr-fetcher'
 
-export function login(payload: LoginPayload) {
+export function login(payload: any) {
   return api.post<string>(`/auth/authorize`, payload)
 }
 
 export function getMyProfile() {
-  return api.get<User>('/my-profile')
+  return api.get<any>('/my-profile')
 }
 
 export function updateMyProfile(payload: Partial<User>) {
