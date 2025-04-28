@@ -30,7 +30,6 @@ export default function CourseDetail() {
       setExamData(examResponse)
 
       const questionsResponse = await getExamQuestions(id)
-      console.log(questionsResponse)
 
       const displayQuestions = questionsResponse.data.map(
         (questionData: any) => ({

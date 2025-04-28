@@ -129,6 +129,12 @@ export default function CourseListExam() {
               loading={!examList}
               columns={[
                 {
+                  label: 'Nama Siswa',
+                  render: (item: any) => (
+                    <Typography>{item.student?.nama}</Typography>
+                  ),
+                },
+                {
                   label: 'Tanggal Ujian',
                   render: (item: any) => (
                     <Typography sx={{ minWidth: 160 }}>
