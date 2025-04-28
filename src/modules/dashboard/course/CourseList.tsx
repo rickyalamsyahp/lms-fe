@@ -2,7 +2,7 @@
 // BankSoalList.jsx
 'use client'
 
-import { Add, Delete, Details, Menu, Replay } from '@mui/icons-material'
+import { Add, Details, Menu, Replay } from '@mui/icons-material'
 import {
   Box,
   Button,
@@ -280,6 +280,16 @@ export default function BankSoalList() {
       render: (item: any) => <Typography>{item.teacher.nama}</Typography>,
     },
     {
+      label: 'Tanggal Ujian',
+      render: (item: any) => (
+        <Typography>
+          {item.scheduledAt
+            ? new Date(item.scheduledAt).toLocaleDateString()
+            : '-'}
+        </Typography>
+      ),
+    },
+    {
       label: 'Aksi',
       render: (item: any) => (
         <Dropdown
@@ -292,7 +302,7 @@ export default function BankSoalList() {
             <>
               <MenuItem
                 onClick={() => {
-                  navigate(`/dashboard/bank-soal/${item?.id}/detail`)
+                  navigate(`/dashboard/course/${item?.id}`)
                 }}
               >
                 <ListItemIcon>
@@ -300,7 +310,7 @@ export default function BankSoalList() {
                 </ListItemIcon>
                 <ListItemText>Detail</ListItemText>
               </MenuItem>
-              <MenuItem
+              {/* <MenuItem
                 onClick={() => {
                   setSelectedItem(item)
                   setShowDeleteConfirm(true)
@@ -310,7 +320,7 @@ export default function BankSoalList() {
                   <Delete />
                 </ListItemIcon>
                 <ListItemText>Hapus</ListItemText>
-              </MenuItem>
+              </MenuItem> */}
             </>
           }
         />

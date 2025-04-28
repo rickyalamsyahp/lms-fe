@@ -34,6 +34,9 @@ export function getKelas(query: any) {
 export function getJurusan(query: any) {
   return api.get<any>(`/guru/jurusan?${qs.stringify(query)}`)
 }
+export function getExamQuestions(id: any) {
+  return api.get<any>(`/guru/question/${id}`)
+}
 
 export function getCoursById(id: string) {
   return api.get<Course>(`/${options.scope}/course/${id}`)

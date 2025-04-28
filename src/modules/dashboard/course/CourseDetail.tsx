@@ -1,115 +1,120 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
-import { Box, Stack, Tab, Tabs } from '@mui/material'
-import { SyntheticEvent, useState } from 'react'
-import { Outlet, useLocation, useNavigate, useParams } from 'react-router-dom'
-import Commandbar from '../../../components/shared/Commandbar'
-import { DialogConfirm } from '../../../components/shared/Dialog/DialogConfirm'
-import { useSession } from '../../../context/session'
-import { ellipsis } from '../../../libs/utils'
-import { deleteUser, useCourse } from './__shared/api'
+// ExamReview.jsx
+'use client'
+
+import {
+  Box,
+  Container,
+  FormControlLabel,
+  Paper,
+  Radio,
+  RadioGroup,
+  Stack,
+  Typography,
+} from '@mui/material'
+import { useEffect, useState } from 'react'
+import { useParams } from 'react-router-dom'
+import { getCoursById } from '../exam/__shared/api'
+import { getExamQuestions } from './__shared/api'
 
 export default function CourseDetail() {
-  const navigate = useNavigate()
-  const { pathname } = useLocation()
-  const { courseId } = useParams()
-  const { isMobile, state } = useSession()
-  const { data: user } = useCourse(courseId as string)
-  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
-  const [tab, setTab] = useState<string>(
-    pathname.replace(`/dashboard/course/${courseId}/`, '')
-  )
+  const { id } = useParams()
+  const [examData, setExamData] = useState<any>(null)
+  const [questions, setQuestions] = useState<any>([])
+  const [isLoading, setIsLoading] = useState(true)
 
-  function handleTabChange(e: SyntheticEvent, newTab: string) {
-    setTab(newTab)
-    navigate(`/dashboard/course/${courseId}/${newTab}`)
-  }
-
-  async function handleDelete() {
+  const fetchExamData = async () => {
     try {
-      await deleteUser(courseId as string)
-      navigate('/dashboard/user')
+      setIsLoading(true)
+      const examData = await getCoursById(id)
+      const examResponse = examData.data
+      setExamData(examResponse)
+
+      const questionsResponse = await getExamQuestions(id)
+      console.log(questionsResponse)
+
+      const displayQuestions = questionsResponse.data.map(
+        (questionData: any) => ({
+          id: questionData.id,
+          question: questionData.content,
+          correctAnswer: questionData.correctAnswer, // <== pastikan API kamu mengembalikan correct answer
+          options: questionData.answers.map((answer: any) => ({
+            value: answer.option,
+            label: answer.content,
+          })),
+        })
+      )
+
+      setQuestions(displayQuestions)
+      setIsLoading(false)
     } catch (error) {
-      throw error
+      console.error('Error fetching exam data:', error)
+      setIsLoading(false)
     }
   }
 
-  return (
-    <>
-      <Stack sx={{ flex: 1 }}>
-        <Commandbar
-          title={
-            user?.description
-              ? ellipsis(user.description, isMobile ? 24 : 48)
-              : '...'
-          }
-          breadcrumbsProps={{
-            items: [
-              {
-                label: 'Menu Utama',
-              },
-              {
-                label: 'Modul Pembelajaran',
-                path: '/dashboard/course',
-              },
-            ],
-          }}
-          // rightAddon={
-          //   <>
-          //     {(state.isAdmin || state.isInstructor) &&
-          //       tab == 'overview' &&
-          //       (isMobile ? (
-          //         <IconButton
-          //           color="warning"
-          //           onClick={() => setShowDeleteConfirm(true)}
-          //         >
-          //           <Delete />
-          //         </IconButton>
-          //       ) : (
-          //         <Button
-          //           startIcon={<Delete />}
-          //           color="warning"
-          //           variant="contained"
-          //           onClick={() => setShowDeleteConfirm(true)}
-          //         >
-          //           Hapus
-          //         </Button>
-          //       ))}
-          //   </>
-          // }
-        />
-        <Tabs
-          value={tab}
-          variant={isMobile ? 'fullWidth' : undefined}
-          onChange={handleTabChange}
-        >
-          <Box sx={{ borderColor: 'thin solid divider' }} />
-          <Tab label="Overview" value="overview" />
-          <Tab label="Pelatihan" value="exam" />
-        </Tabs>
-        <Box sx={{ flex: 1, position: 'relative' }}>
-          <Box
-            sx={{
-              position: 'absolute',
-              height: '100%',
-              width: '100%',
-              overflow: 'auto',
-              display: 'flex',
-              flexDirection: 'column',
-            }}
-          >
-            <Outlet />
-          </Box>
-        </Box>
-      </Stack>
-      <DialogConfirm
-        open={showDeleteConfirm}
-        onClose={() => {
-          setShowDeleteConfirm(false)
+  useEffect(() => {
+    if (id) {
+      fetchExamData()
+    }
+  }, [id])
+
+  if (isLoading) {
+    return (
+      <Container
+        sx={{
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          height: '80vh',
         }}
-        title="Hapus"
-        content="Yakin menghapus akun pengguna ini?"
-        onSubmit={handleDelete}
-      />
-    </>
+      >
+        <Typography>Memuat data ujian...</Typography>
+      </Container>
+    )
+  }
+
+  return (
+    <Container maxWidth="md" sx={{ py: 4 }}>
+      <Stack spacing={2}>
+        <Paper sx={{ p: 2 }}>
+          <Typography variant="h5">Review Ujian</Typography>
+          <Typography>
+            Mata Pelajaran: {examData?.subject?.nama || 'Matematika'}
+          </Typography>
+          <Typography>
+            Kelas: {examData?.classroom?.nama || 'X KULINER 2'}
+          </Typography>
+          <Typography>Semester: {examData?.semester || '2'}</Typography>
+        </Paper>
+
+        <Paper sx={{ p: 3 }}>
+          {questions.map((question: any, index: number) => (
+            <Box key={question.id} sx={{ mb: 4 }}>
+              <Typography sx={{ mb: 1 }}>
+                {index + 1}. {question.question}
+              </Typography>
+              <RadioGroup value={question.correctAnswer}>
+                {question.options.map((option: any) => (
+                  <FormControlLabel
+                    key={option.value}
+                    value={option.value}
+                    control={<Radio />}
+                    label={`${option.value}. ${option.label}`}
+                    sx={{
+                      bgcolor:
+                        option.value === question.correctAnswer
+                          ? 'success.light'
+                          : 'inherit',
+                      borderRadius: 1,
+                      px: 1,
+                    }}
+                  />
+                ))}
+              </RadioGroup>
+            </Box>
+          ))}
+        </Paper>
+      </Stack>
+    </Container>
   )
 }
