@@ -6,6 +6,7 @@ import { createBrowserRouter, RouterProvider } from 'react-router-dom'
 import ErrorPage from './ErrorPage'
 import './index.css'
 import LoginPage from './modules/auth/Login'
+import CourseDetail from './modules/dashboard/course/CourseDetail'
 import CourseList from './modules/dashboard/course/CourseList'
 import ExamList from './modules/dashboard/exam/ExamList'
 import ExamListDetail from './modules/dashboard/exam/ExamListDetail'
@@ -34,7 +35,10 @@ const router = createBrowserRouter([
         path: '/dashboard/course',
         element: <CourseList />,
       },
-
+      {
+        path: '/dashboard/course/:id',
+        element: <CourseDetail />,
+      },
       {
         path: '/dashboard/result',
         element: <CourseExamList />,

@@ -85,14 +85,35 @@ export default function ExamList() {
   }
 
   // Handle exam start
-  const handleStartExam = (exam: any) => {
-    navigate(`/dashboard/exam/${exam?.id}`)
-    // if (checkExamTime(exam)) {
-    //   navigate(`/dashboard/exam/${exam?.id}`)
-    // } else {
-    //   setSelectedItem(exam)
-    //   setOpenTimeWarning(true)
-    // }
+  const handleStartExam = async (exam: any) => {
+    try {
+      if (checkExamTime(exam)) {
+        // 1. Masuk ke fullscreen
+        if (document.documentElement.requestFullscreen) {
+          await document.documentElement.requestFullscreen()
+        }
+        navigate(`/dashboard/exam/${exam?.id}`)
+        // 2. Listen event kalau user keluar tab
+        document.addEventListener('visibilitychange', () => {
+          if (document.hidden) {
+            alert('Anda keluar dari halaman ujian! Ujian otomatis dibatalkan.')
+            // Bisa navigate keluar atau logout
+            // navigate('/dashboard'); // contoh
+          }
+        })
+
+        // 3. Navigate ke halaman ujian
+
+        navigate(`/dashboard/exam/${exam?.id}`)
+      } else {
+        setSelectedItem(exam)
+        setOpenTimeWarning(true)
+      }
+      // navigate(`/dashboard/exam/${exam?.id}`);
+    } catch (error) {
+      console.error('Gagal masuk fullscreen:', error)
+    }
+    // navigate(`/dashboard/exam/${exam?.id}`)
   }
 
   const columns = [
