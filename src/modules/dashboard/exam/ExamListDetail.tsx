@@ -41,7 +41,7 @@ export default function ExamTake() {
   const [showConfirmSubmit, setShowConfirmSubmit] = useState<any>(false)
   const [examSubmitted, setExamSubmitted] = useState<any>(false)
   const [isSubmitting, setIsSubmitting] = useState<any>(false)
-
+  const [isExamStarted, setIsExamStarted] = useState(false)
   // Fetch exam data
   const fetchExamData = async () => {
     try {
@@ -133,7 +133,7 @@ export default function ExamTake() {
         studentId: state.profile?.nis,
         answers,
       }
-      console.log(data)
+      // console.log(data)
       await postExamQuestions(data)
       setExamSubmitted(true)
       setIsSubmitting(false)
@@ -194,7 +194,28 @@ export default function ExamTake() {
 
   // Use this until the real questions API is available
   const displayQuestions = questions.length > 0 ? questions : demoQuestions
+  useEffect(() => {
+    if (!answers || answers.length === 0) return
 
+    const handleTabLeave = async () => {
+      if (document.hidden) {
+        try {
+          await handleSubmitExam()
+          navigate('/dashboard/exam')
+        } catch (err) {
+          console.error('Gagal submit ujian saat pindah tab:', err)
+        }
+      }
+    }
+
+    document.addEventListener('visibilitychange', handleTabLeave)
+    return () => {
+      document.removeEventListener('visibilitychange', handleTabLeave)
+    }
+  }, [answers])
+  useEffect(() => {
+    setIsExamStarted(true)
+  }, [])
   if (isLoading) {
     return (
       <Container

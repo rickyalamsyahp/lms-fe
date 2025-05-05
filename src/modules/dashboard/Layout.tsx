@@ -21,7 +21,10 @@ export default function DashboardLayout() {
       navigate('/dashboard/user')
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [profile])
-
+  const hiddenSidebarPaths = [/^\/dashboard\/exam\/[^/]+$/]
+  const isSidebarHidden = hiddenSidebarPaths.some((regex) =>
+    regex.test(location.pathname)
+  )
   return (
     <AuthProvider>
       <SessionProvider>
@@ -34,14 +37,14 @@ export default function DashboardLayout() {
             position: 'fixed',
           }}
         >
-          <Navbar />
+          {!isSidebarHidden && <Navbar />}
           <Box sx={{ flex: 1, position: 'relative' }}>
             <Stack
               flexDirection={'row'}
               sx={{ position: 'absolute', height: '100%', width: '100%' }}
             >
               {/* {profile?.data?.role !== ScopeSlug.STUDENT && <Sidebar />} */}
-              <Sidebar />
+              {!isSidebarHidden && <Sidebar />}
               <Box sx={{ flex: 1, p: 2, overflow: 'auto', display: 'flex' }}>
                 <Outlet />
                 {/* {profile?.data?.role === ScopeSlug.STUDENT ? (

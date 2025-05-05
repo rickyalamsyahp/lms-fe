@@ -31,7 +31,7 @@ export default function ExamList() {
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
   const [selectedItem, setSelectedItem] = useState<any>(undefined)
   const [openTimeWarning, setOpenTimeWarning] = useState(false)
-
+  const [isExamStarted, setIsExamStarted] = useState(false)
   const { data: courseList, mutate: refetch } = useCourseList({
     page: 1,
     size: 50,
@@ -93,23 +93,10 @@ export default function ExamList() {
           await document.documentElement.requestFullscreen()
         }
         navigate(`/dashboard/exam/${exam?.id}`)
-        // 2. Listen event kalau user keluar tab
-        document.addEventListener('visibilitychange', () => {
-          if (document.hidden) {
-            alert('Anda keluar dari halaman ujian! Ujian otomatis dibatalkan.')
-            // Bisa navigate keluar atau logout
-            // navigate('/dashboard'); // contoh
-          }
-        })
-
-        // 3. Navigate ke halaman ujian
-
-        navigate(`/dashboard/exam/${exam?.id}`)
       } else {
         setSelectedItem(exam)
         setOpenTimeWarning(true)
       }
-      // navigate(`/dashboard/exam/${exam?.id}`);
     } catch (error) {
       console.error('Gagal masuk fullscreen:', error)
     }
