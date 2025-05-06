@@ -86,21 +86,21 @@ export default function ExamList() {
 
   // Handle exam start
   const handleStartExam = async (exam: any) => {
-    try {
-      if (checkExamTime(exam)) {
-        // 1. Masuk ke fullscreen
-        if (document.documentElement.requestFullscreen) {
-          await document.documentElement.requestFullscreen()
-        }
-        navigate(`/dashboard/exam/${exam?.id}`)
-      } else {
-        setSelectedItem(exam)
-        setOpenTimeWarning(true)
-      }
-    } catch (error) {
-      console.error('Gagal masuk fullscreen:', error)
-    }
-    // navigate(`/dashboard/exam/${exam?.id}`)
+    // try {
+    //   if (checkExamTime(exam)) {
+    //     // 1. Masuk ke fullscreen
+    //     // if (document.documentElement.requestFullscreen) {
+    //     //   await document.documentElement.requestFullscreen()
+    //     // }
+    //     navigate(`/dashboard/exam/${exam?.id}`)
+    //   } else {
+    //     setSelectedItem(exam)
+    //     setOpenTimeWarning(true)
+    //   }
+    // } catch (error) {
+    //   console.error('Gagal masuk fullscreen:', error)
+    // }
+    navigate(`/dashboard/exam/${exam?.id}`)
   }
 
   const columns = [

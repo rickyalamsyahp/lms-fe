@@ -21,6 +21,7 @@ import {
 } from '@mui/material'
 import { useEffect, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
+import screenfull from 'screenfull'
 import { useSession } from '../../../context/session'
 import {
   getCoursById,
@@ -58,24 +59,29 @@ export default function ExamTake() {
       // In a real implementation, you would fetch questions as well
       const questionsResponse = await getExamQuestions(id)
       const displayQuestions = questionsResponse.data.map(
-        (questionData: any) => {
-          return {
-            id: questionData.id,
-            question: questionData.content, // or another field if you want a different label for the question
-            options: questionData.answers.map((answer: any) => ({
-              value: answer.option, // Answer option (a, b, c, etc.)
-              label: answer.content, // The content for that option
+        (questionData: any) => ({
+          id: questionData.id,
+          question: questionData.content,
+          options: questionData.answers
+            .sort((a: any, b: any) => a.option.localeCompare(b.option))
+            .map((answer: any) => ({
+              value: answer.option,
+              label: answer.content,
             })),
-          }
-        }
+        })
       )
+
+      // Fungsi untuk mengacak array pertanyaan
       const shuffleArray = (array: any[]): any[] => {
-        for (let i = array.length - 1; i > 0; i--) {
+        const copiedArray = [...array] // Hindari mutasi langsung pada array asli
+        for (let i = copiedArray.length - 1; i > 0; i--) {
           const j = Math.floor(Math.random() * (i + 1))
-          ;[array[i], array[j]] = [array[j], array[i]] // Swap elements
+          ;[copiedArray[i], copiedArray[j]] = [copiedArray[j], copiedArray[i]]
         }
-        return array
+        return copiedArray
       }
+
+      // Set state dengan pertanyaan yang sudah diacak, tapi options tetap urut
       setQuestions(shuffleArray(displayQuestions))
 
       setIsLoading(false)
@@ -137,7 +143,9 @@ export default function ExamTake() {
       await postExamQuestions(data)
       setExamSubmitted(true)
       setIsSubmitting(false)
-
+      if (screenfull.isEnabled && screenfull.isFullscreen) {
+        await screenfull.exit()
+      }
       // Show success message or redirect
       setTimeout(() => {
         navigate('/dashboard/exam')
@@ -197,25 +205,54 @@ export default function ExamTake() {
   useEffect(() => {
     if (!answers || answers.length === 0) return
 
-    const handleTabLeave = async () => {
-      if (document.hidden) {
-        try {
-          await handleSubmitExam()
-          navigate('/dashboard/exam')
-        } catch (err) {
-          console.error('Gagal submit ujian saat pindah tab:', err)
-        }
+    const handleBlur = async () => {
+      try {
+        await handleSubmitExam()
+      } catch (err) {
+        console.error('Gagal submit ujian saat berpindah aplikasi:', err)
       }
     }
 
-    document.addEventListener('visibilitychange', handleTabLeave)
+    // // Menambahkan event listener untuk menangani perubahan tab dan aplikasi
+    // window.addEventListener('beforeunload', handleBeforeUnload)
+    // document.addEventListener('visibilitychange', handleTabLeave)
+    window.addEventListener('blur', handleBlur)
+
+    // Cleanup function untuk menghapus event listeners saat komponen di-unmount
     return () => {
-      document.removeEventListener('visibilitychange', handleTabLeave)
+      // window.removeEventListener('beforeunload', handleBeforeUnload)
+      // document.removeEventListener('visibilitychange', handleTabLeave)
+      window.removeEventListener('blur', handleBlur)
     }
   }, [answers])
+
   useEffect(() => {
     setIsExamStarted(true)
+
+    if (screenfull.isEnabled) {
+      screenfull.request().catch(() => {
+        // handleSubmitExam()
+        // console.warn('Gagal masuk fullscreen')
+      })
+    }
   }, [])
+  useEffect(() => {
+    if (!screenfull.isEnabled) return
+
+    const handleFullscreenChange = () => {
+      if (!screenfull.isFullscreen) {
+        screenfull.request().catch(() => {
+          console.warn('Tidak bisa kembali ke fullscreen.')
+        })
+      }
+    }
+
+    screenfull.on('change', handleFullscreenChange)
+
+    return () => {
+      screenfull.off('change', handleFullscreenChange)
+    }
+  }, [answers])
   if (isLoading) {
     return (
       <Container
