@@ -87,14 +87,14 @@ export default function EnhancedExamList() {
   }
 
   const handleStartExam = async (exam: any) => {
-    const availability = checkExamAvailability(exam)
-    // console.log(availability)
+    // const availability = checkExamAvailability(exam)
+    // // console.log(availability)
 
-    if (!availability.canStart && exam.result?.status !== 'reopened') {
-      setSelectedExam(exam)
-      setShowExamInfo(true)
-      return
-    }
+    // if (!availability.canStart && exam.result?.status !== 'reopened') {
+    //   setSelectedExam(exam)
+    //   setShowExamInfo(true)
+    //   return
+    // }
 
     try {
       // Try to enter fullscreen

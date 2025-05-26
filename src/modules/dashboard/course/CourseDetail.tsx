@@ -32,25 +32,16 @@ export default function CourseDetail() {
       setExamData(examResponse)
 
       const questionsResponse = await getExamQuestions(id)
-      const shuffleArray = (array: any[]) => {
-        const shuffled = [...array]
-        for (let i = shuffled.length - 1; i > 0; i--) {
-          const j = Math.floor(Math.random() * (i + 1))
-          ;[shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]]
-        }
-        return shuffled
-      }
+
       const displayQuestions = questionsResponse.data.map(
         (questionData: any) => ({
           id: questionData.id,
           question: questionData.content,
-          options: shuffleArray(questionData.answers).map(
-            (answer: any, index: any) => ({
-              value: String.fromCharCode(97 + index),
-              label: answer.content,
-              isCorrect: answer.isCorrect,
-            })
-          ),
+          options: questionData.answers.map((answer: any, index: any) => ({
+            value: String.fromCharCode(97 + index),
+            label: answer.content,
+            isCorrect: answer.isCorrect,
+          })),
         })
       )
 

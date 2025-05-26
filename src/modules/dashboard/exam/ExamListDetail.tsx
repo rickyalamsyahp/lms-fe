@@ -142,11 +142,11 @@ export default function ExamTake() {
   }
 
   // Helper function to convert answers with isCorrect values
-  const convertAnswersToIsCorrect = () => {
-    const convertedAnswers: any = {}
+  const convertAnswersToContent = () => {
+    const convertedAnswers = {} as any
 
     Object.keys(answers).forEach((questionId) => {
-      const selectedOptionValue = answers[questionId]
+      const selectedOptionValue = answers[questionId] // This is 'a', 'b', 'c', 'd'
       const question = displayQuestions.find(
         (q: any) => q.id.toString() === questionId
       )
@@ -156,7 +156,8 @@ export default function ExamTake() {
           (opt: any) => opt.value === selectedOptionValue
         )
         if (selectedOption) {
-          convertedAnswers[questionId] = selectedOption.isCorrect
+          // Send the actual content/text of the selected answer
+          convertedAnswers[questionId] = selectedOption.label
         }
       }
     })
@@ -165,33 +166,34 @@ export default function ExamTake() {
   }
 
   const handleSubmitExam = async () => {
-    // setShowConfirmSubmit(false)
     try {
-      // setIsSubmitting(true)
+      setIsSubmitting(true)
 
-      // Convert answers to isCorrect format
-      const convertedAnswers = convertAnswersToIsCorrect()
+      // Convert answers to content format (send actual answer text)
+      const convertedAnswers = convertAnswersToContent()
 
       const data = {
-        examId: id,
-        studentId: state.profile?.nis,
-        answers: convertedAnswers, // Now sending isCorrect values instead of option values
+        questionBankId: id, // Changed from examId to questionBankId to match backend
+        answers: convertedAnswers, // Now sending actual answer content/text
+        isAutoSubmit: false,
+        duration: examData?.duration ? examData.duration * 60 - timeLeft : 0, // Calculate actual duration taken
+        violations: 0,
       }
 
-      // console.log(data)
       await postExamQuestions(data)
       setExamSubmitted(true)
       setIsSubmitting(false)
+
       if (screenfull.isEnabled && screenfull.isFullscreen) {
         await screenfull.exit()
       }
-      // Show success message or redirect
+
       setTimeout(() => {
         navigate('/dashboard/exam')
       }, 2000)
     } catch (error) {
       console.error('Error submitting exam', error)
-      // setIsSubmitting(false)
+      setIsSubmitting(false)
     }
   }
 
