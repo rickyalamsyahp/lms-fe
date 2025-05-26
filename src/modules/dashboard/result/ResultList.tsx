@@ -1,200 +1,241 @@
-/* eslint-disable react-hooks/exhaustive-deps */
-'use client'
-
-import { Replay } from '@mui/icons-material'
-import { Box, IconButton, Stack, Typography } from '@mui/material'
+import { Assessment, Download, Replay, Visibility } from '@mui/icons-material'
+import {
+  Box,
+  Button,
+  Chip,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  IconButton,
+  Stack,
+  Typography,
+} from '@mui/material'
 import { useState } from 'react'
-import { useParams } from 'react-router-dom'
 import Commandbar from '../../../components/shared/Commandbar'
 import DataTable from '../../../components/shared/DataTable'
-import { DialogConfirm } from '../../../components/shared/Dialog/DialogConfirm'
-import InfiniteScroll from '../../../components/shared/InfiniteScroll'
 import { useSession } from '../../../context/session'
-import FileViewer from '../../filemeta/__components/FileViewer'
-import CourseExamForm from './__components/CourseExamForm'
-import { deleteExam, useCourseExamList } from './__shared/api'
-import { CourseExam } from './__shared/type'
+import ExamResultCard from './__components/ExamResultCard'
+import ExamResultDetail from './__components/ExamResultDetail'
+import { useCourseExamList } from './__shared/api'
 
-export default function CourseListExam() {
+export default function EnhancedCourseListExam() {
   const { isMobile, state } = useSession()
   const [page, setPage] = useState(1)
   const [size, setSize] = useState(10)
-  const [showForm, setShowForm] = useState(false)
-  const [selectedItem, setSelectedItem] = useState<CourseExam | undefined>()
-  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
-  const [showFile, setShowFile] = useState(false)
-  const { courseId } = useParams()
-
-  const query = {
-    page,
-    size,
-  }
+  const [selectedResult, setSelectedResult] = useState<any>(null)
+  const [showDetailDialog, setShowDetailDialog] = useState(false)
 
   const { data: examList, mutate: refetch } = useCourseExamList(
     state.profile?.scope,
-    {
-      ...query,
-    }
+    { page, size }
   )
 
-  // function handleOpenCourseExam(d: CourseExam) {
-  //   setSelectedItem(d)
-  //   setShowFile(true)
-  // }
-
-  async function handleDelete() {
+  const handleDownloadResults = async () => {
     try {
-      await deleteExam(selectedItem?.id as string)
-      refetch()
+      const response = await fetch('/api/exam-results/download', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          filters: {
+            teacherId: state.isInstructor ? state.profile?.kode : undefined,
+            studentId: state.profile?.nis,
+            semester: new Date().getMonth() < 6 ? '2' : '1',
+          },
+        }),
+      })
+
+      const blob = await response.blob()
+      const url = window.URL.createObjectURL(blob)
+      const link = document.createElement('a')
+      link.href = url
+      link.download = `hasil-ujian-${new Date().toISOString().split('T')[0]}.xlsx`
+      link.click()
+      window.URL.revokeObjectURL(url)
     } catch (error) {
-      throw error
+      console.error('Failed to download results:', error)
     }
   }
-  const formatDate = (dateString: any) => {
-    const date = new Date(dateString)
 
-    // Using Intl.DateTimeFormat for custom formatting
-    const formatter = new Intl.DateTimeFormat('id-ID', {
-      year: 'numeric',
-      month: 'long', // 'long' will give you the full month name
-      day: 'numeric',
-      hour12: false, // 24-hour format
-    })
-
-    const formattedDate = formatter.format(date)
-
-    return formattedDate
+  const getScoreColor = (percentage: number) => {
+    if (percentage >= 80) return 'success'
+    if (percentage >= 70) return 'warning'
+    return 'error'
   }
+
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString('id-ID', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+    })
+  }
+
+  const columns = [
+    {
+      label: 'Siswa',
+      render: (item: any) => (
+        <Box>
+          <Typography fontWeight="bold">{item.student?.nama}</Typography>
+          <Typography variant="caption" color="text.secondary">
+            NIS: {item.studentId}
+          </Typography>
+        </Box>
+      ),
+    },
+    {
+      label: 'Ujian',
+      render: (item: any) => (
+        <Box>
+          <Typography>{item.questionBank?.title}</Typography>
+          <Typography variant="body2" color="text.secondary">
+            {item.questionBank?.subject?.nama}
+          </Typography>
+          <Typography variant="caption" color="text.secondary">
+            {item.questionBank?.classroom?.nama} • Semester{' '}
+            {item.questionBank?.semester}
+          </Typography>
+        </Box>
+      ),
+    },
+    {
+      label: 'Tanggal Ujian',
+      render: (item: any) => (
+        <Typography sx={{ minWidth: 160 }}>
+          {formatDate(item.questionBank?.scheduledAt)}
+        </Typography>
+      ),
+    },
+    {
+      label: 'Hasil',
+      render: (item: any) => (
+        <Box>
+          <Stack direction="row" spacing={1} alignItems="center">
+            <Typography fontWeight="bold">
+              {item.score}/{item.totalPoints}
+            </Typography>
+            <Chip
+              label={`${Math.round(item.percentage)}%`}
+              color={getScoreColor(item.percentage)}
+              size="small"
+            />
+          </Stack>
+          <Typography variant="caption" color="text.secondary">
+            Status:{' '}
+            {item.status === 'submitted'
+              ? 'Submit Manual'
+              : item.status === 'auto_submitted'
+                ? 'Auto Submit'
+                : item.status}
+          </Typography>
+        </Box>
+      ),
+    },
+    {
+      label: 'Durasi',
+      render: (item: any) => (
+        <Typography>
+          {item.duration
+            ? `${Math.floor(item.duration / 60)}:${(item.duration % 60).toString().padStart(2, '0')}`
+            : '-'}
+        </Typography>
+      ),
+    },
+    {
+      label: 'Submit',
+      render: (item: any) => (
+        <Typography variant="body2">
+          {item.submittedAt ? formatDate(item.submittedAt) : '-'}
+        </Typography>
+      ),
+    },
+    {
+      label: 'Aksi',
+      render: (item: any) => (
+        <Stack direction="row" spacing={1}>
+          <Button
+            size="small"
+            startIcon={<Visibility />}
+            onClick={() => {
+              setSelectedResult(item)
+              setShowDetailDialog(true)
+            }}
+          >
+            Detail
+          </Button>
+          {state.isInstructor && (
+            <Button
+              size="small"
+              startIcon={<Assessment />}
+              onClick={() =>
+                window.open(
+                  `/dashboard/exam/${item.questionBankId}/analytics`,
+                  '_blank'
+                )
+              }
+            >
+              Analisis
+            </Button>
+          )}
+        </Stack>
+      ),
+    },
+  ]
+
   return (
     <>
       <Stack sx={{ flex: 1 }}>
         <Commandbar
-          title={'Hasil Ujian'}
-          // searchProps={{
-          //   onSearch: (newSearch) => setSearch(newSearch),
-          //   placeholder: 'Cari Pelatihan...',
-          // }}
+          title="Hasil Ujian"
           breadcrumbsProps={{
-            items: [
-              {
-                label: 'Menu Utama',
-              },
-            ],
+            items: [{ label: 'Menu Utama' }],
           }}
           rightAddon={
-            !state.isTrainee && (
-              <>
-                <IconButton
-                  onClick={() => refetch()}
-                  sx={{ mr: isMobile ? 0 : 2 }}
+            <>
+              <IconButton
+                onClick={() => refetch()}
+                sx={{ mr: isMobile ? 0 : 2 }}
+              >
+                <Replay />
+              </IconButton>
+
+              {(state.isInstructor || state.isAdmin) && (
+                <Button
+                  startIcon={<Download />}
+                  variant="contained"
+                  onClick={handleDownloadResults}
+                  sx={{ mr: 1 }}
                 >
-                  <Replay />
-                </IconButton>
-                {/* {isMobile ? (
-                  <IconButton onClick={() => setShowForm(true)} color="primary">
-                    <Add />
-                  </IconButton>
-                ) : (
-                  <Button
-                    startIcon={<Add />}
-                    variant="contained"
-                    onClick={() => setShowForm(true)}
-                  >
-                    Tambah
-                  </Button>
-                )} */}
-              </>
-            )
+                  Download
+                </Button>
+              )}
+            </>
           }
         />
+
         <Box sx={{ flex: 1, px: 2 }}>
+          <Box sx={{ my: 2 }}>
+            <Typography variant="h6" sx={{ mb: 1 }}>
+              HASIL UJIAN
+            </Typography>
+            <Typography variant="body2" sx={{ mb: 2 }}>
+              Berikut adalah hasil ujian yang telah dikerjakan.
+            </Typography>
+          </Box>
+
           {isMobile ? (
-            <InfiniteScroll>
-              <Stack sx={{ gap: 1, py: 2 }}>
-                {/* {userList?.results.map((d: Course) => (
-                  <UserCard
-                    key={d.id}
-                    data={d}
-                    onClick={() => {
-                      setSelectedItem(d)
-                      setShowForm(true)
-                    }}
-                  />
-                ))} */}
-              </Stack>
-            </InfiniteScroll>
+            <Stack spacing={2}>
+              {examList?.results?.map((result: any) => (
+                <ExamResultCard key={result.id} result={result} />
+              ))}
+            </Stack>
           ) : (
             <DataTable
               data={examList?.results}
               loading={!examList}
-              columns={[
-                {
-                  label: 'Nama Siswa',
-                  render: (item: any) => (
-                    <Typography>{item.student?.nama}</Typography>
-                  ),
-                },
-                {
-                  label: 'Tanggal Ujian',
-                  render: (item: any) => (
-                    <Typography sx={{ minWidth: 160 }}>
-                      {formatDate(item.questionBank.scheduledAt)}{' '}
-                    </Typography>
-                  ),
-                },
-                {
-                  label: 'Mata Pelajaran',
-                  render: (item: any) => (
-                    <Typography sx={{ minWidth: 160 }}>
-                      {item.questionBank.subject.nama}
-                    </Typography>
-                  ),
-                },
-                {
-                  label: 'Durasi Ujian',
-                  render: (item: any) => (
-                    <Typography> {item.questionBank.duration} Menit</Typography>
-                  ),
-                },
-                {
-                  label: 'Kelas',
-                  render: (item: any) => (
-                    <Typography sx={{ minWidth: 120 }}>
-                      {item.questionBank.classroom.nama}
-                    </Typography>
-                  ),
-                },
-                {
-                  label: 'Jurusan',
-                  render: (item: any) => (
-                    <Typography sx={{ minWidth: 120 }}>
-                      {item.questionBank.classroom.jurusans.nama}
-                    </Typography>
-                  ),
-                },
-                {
-                  label: 'Semester',
-                  render: (item: any) => (
-                    <Typography sx={{ minWidth: 160 }}>
-                      {item.questionBank.semester}
-                    </Typography>
-                  ),
-                },
-                {
-                  label: 'Nama Guru',
-                  render: (item: any) => (
-                    <Typography sx={{ minWidth: 160 }}>
-                      {item.questionBank.teacher.nama}
-                    </Typography>
-                  ),
-                },
-                {
-                  label: 'Nilai',
-                  render: (item: any) => (
-                    <Typography sx={{ minWidth: 160 }}>{item.score}</Typography>
-                  ),
-                },
-              ]}
+              columns={columns}
               paginationProps={{
                 rowsPerPageOptions: [10, 25, 50],
                 rowsPerPage: size,
@@ -210,34 +251,22 @@ export default function CourseListExam() {
           )}
         </Box>
       </Stack>
-      <CourseExamForm
-        courseId={courseId as string}
-        isOpen={showForm}
-        initialData={selectedItem}
-        onClose={() => {
-          setShowForm(false)
-          setTimeout(() => setSelectedItem(undefined), 500)
-        }}
-        onSuccess={refetch}
-      />
-      <DialogConfirm
-        open={showDeleteConfirm}
-        onClose={() => {
-          setShowDeleteConfirm(false)
-          setSelectedItem(undefined)
-        }}
-        title="Delete"
-        content={`Yakin menghapus pelatihan ini?`}
-        onSubmit={handleDelete}
-      />
-      <FileViewer
-        fileMeta={selectedItem?.fileMeta}
-        open={showFile}
-        onClose={() => {
-          setShowFile(false)
-          setSelectedItem(undefined)
-        }}
-      />
+
+      {/* Detail Dialog */}
+      <Dialog
+        open={showDetailDialog}
+        onClose={() => setShowDetailDialog(false)}
+        maxWidth="md"
+        fullWidth
+      >
+        <DialogTitle>Detail Hasil Ujian</DialogTitle>
+        <DialogContent>
+          {selectedResult && <ExamResultDetail result={selectedResult} />}
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setShowDetailDialog(false)}>Tutup</Button>
+        </DialogActions>
+      </Dialog>
     </>
   )
 }

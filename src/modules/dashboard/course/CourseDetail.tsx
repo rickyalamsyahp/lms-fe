@@ -26,20 +26,31 @@ export default function CourseDetail() {
     try {
       setIsLoading(true)
       const examData = await getCoursById(id)
+      console.log(examData)
+
       const examResponse = examData.data
       setExamData(examResponse)
 
       const questionsResponse = await getExamQuestions(id)
-
+      const shuffleArray = (array: any[]) => {
+        const shuffled = [...array]
+        for (let i = shuffled.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1))
+          ;[shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]]
+        }
+        return shuffled
+      }
       const displayQuestions = questionsResponse.data.map(
         (questionData: any) => ({
           id: questionData.id,
           question: questionData.content,
-          correctAnswer: questionData.correctAnswer, // <== pastikan API kamu mengembalikan correct answer
-          options: questionData.answers.map((answer: any) => ({
-            value: answer.option,
-            label: answer.content,
-          })),
+          options: shuffleArray(questionData.answers).map(
+            (answer: any, index: any) => ({
+              value: String.fromCharCode(97 + index),
+              label: answer.content,
+              isCorrect: answer.isCorrect,
+            })
+          ),
         })
       )
 
@@ -81,7 +92,9 @@ export default function CourseDetail() {
             Mata Pelajaran: {examData?.subject?.nama || 'Matematika'}
           </Typography>
           <Typography>
-            Kelas: {examData?.classroom?.nama || 'X KULINER 2'}
+            Kelas:{' '}
+            {examData?.classrooms.map((c: any) => c.nama).join(', ') ||
+              'X KULINER 2'}
           </Typography>
           <Typography>Semester: {examData?.semester || '2'}</Typography>
         </Paper>
@@ -92,7 +105,12 @@ export default function CourseDetail() {
               <Typography sx={{ mb: 1 }}>
                 {index + 1}. {question.question}
               </Typography>
-              <RadioGroup value={question.correctAnswer}>
+              <RadioGroup
+                value={
+                  question.options.find((option: any) => option.isCorrect === 1)
+                    ?.value ?? ''
+                }
+              >
                 {question.options.map((option: any) => (
                   <FormControlLabel
                     key={option.value}
@@ -101,9 +119,7 @@ export default function CourseDetail() {
                     label={`${option.value}. ${option.label}`}
                     sx={{
                       bgcolor:
-                        option.value === question.correctAnswer
-                          ? 'success.light'
-                          : 'inherit',
+                        option.isCorrect === 1 ? 'success.light' : 'inherit',
                       borderRadius: 1,
                       px: 1,
                     }}

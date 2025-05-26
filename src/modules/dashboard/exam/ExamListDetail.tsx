@@ -43,6 +43,7 @@ export default function ExamTake() {
   const [examSubmitted, setExamSubmitted] = useState<any>(false)
   const [isSubmitting, setIsSubmitting] = useState<any>(false)
   const [isExamStarted, setIsExamStarted] = useState(false)
+
   // Fetch exam data
   const fetchExamData = async () => {
     try {
@@ -58,16 +59,26 @@ export default function ExamTake() {
 
       // In a real implementation, you would fetch questions as well
       const questionsResponse = await getExamQuestions(id)
+
+      const shuffleArray2 = (array: any[]) => {
+        const shuffled = [...array]
+        for (let i = shuffled.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1))
+          ;[shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]]
+        }
+        return shuffled
+      }
       const displayQuestions = questionsResponse.data.map(
         (questionData: any) => ({
           id: questionData.id,
           question: questionData.content,
-          options: questionData.answers
-            .sort((a: any, b: any) => a.option.localeCompare(b.option))
-            .map((answer: any) => ({
-              value: answer.option,
+          options: shuffleArray2(questionData.answers).map(
+            (answer: any, index: any) => ({
+              value: String.fromCharCode(97 + index),
               label: answer.content,
-            })),
+              isCorrect: answer.isCorrect,
+            })
+          ),
         })
       )
 
@@ -80,7 +91,6 @@ export default function ExamTake() {
         }
         return copiedArray
       }
-
       // Set state dengan pertanyaan yang sudah diacak, tapi options tetap urut
       setQuestions(shuffleArray(displayQuestions))
 
@@ -123,10 +133,35 @@ export default function ExamTake() {
   }
 
   const handleAnswerChange = (questionId: any, value: any) => {
+    console.log(value)
+
     setAnswers((prev: any) => ({
       ...prev,
       [questionId]: value,
     }))
+  }
+
+  // Helper function to convert answers with isCorrect values
+  const convertAnswersToIsCorrect = () => {
+    const convertedAnswers: any = {}
+
+    Object.keys(answers).forEach((questionId) => {
+      const selectedOptionValue = answers[questionId]
+      const question = displayQuestions.find(
+        (q: any) => q.id.toString() === questionId
+      )
+
+      if (question) {
+        const selectedOption = question.options.find(
+          (opt: any) => opt.value === selectedOptionValue
+        )
+        if (selectedOption) {
+          convertedAnswers[questionId] = selectedOption.isCorrect
+        }
+      }
+    })
+
+    return convertedAnswers
   }
 
   const handleSubmitExam = async () => {
@@ -134,11 +169,15 @@ export default function ExamTake() {
     try {
       // setIsSubmitting(true)
 
+      // Convert answers to isCorrect format
+      const convertedAnswers = convertAnswersToIsCorrect()
+
       const data = {
         examId: id,
         studentId: state.profile?.nis,
-        answers,
+        answers: convertedAnswers, // Now sending isCorrect values instead of option values
       }
+
       // console.log(data)
       await postExamQuestions(data)
       setExamSubmitted(true)
@@ -162,46 +201,47 @@ export default function ExamTake() {
       id: 1,
       question: 'Jawab pertanyaan dibawah ini dengan benar',
       options: [
-        { value: 'A', label: 'Jawaban A benar' },
-        { value: 'B', label: 'Jawaban B benar' },
-        { value: 'C', label: 'Jawaban C benar' },
-        { value: 'D', label: 'Jawaban D benar' },
+        { value: 'a', label: 'Jawaban A benar', isCorrect: false },
+        { value: 'b', label: 'Jawaban B benar', isCorrect: true },
+        { value: 'c', label: 'Jawaban C benar', isCorrect: false },
+        { value: 'd', label: 'Jawaban D benar', isCorrect: false },
       ],
     },
     {
       id: 2,
       question: 'Jawab pertanyaan dibawah ini dengan benar',
       options: [
-        { value: 'A', label: 'Jawaban A benar' },
-        { value: 'B', label: 'Jawaban B benar' },
-        { value: 'C', label: 'Jawaban C benar' },
-        { value: 'D', label: 'Jawaban D benar' },
+        { value: 'a', label: 'Jawaban A benar', isCorrect: true },
+        { value: 'b', label: 'Jawaban B benar', isCorrect: false },
+        { value: 'c', label: 'Jawaban C benar', isCorrect: false },
+        { value: 'd', label: 'Jawaban D benar', isCorrect: false },
       ],
     },
     {
       id: 3,
       question: 'Jawab pertanyaan dibawah ini dengan benar',
       options: [
-        { value: 'A', label: 'Jawaban A benar' },
-        { value: 'B', label: 'Jawaban B benar' },
-        { value: 'C', label: 'Jawaban C benar' },
-        { value: 'D', label: 'Jawaban D benar' },
+        { value: 'a', label: 'Jawaban A benar', isCorrect: false },
+        { value: 'b', label: 'Jawaban B benar', isCorrect: false },
+        { value: 'c', label: 'Jawaban C benar', isCorrect: true },
+        { value: 'd', label: 'Jawaban D benar', isCorrect: false },
       ],
     },
     {
       id: 4,
       question: 'Jawab pertanyaan dibawah ini dengan benar',
       options: [
-        { value: 'A', label: 'Jawaban A benar' },
-        { value: 'B', label: 'Jawaban B benar' },
-        { value: 'C', label: 'Jawaban C benar' },
-        { value: 'D', label: 'Jawaban D benar' },
+        { value: 'a', label: 'Jawaban A benar', isCorrect: false },
+        { value: 'b', label: 'Jawaban B benar', isCorrect: false },
+        { value: 'c', label: 'Jawaban C benar', isCorrect: false },
+        { value: 'd', label: 'Jawaban D benar', isCorrect: true },
       ],
     },
   ]
 
   // Use this until the real questions API is available
   const displayQuestions = questions.length > 0 ? questions : demoQuestions
+
   useEffect(() => {
     if (!answers || answers.length === 0) return
 
@@ -236,6 +276,7 @@ export default function ExamTake() {
       })
     }
   }, [])
+
   useEffect(() => {
     if (!screenfull.isEnabled) return
 
@@ -253,6 +294,7 @@ export default function ExamTake() {
       screenfull.off('change', handleFullscreenChange)
     }
   }, [answers])
+
   if (isLoading) {
     return (
       <Container
@@ -322,7 +364,7 @@ export default function ExamTake() {
                     key={option.value}
                     value={option.value}
                     control={<Radio />}
-                    label={`${option.value}. ${option.label}`}
+                    label={`${option.value.toUpperCase()}. ${option.label}`}
                   />
                 ))}
               </RadioGroup>

@@ -1,18 +1,35 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-// BankSoalList.jsx
-'use client'
-
-import { Add, Details, Menu, Replay } from '@mui/icons-material'
 import {
+  Add,
+  AudioFile,
+  Delete,
+  Details,
+  Download,
+  Drafts,
+  Image,
+  Menu,
+  People,
+  Replay,
+  Save,
+  Upload,
+  Visibility,
+} from '@mui/icons-material'
+import {
+  Alert,
+  Autocomplete,
   Box,
   Button,
+  Card,
+  CardContent,
+  Checkbox,
+  Chip,
   Dialog,
   DialogActions,
   DialogContent,
   DialogTitle,
-  Divider,
   FormControl,
   FormControlLabel,
+  FormGroup,
   Grid,
   IconButton,
   InputLabel,
@@ -23,9 +40,13 @@ import {
   RadioGroup,
   Select,
   Stack,
+  Switch,
+  Tab,
+  Tabs,
   TextField,
   Typography,
 } from '@mui/material'
+import { MathJax, MathJaxContext } from 'better-react-mathjax'
 import { useEffect, useState } from 'react'
 import toast from 'react-hot-toast'
 import { useNavigate } from 'react-router-dom'
@@ -34,6 +55,8 @@ import DataTable from '../../../components/shared/DataTable'
 import { DialogConfirm } from '../../../components/shared/Dialog/DialogConfirm'
 import Dropdown from '../../../components/shared/Dropdown'
 import { useSession } from '../../../context/session'
+import AttendanceDialog from './__components/AttendanceDialog'
+import OnlineStudentsDialog from './__components/OnlineStudentsDialog'
 import {
   createCours,
   getJurusan,
@@ -43,7 +66,22 @@ import {
   useCourseList,
 } from './__shared/api'
 
-export default function BankSoalList() {
+// Question Types
+enum QuestionType {
+  MULTIPLE_CHOICE = 'multiple_choice',
+  COMPLEX_MULTIPLE_CHOICE = 'complex_multiple_choice',
+  TRUE_FALSE = 'true_false',
+  ESSAY = 'essay',
+}
+
+const questionTypeLabels = {
+  [QuestionType.MULTIPLE_CHOICE]: 'Pilihan Ganda',
+  [QuestionType.COMPLEX_MULTIPLE_CHOICE]: 'Pilihan Ganda Kompleks',
+  [QuestionType.TRUE_FALSE]: 'Benar/Salah',
+  [QuestionType.ESSAY]: 'Essay',
+}
+
+export default function EnhancedBankSoalList() {
   const navigate = useNavigate()
   const { isMobile, state } = useSession()
   const [page, setPage] = useState(1)
@@ -51,43 +89,21 @@ export default function BankSoalList() {
   const [search, setSearch] = useState('')
   const [showFormCreate, setShowFormCreate] = useState(false)
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
+  const [showReopenDialog, setShowReopenDialog] = useState(false)
+  const [showUploadDialog, setShowUploadDialog] = useState(false)
+  const [showAttendanceDialog, setShowAttendanceDialog] = useState(false)
+  const [showOnlineStudents, setShowOnlineStudents] = useState(false)
   const [selectedItem, setSelectedItem] = useState<any>(undefined)
+  const [activeTab, setActiveTab] = useState(0)
+  const [isDraft, setIsDraft] = useState(true)
+  const [autoSaveTimer, setAutoSaveTimer] = useState<NodeJS.Timeout | null>(
+    null
+  )
   const [mataPelajaranOptions, setMataPelajaranOptions] = useState<any>([])
-
   const [kelasOptions, setKelasOptions] = useState<any>([])
-  const [jurusanOptions, setJurusanOptions] = useState<any>([])
-  // Form states
-  const [formData, setFormData] = useState({
-    mataPelajaran: '',
-    kelas: '',
-    jurusan: '',
-    guru: '',
-    semester: '',
-    tanggalUjian: '',
-    jamUjian: '',
-    durasiUjian: '',
-    soal: [
-      {
-        pertanyaan: '',
-        jawaban: [
-          { text: '', isCorrect: false },
-          { text: '', isCorrect: true },
-          { text: '', isCorrect: false },
-          { text: '', isCorrect: false },
-        ],
-      },
-    ],
-  })
-
-  const guruOptions = ['Bu Iulu', 'Pak Budi', 'Bu Siti', 'Pak Agus']
+  const [jurusansOptions, setJurusanOptions] = useState<any>([])
   const semesterOptions = ['1', '2', '3', '4', '5', '6']
-  const durasiOptions = [
-    '30 menit',
-    '45 menit',
-    '60 menit',
-    '90 menit',
-    '120 menit',
-  ]
+
   const { data: courseList, mutate: refetch } = useCourseList({
     page: 1,
     size: 50,
@@ -96,10 +112,7 @@ export default function BankSoalList() {
     // orderBy: 'level',
     // 'published:eq': true,
   })
-  console.log(courseList)
 
-  // Mock data for the table
-  const [bankSoalList, setBankSoalList] = useState<any>([])
   const GetMatapelajara = async () => {
     try {
       const res = await getMapel({ kodeMapel: state.profile?.skdmapel })
@@ -142,151 +155,383 @@ export default function BankSoalList() {
     GetMatapelajara()
     // GetMapmataapelajara()
   }, [])
+  // Enhanced form data
+  const [formData, setFormData] = useState<any>({
+    title: '',
+    description: '',
+    mataPelajaran: '',
+    jurusan: '',
+    classroomIds: [], // Multiple classes
+    coTeacherIds: [], // Co-teachers
+    semester: '',
+    tanggalUjian: '',
+    jamUjian: '',
+    durasiUjian: '',
+    randomizeQuestions: false,
+    randomizeAnswers: false,
+    requireAllAnswers: true,
+    showResults: true,
+    allowReview: false,
+    instructions: '',
+    passingScore: '',
+    soal: [],
+  })
 
-  // Add new question to form
+  // Auto-save functionality
+  // const autoSave = useCallback(async () => {
+  //   if (formData.soal.length > 0) {
+  //     try {
+  //       await saveAsDraft(formData)
+  //       console.log('Auto-saved at', new Date().toLocaleTimeString())
+  //     } catch (error) {
+  //       console.error('Auto-save failed:', error)
+  //     }
+  //   }
+  // }, [formData])
+
+  // useEffect(() => {
+  //   if (showFormCreate && formData.soal.length > 0) {
+  //     if (autoSaveTimer) clearTimeout(autoSaveTimer)
+  //     const timer = setTimeout(autoSave, 5000) // Auto-save every 5 seconds
+  //     setAutoSaveTimer(timer)
+  //   }
+  //   return () => {
+  //     if (autoSaveTimer) clearTimeout(autoSaveTimer)
+  //   }
+  // }, [formData, showFormCreate, autoSave])
+
+  // Add new question to form - moved to bottom
   const addQuestion = () => {
     const newSoal = [...formData.soal]
     newSoal.push({
-      pertanyaan: 'Jawab pertanyaan dibawah ini dengan benar',
+      type: QuestionType.MULTIPLE_CHOICE,
+      pertanyaan: '',
+      imageUrl: '',
+      audioUrl: '',
+      equation: '',
+      keywords: [],
+      points: 1,
+      explanation: '',
       jawaban: [
-        { text: 'Jawaban A benar', isCorrect: false },
-        { text: 'Jawaban B benar', isCorrect: true },
-        { text: 'Jawaban C benar', isCorrect: false },
-        { text: 'Jawaban D benar', isCorrect: false },
+        { text: '', isCorrect: false, imageUrl: '', audioUrl: '' },
+        { text: '', isCorrect: true, imageUrl: '', audioUrl: '' },
+        { text: '', isCorrect: false, imageUrl: '', audioUrl: '' },
+        { text: '', isCorrect: false, imageUrl: '', audioUrl: '' },
+        { text: '', isCorrect: false, imageUrl: '', audioUrl: '' },
       ],
     })
     setFormData({ ...formData, soal: newSoal })
   }
 
-  // Handle form change
-  const handleFormChange = (field: any, value: any) => {
-    setFormData({ ...formData, [field]: value })
-  }
-
-  // Handle question change
-  const handleQuestionChange = (index: any, value: any) => {
+  // Remove question
+  const removeQuestion = (index: number) => {
     const newSoal = [...formData.soal]
-    newSoal[index].pertanyaan = value
+    newSoal.splice(index, 1)
     setFormData({ ...formData, soal: newSoal })
   }
 
-  // Handle answer change
-  const handleAnswerChange = (
-    questionIndex: any,
-    answerIndex: any,
-    value: any
+  // Handle question type change
+  const handleQuestionTypeChange = (index: number, type: QuestionType) => {
+    const newSoal = [...formData.soal]
+    newSoal[index].type = type
+
+    // Adjust answers based on type
+    if (type === QuestionType.TRUE_FALSE) {
+      newSoal[index].jawaban = [
+        { text: 'Benar', isCorrect: true, imageUrl: '', audioUrl: '' },
+        { text: 'Salah', isCorrect: false, imageUrl: '', audioUrl: '' },
+      ]
+    } else if (type === QuestionType.ESSAY) {
+      newSoal[index].jawaban = []
+      newSoal[index].keywords = ['']
+    } else if (newSoal[index].jawaban.length < 4) {
+      // Ensure minimum 4 options for multiple choice
+      while (newSoal[index].jawaban.length < 4) {
+        newSoal[index].jawaban.push({
+          text: '',
+          isCorrect: false,
+          imageUrl: '',
+          audioUrl: '',
+        })
+      }
+    }
+
+    setFormData({ ...formData, soal: newSoal })
+  }
+
+  // Handle complex multiple choice (multiple correct answers)
+  const handleComplexAnswerChange = (
+    questionIndex: number,
+    answerIndex: number,
+    isCorrect: boolean
   ) => {
     const newSoal = [...formData.soal]
-    newSoal[questionIndex].jawaban[answerIndex].text = value
+    newSoal[questionIndex].jawaban[answerIndex].isCorrect = isCorrect
     setFormData({ ...formData, soal: newSoal })
   }
 
-  // Handle correct answer change
-  const handleCorrectAnswerChange = (questionIndex: any, answerIndex: any) => {
-    const newSoal = [...formData.soal]
-    newSoal[questionIndex].jawaban.forEach((answer, idx) => {
-      answer.isCorrect = idx === answerIndex
-    })
-    setFormData({ ...formData, soal: newSoal })
-  }
-
-  // Handle form submit
-  const handleSubmit = async () => {
+  // Handle file uploads
+  const handleImageUpload = async (
+    file: File,
+    type: 'question' | 'answer',
+    questionIndex: number,
+    answerIndex?: number
+  ) => {
     try {
-      const payload = {
-        mataPelajaranId: formData.mataPelajaran,
-        kelasId: formData.kelas,
-        jurusanId: formData.jurusan,
-        semester: formData.semester,
-        tanggalUjian: formData.tanggalUjian,
-        jamUjian: formData.jamUjian,
-        durasiUjian: parseInt(formData.durasiUjian),
-        guruId: state.profile?.kode,
-        soal: formData.soal,
-      }
+      const formDatas = new FormData()
+      formDatas.append('file', file)
 
-      await createCours(payload)
-      toast.success('Soal ujian berhasil disimpan')
-      setShowFormCreate(false)
-
-      // Reset form
-      setFormData({
-        mataPelajaran: '',
-        kelas: '',
-        jurusan: '',
-        guru: '',
-        semester: '',
-        tanggalUjian: '',
-        durasiUjian: '',
-        jamUjian: '',
-        soal: [
-          {
-            pertanyaan: 'Jawab pertanyaan dibawah ini dengan benar',
-            jawaban: [
-              { text: 'Jawaban A benar', isCorrect: false },
-              { text: 'Jawaban B benar', isCorrect: true },
-              { text: 'Jawaban C benar', isCorrect: false },
-              { text: 'Jawaban D benar', isCorrect: false },
-            ],
-          },
-        ],
+      const response = await fetch('/api/upload/image', {
+        method: 'POST',
+        body: formDatas,
       })
-      refetch()
-    } catch (error) {
-      console.log(error)
 
-      // toast.error(error)
+      const result = await response.json()
+
+      if (result.success) {
+        const newSoal = [...formData.soal]
+        if (type === 'question') {
+          newSoal[questionIndex].imageUrl = result.url
+        } else if (type === 'answer' && answerIndex !== undefined) {
+          newSoal[questionIndex].jawaban[answerIndex].imageUrl = result.url
+        }
+        setFormData({ ...formData, soal: newSoal })
+        toast.success('Gambar berhasil diupload')
+      }
+    } catch (error) {
+      toast.error('Gagal upload gambar')
     }
   }
 
-  // Handle delete
-  const handleDelete = () => {
-    // Filter out the deleted item
-    const newList = bankSoalList.results.filter(
-      (item: any) => item.id !== selectedItem?.id
-    )
-    setBankSoalList({
-      results: newList,
-      total: bankSoalList.total - 1,
-    })
-    setShowDeleteConfirm(false)
-    setSelectedItem(undefined)
-    toast.success('Soal ujian berhasil dihapus')
+  const handleAudioUpload = async (
+    file: File,
+    type: 'question' | 'answer',
+    questionIndex: number,
+    answerIndex?: number
+  ) => {
+    try {
+      const formDatas = new FormData()
+      formDatas.append('file', file)
+
+      const response = await fetch('/api/upload/audio', {
+        method: 'POST',
+        body: formDatas,
+      })
+
+      const result = await response.json()
+
+      if (result.success) {
+        const newSoal = [...formData.soal]
+        if (type === 'question') {
+          newSoal[questionIndex].audioUrl = result.url
+        } else if (type === 'answer' && answerIndex !== undefined) {
+          newSoal[questionIndex].jawaban[answerIndex].audioUrl = result.url
+        }
+        setFormData({ ...formData, soal: newSoal })
+        toast.success('Audio berhasil diupload')
+      }
+    } catch (error) {
+      toast.error('Gagal upload audio')
+    }
   }
 
-  // Fetch data when filters change
-  useEffect(() => {
-    // In a real app, you would fetch data based on filters
-    console.log('Fetching data...')
-  }, [page, size, search])
+  // Save as draft
+  // const saveAsDraft = async (data: any) => {
+  //   try {
+  //     const payload = {
+  //       ...data,
+  //       status: 'draft',
+  //       guruId: state.profile?.kode,
+  //     }
+  //     await createCours(payload)
+  //     toast.success('Draft berhasil disimpan')
+  //   } catch (error) {
+  //     console.error('Failed to save draft:', error)
+  //   }
+  // }
+
+  // Handle form submit
+  const handleSubmit = async (saveType: 'draft' | 'active' = 'active') => {
+    try {
+      const payload = {
+        ...formData,
+        mataPelajaranId: formData.mataPelajaran,
+        status: saveType,
+        guruId: state.profile?.kode,
+        classroomIds: formData.classroomIds,
+        coTeacherIds: formData.coTeacherIds,
+        passingScore: Number(formData.passingScore),
+        durasiUjian: Number(formData.durasiUjian),
+      }
+
+      await createCours(payload)
+      toast.success(
+        `Soal ujian berhasil ${saveType === 'draft' ? 'disimpan sebagai draft' : 'dipublikasi'}`
+      )
+      setShowFormCreate(false)
+      resetForm()
+      refetch()
+    } catch (error) {
+      toast.error('Gagal menyimpan soal ujian')
+    }
+  }
+
+  // Reset form
+  const resetForm = () => {
+    setFormData({
+      title: '',
+      description: '',
+      mataPelajaran: '',
+      classroomIds: [],
+      coTeacherIds: [],
+      semester: '',
+      tanggalUjian: '',
+      jamUjian: '',
+      durasiUjian: '',
+      randomizeQuestions: false,
+      randomizeAnswers: false,
+      requireAllAnswers: true,
+      showResults: true,
+      allowReview: false,
+      instructions: '',
+      passingScore: '',
+      soal: [],
+    })
+  }
+
+  // Import from Excel
+  const handleExcelImport = async (file: File) => {
+    try {
+      const formData = new FormData()
+      formData.append('file', file)
+
+      const response = await fetch('/api/question-bank/import-excel', {
+        method: 'POST',
+        body: formData,
+      })
+
+      const result = await response.json()
+
+      if (result.success) {
+        toast.success(`Berhasil import ${result.totalQuestions} soal`)
+        // refetch()
+      }
+    } catch (error) {
+      toast.error('Gagal import dari Excel')
+    }
+  }
+
+  // Download Excel template
+  const downloadExcelTemplate = () => {
+    const link = document.createElement('a')
+    link.href = '/templates/question-template.xlsx'
+    link.download = 'template-soal-ujian.xlsx'
+    link.click()
+  }
+
+  // Reopen exam
+  const handleReopenExam = async (examId: string, studentIds?: string[]) => {
+    try {
+      // await reopenExam(examId, studentIds)
+      toast.success('Ujian berhasil dibuka kembali')
+      setShowReopenDialog(false)
+      // refetch()
+    } catch (error) {
+      toast.error('Gagal membuka kembali ujian')
+    }
+  }
+
+  // Download participants
+  const handleDownloadParticipants = async (examId: string) => {
+    try {
+      const response = await fetch(`/api/question-bank/${examId}/participants`)
+      const blob = await response.blob()
+      const url = window.URL.createObjectURL(blob)
+      const link = document.createElement('a')
+      link.href = url
+      link.download = `participants_${examId}.xlsx`
+      link.click()
+      window.URL.revokeObjectURL(url)
+    } catch (error) {
+      toast.error('Gagal download data peserta')
+    }
+  }
 
   const columns = [
     {
-      label: 'Mata Pelajaran',
-      render: (item: any) => <Typography>{item.subject.nama}</Typography>,
-    },
-    {
-      label: 'Kelas',
-      render: (item: any) => <Typography>{item.classroom.nama}</Typography>,
-    },
-    {
-      label: 'Jurusan',
+      label: 'Judul',
       render: (item: any) => (
-        <Typography>{item.classroom.jurusans.nama}</Typography>
+        <Box>
+          <Typography fontWeight="bold">{item.title}</Typography>
+          <Typography variant="caption" color="text.secondary">
+            {item.description}
+          </Typography>
+          <Box sx={{ mt: 1 }}>
+            <Chip
+              size="small"
+              label={item.status}
+              color={item.status === 'active' ? 'success' : 'default'}
+            />
+          </Box>
+        </Box>
       ),
     },
     {
-      label: 'Nama Guru',
-      render: (item: any) => <Typography>{item.teacher.nama}</Typography>,
+      label: 'Mata Pelajaran',
+      render: (item: any) => <Typography>{item.subject?.nama}</Typography>,
     },
     {
-      label: 'Tanggal Ujian',
+      label: 'Kelas',
       render: (item: any) => (
-        <Typography>
-          {item.scheduledAt
-            ? new Date(item.scheduledAt).toLocaleDateString()
-            : '-'}
-        </Typography>
+        <Box>
+          {item.classrooms?.map((classroom: any) => (
+            <Chip
+              key={classroom.kode}
+              size="small"
+              label={classroom.nama}
+              sx={{ mr: 0.5, mb: 0.5 }}
+            />
+          ))}
+        </Box>
+      ),
+    },
+    {
+      label: 'Jadwal',
+      render: (item: any) => (
+        <Box>
+          <Typography variant="body2">
+            {item.scheduledAt
+              ? new Date(item.scheduledAt).toLocaleDateString('id-ID')
+              : '-'}
+          </Typography>
+          <Typography variant="caption" color="text.secondary">
+            {item.jamUjian} ({item.duration} menit)
+          </Typography>
+        </Box>
+      ),
+    },
+    {
+      label: 'Soal',
+      render: (item: any) => (
+        <Box>
+          <Typography>{item.totalQuestions} soal</Typography>
+          <Typography variant="caption" color="text.secondary">
+            {item.totalPoints} poin
+          </Typography>
+        </Box>
+      ),
+    },
+    {
+      label: 'Guru',
+      render: (item: any) => (
+        <Box>
+          <Typography>{item.teacher?.nama}</Typography>
+          {item.coTeacherIds?.length > 0 && (
+            <Typography variant="caption" color="text.secondary">
+              +{item.coTeacherIds.length} co-teacher
+            </Typography>
+          )}
+        </Box>
       ),
     },
     {
@@ -301,26 +546,74 @@ export default function BankSoalList() {
           menuList={
             <>
               <MenuItem
-                onClick={() => {
-                  navigate(`/dashboard/course/${item?.id}`)
-                }}
+                onClick={() => navigate(`/dashboard/course/${item?.id}`)}
               >
                 <ListItemIcon>
                   <Details />
                 </ListItemIcon>
                 <ListItemText>Detail</ListItemText>
               </MenuItem>
-              {/* <MenuItem
-                onClick={() => {
-                  setSelectedItem(item)
-                  setShowDeleteConfirm(true)
-                }}
-              >
-                <ListItemIcon>
-                  <Delete />
-                </ListItemIcon>
-                <ListItemText>Hapus</ListItemText>
-              </MenuItem> */}
+
+              {(state.isAdmin || state.isInstructor) && (
+                <>
+                  <MenuItem
+                    onClick={() => {
+                      setSelectedItem(item)
+                      setShowReopenDialog(true)
+                    }}
+                  >
+                    <ListItemIcon>
+                      <Replay />
+                    </ListItemIcon>
+                    <ListItemText>Buka Kembali</ListItemText>
+                  </MenuItem>
+
+                  <MenuItem onClick={() => handleDownloadParticipants(item.id)}>
+                    <ListItemIcon>
+                      <Download />
+                    </ListItemIcon>
+                    <ListItemText>Download Peserta</ListItemText>
+                  </MenuItem>
+
+                  <MenuItem
+                    onClick={() => {
+                      setSelectedItem(item)
+                      setShowAttendanceDialog(true)
+                    }}
+                  >
+                    <ListItemIcon>
+                      <People />
+                    </ListItemIcon>
+                    <ListItemText>Daftar Hadir</ListItemText>
+                  </MenuItem>
+
+                  <MenuItem
+                    onClick={() => {
+                      setSelectedItem(item)
+                      setShowOnlineStudents(true)
+                    }}
+                  >
+                    <ListItemIcon>
+                      <Visibility />
+                    </ListItemIcon>
+                    <ListItemText>Siswa Online</ListItemText>
+                  </MenuItem>
+                </>
+              )}
+
+              {item.status === 'draft' && (
+                <MenuItem
+                  onClick={() => {
+                    setSelectedItem(item)
+                    setShowDeleteConfirm(true)
+                  }}
+                >
+                  <ListItemIcon>
+                    <Delete />
+                  </ListItemIcon>
+                  <ListItemText>Hapus</ListItemText>
+                </MenuItem>
+              )}
             </>
           }
         />
@@ -329,7 +622,7 @@ export default function BankSoalList() {
   ]
 
   return (
-    <>
+    <MathJaxContext>
       <Stack sx={{ flex: 1 }}>
         <Commandbar
           title="Menu Bank Soal"
@@ -342,6 +635,22 @@ export default function BankSoalList() {
               <IconButton onClick={() => {}} sx={{ mr: isMobile ? 0 : 2 }}>
                 <Replay />
               </IconButton>
+
+              {state.isInstructor && (
+                <>
+                  <IconButton onClick={downloadExcelTemplate} sx={{ mr: 1 }}>
+                    <Download />
+                  </IconButton>
+
+                  <IconButton
+                    onClick={() => setShowUploadDialog(true)}
+                    sx={{ mr: 1 }}
+                  >
+                    <Upload />
+                  </IconButton>
+                </>
+              )}
+
               {state.isInstructor &&
                 (isMobile ? (
                   <IconButton
@@ -365,16 +674,6 @@ export default function BankSoalList() {
         />
 
         <Box sx={{ flex: 1, px: 2 }}>
-          <Box sx={{ my: 2 }}>
-            <Typography variant="h6" sx={{ mb: 1 }}>
-              MENU BANK SOAL
-            </Typography>
-            <Typography variant="body2" sx={{ mb: 2 }}>
-              Menu bank soal berisi informasi terkait dengan daftar soal ujian
-              yang sudah dibuat oleh guru dan menu untuk membuat soal ujian.
-            </Typography>
-          </Box>
-
           <DataTable
             data={courseList?.results}
             loading={!courseList}
@@ -394,237 +693,805 @@ export default function BankSoalList() {
         </Box>
       </Stack>
 
-      {/* Form untuk membuat soal */}
+      {/* Enhanced Form Dialog */}
       <Dialog
         open={showFormCreate}
         onClose={() => setShowFormCreate(false)}
-        maxWidth="md"
+        maxWidth="lg"
         fullWidth
+        fullScreen={isMobile}
       >
-        <DialogTitle>Buat Soal Ujian</DialogTitle>
-        <DialogContent>
-          <Grid container spacing={2} sx={{ mt: 1 }}>
-            <Grid item xs={12} md={6}>
-              <FormControl fullWidth size="small">
-                <InputLabel>Pilih mata pelajaran</InputLabel>
-                <Select
-                  value={formData.mataPelajaran}
-                  onChange={(e) =>
-                    handleFormChange('mataPelajaran', e.target.value)
-                  }
-                  label="Pilih mata pelajaran"
-                >
-                  {mataPelajaranOptions.map((option: any) => (
-                    <MenuItem key={option.kode} value={option.kode}>
-                      {option.nama}
-                    </MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
-            </Grid>
-            <Grid item xs={12} md={6}>
-              <FormControl fullWidth size="small">
-                <InputLabel>Semester</InputLabel>
-                <Select
-                  value={formData.semester}
-                  onChange={(e) => {
-                    handleFormChange('semester', e.target.value)
-                    GetMapmataapelajara(e.target.value)
-                  }}
-                  label="Semester"
-                >
-                  {semesterOptions.map((option) => (
-                    <MenuItem key={option} value={option}>
-                      {option}
-                    </MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
-            </Grid>
-            <Grid item xs={12} md={6}>
-              {formData.semester && (
-                <FormControl fullWidth size="small">
-                  <InputLabel>Pilih kelas</InputLabel>
-                  <Select
-                    value={formData.kelas}
-                    onChange={(e) => {
-                      const selectedKode = e.target.value
-                      const selectedOption = kelasOptions.find(
-                        (option: any) => option.kode === selectedKode
-                      )
-                      console.log(selectedOption)
+        <DialogTitle>
+          <Box
+            sx={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+            }}
+          >
+            <Typography variant="h6">Buat Soal Ujian</Typography>
+            <Box>
+              <Chip
+                label={isDraft ? 'Draft' : 'Aktif'}
+                color={isDraft ? 'default' : 'success'}
+                size="small"
+              />
+            </Box>
+          </Box>
+        </DialogTitle>
 
-                      if (selectedOption) {
-                        handleFormChange('kelas', selectedKode) // simpan kode ke form
-                        GetJurusanKelas(selectedOption.kodeKompetensikeahlian) // kirim kode_kompetensikeahlian
-                      }
-                    }}
-                    label="Pilih kelas"
+        <DialogContent>
+          <Tabs value={activeTab} onChange={(e, value) => setActiveTab(value)}>
+            <Tab label="Informasi Dasar" />
+            <Tab label="Pengaturan" />
+            <Tab label="Soal" />
+          </Tabs>
+
+          {/* Tab 1: Basic Information */}
+          {activeTab === 0 && (
+            <Grid container spacing={2} sx={{ mt: 1 }}>
+              <Grid item xs={12}>
+                <TextField
+                  fullWidth
+                  label="Judul Ujian"
+                  value={formData.title}
+                  onChange={(e) =>
+                    setFormData({ ...formData, title: e.target.value })
+                  }
+                  required
+                />
+              </Grid>
+
+              <Grid item xs={12}>
+                <TextField
+                  fullWidth
+                  label="Deskripsi"
+                  multiline
+                  rows={3}
+                  value={formData.description}
+                  onChange={(e) =>
+                    setFormData({ ...formData, description: e.target.value })
+                  }
+                />
+              </Grid>
+
+              <Grid item xs={12} md={6}>
+                <FormControl fullWidth>
+                  <InputLabel>Mata Pelajaran</InputLabel>
+                  <Select
+                    value={formData.mataPelajaran}
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        mataPelajaran: e.target.value,
+                      })
+                    }
+                    label="Mata Pelajaran"
                   >
-                    {kelasOptions.map((option: any) => (
+                    {mataPelajaranOptions.map((option: any) => (
                       <MenuItem key={option.kode} value={option.kode}>
                         {option.nama}
                       </MenuItem>
                     ))}
                   </Select>
                 </FormControl>
-              )}
-            </Grid>
-            <Grid item xs={12} md={6}>
-              {formData.kelas && (
-                <FormControl fullWidth size="small">
-                  <InputLabel>Pilih jurusan</InputLabel>
+              </Grid>
+
+              <Grid item xs={12} md={6}>
+                <FormControl fullWidth>
+                  <InputLabel>Semester</InputLabel>
+                  <Select
+                    value={formData.semester}
+                    onChange={(e) => {
+                      setFormData({ ...formData, semester: e.target.value })
+                      GetMapmataapelajara(e.target.value)
+                    }}
+                    label="Semester"
+                  >
+                    {semesterOptions.map((option: any) => (
+                      <MenuItem key={option} value={option}>
+                        Semester {option}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
+              </Grid>
+              <Grid item xs={12} md={6}>
+                <FormControl fullWidth>
+                  <InputLabel>Jurusan</InputLabel>
                   <Select
                     value={formData.jurusan}
                     onChange={(e) =>
-                      handleFormChange('jurusan', e.target.value)
+                      setFormData({ ...formData, jurusan: e.target.value })
                     }
-                    label="Pilih jurusan"
+                    label="jurusan"
                   >
-                    {jurusanOptions.map((option: any) => (
+                    {jurusansOptions.map((option: any) => (
                       <MenuItem key={option.kode} value={option.kode}>
                         {option.nama}
                       </MenuItem>
                     ))}
                   </Select>
                 </FormControl>
-              )}
-            </Grid>
+              </Grid>
 
-            {/* <Grid item xs={12} md={6}>
-              <FormControl fullWidth size="small">
-                <InputLabel>Soal</InputLabel>
-                <Select
-                  value={formData.soalType || 'Soal A'}
-                  onChange={(e) => handleFormChange('soalType', e.target.value)}
-                  label="Soal"
-                >
-                  {soalOptions.map((option) => (
-                    <MenuItem key={option} value={option}>
-                      {option}
-                    </MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
-            </Grid> */}
-            <Grid item xs={12} md={6}>
-              <TextField
-                fullWidth
-                label="Tanggal ujian"
-                type="date"
-                size="small"
-                value={formData.tanggalUjian}
-                onChange={(e) =>
-                  handleFormChange('tanggalUjian', e.target.value)
-                }
-                InputLabelProps={{ shrink: true }}
-              />
-            </Grid>
-            <Grid item xs={12} md={6}>
-              <TextField
-                fullWidth
-                label="Jam ujian"
-                type="time"
-                size="small"
-                value={formData.jamUjian}
-                onChange={(e) => handleFormChange('jamUjian', e.target.value)}
-                InputLabelProps={{ shrink: true }}
-              />
-            </Grid>
-            <Grid item xs={12} md={6}>
-              <FormControl fullWidth size="small">
-                <InputLabel>Durasi ujian</InputLabel>
-                <Select
+              <Grid item xs={12}>
+                <Autocomplete
+                  multiple
+                  options={kelasOptions}
+                  getOptionLabel={(option) => option.nama}
+                  value={formData.classroomIds
+                    .map((id: any) =>
+                      kelasOptions.find((k: any) => k.kode === id)
+                    )
+                    .filter(Boolean)}
+                  onChange={(e, newValue) => {
+                    setFormData({
+                      ...formData,
+                      classroomIds: newValue.map((v) => v.kode),
+                    })
+                  }}
+                  renderInput={(params) => (
+                    <TextField {...params} label="Pilih Kelas (Multiple)" />
+                  )}
+                />
+              </Grid>
+
+              {/* {state.isAdmin && (
+                <Grid item xs={12}>
+                  <Autocomplete
+                    multiple
+                    options={teacherOptions}
+                    getOptionLabel={(option) => option.nama}
+                    value={formData.coTeacherIds
+                      .map((id: any) =>
+                        teacherOptions.find((t: any) => t.kode === id)
+                      )
+                      .filter(Boolean)}
+                    onChange={(e, newValue) => {
+                      setFormData({
+                        ...formData,
+                        coTeacherIds: newValue.map((v) => v.kode),
+                      })
+                    }}
+                    renderInput={(params) => (
+                      <TextField {...params} label="Co-Teachers (Optional)" />
+                    )}
+                  />
+                </Grid>
+              )} */}
+
+              <Grid item xs={12} md={4}>
+                <TextField
+                  fullWidth
+                  label="Tanggal Ujian"
+                  type="date"
+                  value={formData.tanggalUjian}
+                  onChange={(e) =>
+                    setFormData({ ...formData, tanggalUjian: e.target.value })
+                  }
+                  InputLabelProps={{ shrink: true }}
+                />
+              </Grid>
+
+              <Grid item xs={12} md={4}>
+                <TextField
+                  fullWidth
+                  label="Jam Ujian"
+                  type="time"
+                  value={formData.jamUjian}
+                  onChange={(e) =>
+                    setFormData({ ...formData, jamUjian: e.target.value })
+                  }
+                  InputLabelProps={{ shrink: true }}
+                />
+              </Grid>
+
+              <Grid item xs={12} md={4}>
+                <TextField
+                  fullWidth
+                  label="Durasi (menit)"
+                  type="number"
                   value={formData.durasiUjian}
                   onChange={(e) =>
-                    handleFormChange('durasiUjian', e.target.value)
+                    setFormData({ ...formData, durasiUjian: e.target.value })
                   }
-                  label="Durasi ujian"
+                />
+              </Grid>
+            </Grid>
+          )}
+
+          {/* Tab 2: Settings */}
+          {activeTab === 1 && (
+            <Grid container spacing={2} sx={{ mt: 1 }}>
+              <Grid item xs={12}>
+                <TextField
+                  fullWidth
+                  label="Instruksi Ujian"
+                  multiline
+                  rows={4}
+                  value={formData.instructions}
+                  onChange={(e) =>
+                    setFormData({ ...formData, instructions: e.target.value })
+                  }
+                />
+              </Grid>
+
+              <Grid item xs={12} md={6}>
+                <TextField
+                  fullWidth
+                  label="Nilai Kelulusan (%)"
+                  type="number"
+                  value={formData.passingScore}
+                  onChange={(e) =>
+                    setFormData({ ...formData, passingScore: e.target.value })
+                  }
+                  inputProps={{ min: 0, max: 100 }}
+                />
+              </Grid>
+
+              <Grid item xs={12}>
+                <FormGroup>
+                  <FormControlLabel
+                    control={
+                      <Switch
+                        checked={formData.randomizeQuestions}
+                        onChange={(e) =>
+                          setFormData({
+                            ...formData,
+                            randomizeQuestions: e.target.checked,
+                          })
+                        }
+                      />
+                    }
+                    label="Acak Urutan Soal"
+                  />
+
+                  <FormControlLabel
+                    control={
+                      <Switch
+                        checked={formData.randomizeAnswers}
+                        onChange={(e) =>
+                          setFormData({
+                            ...formData,
+                            randomizeAnswers: e.target.checked,
+                          })
+                        }
+                      />
+                    }
+                    label="Acak Urutan Jawaban"
+                  />
+
+                  <FormControlLabel
+                    control={
+                      <Switch
+                        checked={formData.requireAllAnswers}
+                        onChange={(e) =>
+                          setFormData({
+                            ...formData,
+                            requireAllAnswers: e.target.checked,
+                          })
+                        }
+                      />
+                    }
+                    label="Wajib Jawab Semua Soal"
+                  />
+
+                  <FormControlLabel
+                    control={
+                      <Switch
+                        checked={formData.showResults}
+                        onChange={(e) =>
+                          setFormData({
+                            ...formData,
+                            showResults: e.target.checked,
+                          })
+                        }
+                      />
+                    }
+                    label="Tampilkan Hasil ke Siswa"
+                  />
+
+                  <FormControlLabel
+                    control={
+                      <Switch
+                        checked={formData.allowReview}
+                        onChange={(e) =>
+                          setFormData({
+                            ...formData,
+                            allowReview: e.target.checked,
+                          })
+                        }
+                      />
+                    }
+                    label="Izinkan Review Jawaban"
+                  />
+                </FormGroup>
+              </Grid>
+            </Grid>
+          )}
+
+          {/* Tab 3: Questions */}
+          {activeTab === 2 && (
+            <Box sx={{ mt: 2 }}>
+              {formData.soal.map((soal: any, soalIndex: any) => (
+                <Card key={soalIndex} sx={{ mb: 3 }}>
+                  <CardContent>
+                    <Box
+                      sx={{
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        alignItems: 'center',
+                        mb: 2,
+                      }}
+                    >
+                      <Typography variant="h6">Soal {soalIndex + 1}</Typography>
+                      <Box>
+                        <IconButton
+                          color="error"
+                          onClick={() => removeQuestion(soalIndex)}
+                          size="small"
+                        >
+                          <Delete />
+                        </IconButton>
+                      </Box>
+                    </Box>
+
+                    <Grid container spacing={2}>
+                      <Grid item xs={12} md={6}>
+                        <FormControl fullWidth size="small">
+                          <InputLabel>Tipe Soal</InputLabel>
+                          <Select
+                            value={soal.type || QuestionType.MULTIPLE_CHOICE}
+                            onChange={(e) =>
+                              handleQuestionTypeChange(
+                                soalIndex,
+                                e.target.value as QuestionType
+                              )
+                            }
+                            label="Tipe Soal"
+                          >
+                            {Object.entries(questionTypeLabels).map(
+                              ([value, label]) => (
+                                <MenuItem key={value} value={value}>
+                                  {label}
+                                </MenuItem>
+                              )
+                            )}
+                          </Select>
+                        </FormControl>
+                      </Grid>
+
+                      <Grid item xs={12} md={3}>
+                        <TextField
+                          fullWidth
+                          label="Poin"
+                          type="number"
+                          size="small"
+                          value={soal.points || 1}
+                          onChange={(e) => {
+                            const newSoal = [...formData.soal]
+                            newSoal[soalIndex].points =
+                              parseInt(e.target.value) || 1
+                            setFormData({ ...formData, soal: newSoal })
+                          }}
+                          inputProps={{ min: 1 }}
+                        />
+                      </Grid>
+
+                      <Grid item xs={12}>
+                        <TextField
+                          fullWidth
+                          label="Pertanyaan"
+                          multiline
+                          rows={3}
+                          value={soal.pertanyaan}
+                          onChange={(e) => {
+                            const newSoal = [...formData.soal]
+                            newSoal[soalIndex].pertanyaan = e.target.value
+                            setFormData({ ...formData, soal: newSoal })
+                          }}
+                        />
+                      </Grid>
+
+                      {/* Media Upload for Question */}
+                      <Grid item xs={12}>
+                        <Box sx={{ display: 'flex', gap: 1 }}>
+                          <Button
+                            variant="outlined"
+                            size="small"
+                            startIcon={<Image />}
+                            component="label"
+                          >
+                            Upload Gambar
+                            <input
+                              hidden
+                              accept="image/*"
+                              type="file"
+                              onChange={(e) => {
+                                const file = e.target.files?.[0]
+                                if (file)
+                                  handleImageUpload(file, 'question', soalIndex)
+                              }}
+                            />
+                          </Button>
+
+                          <Button
+                            variant="outlined"
+                            size="small"
+                            startIcon={<AudioFile />}
+                            component="label"
+                          >
+                            Upload Audio
+                            <input
+                              hidden
+                              accept="audio/*"
+                              type="file"
+                              onChange={(e) => {
+                                const file = e.target.files?.[0]
+                                if (file)
+                                  handleAudioUpload(file, 'question', soalIndex)
+                              }}
+                            />
+                          </Button>
+                        </Box>
+
+                        {soal.imageUrl && (
+                          <Box sx={{ mt: 1 }}>
+                            <img
+                              src={soal.imageUrl}
+                              alt="Question"
+                              style={{ maxWidth: 200, height: 'auto' }}
+                            />
+                          </Box>
+                        )}
+
+                        {soal.audioUrl && (
+                          <Box sx={{ mt: 1 }}>
+                            <audio controls src={soal.audioUrl} />
+                          </Box>
+                        )}
+                      </Grid>
+
+                      {/* Math Equation */}
+                      <Grid item xs={12}>
+                        <TextField
+                          fullWidth
+                          label="Rumus Matematika (LaTeX)"
+                          value={soal.equation || ''}
+                          onChange={(e) => {
+                            const newSoal = [...formData.soal]
+                            newSoal[soalIndex].equation = e.target.value
+                            setFormData({ ...formData, soal: newSoal })
+                          }}
+                          placeholder="Contoh: x = \frac{-b \pm \sqrt{b^2-4ac}}{2a}"
+                        />
+                        {soal.equation && (
+                          <Box
+                            sx={{
+                              mt: 1,
+                              p: 1,
+                              border: '1px solid #ccc',
+                              borderRadius: 1,
+                            }}
+                          >
+                            <MathJax>{`$$${soal.equation}$$`}</MathJax>
+                          </Box>
+                        )}
+                      </Grid>
+
+                      {/* Essay Keywords */}
+                      {soal.type === QuestionType.ESSAY && (
+                        <Grid item xs={12}>
+                          <TextField
+                            fullWidth
+                            label="Kata Kunci (pisahkan dengan koma)"
+                            value={soal.keywords?.join(', ') || ''}
+                            onChange={(e) => {
+                              const newSoal = [...formData.soal]
+                              newSoal[soalIndex].keywords = e.target.value
+                                .split(',')
+                                .map((k) => k.trim())
+                              setFormData({ ...formData, soal: newSoal })
+                            }}
+                            helperText="Masukkan kata kunci yang harus ada dalam jawaban siswa"
+                          />
+                        </Grid>
+                      )}
+
+                      {/* Answers for non-essay questions */}
+                      {soal.type !== QuestionType.ESSAY && (
+                        <Grid item xs={12}>
+                          <Typography variant="subtitle2" sx={{ mb: 1 }}>
+                            Pilihan Jawaban:
+                          </Typography>
+
+                          {soal.type ===
+                          QuestionType.COMPLEX_MULTIPLE_CHOICE ? (
+                            // Complex Multiple Choice (checkboxes)
+                            <FormGroup>
+                              {soal.jawaban.map(
+                                (jawaban: any, jawabanIndex: any) => (
+                                  <Box
+                                    key={jawabanIndex}
+                                    sx={{
+                                      display: 'flex',
+                                      alignItems: 'center',
+                                      mb: 1,
+                                    }}
+                                  >
+                                    <FormControlLabel
+                                      control={
+                                        <Checkbox
+                                          checked={jawaban.isCorrect}
+                                          onChange={(e) =>
+                                            handleComplexAnswerChange(
+                                              soalIndex,
+                                              jawabanIndex,
+                                              e.target.checked
+                                            )
+                                          }
+                                        />
+                                      }
+                                      label={`${String.fromCharCode(65 + jawabanIndex)}.`}
+                                    />
+                                    <TextField
+                                      fullWidth
+                                      size="small"
+                                      value={jawaban.text}
+                                      onChange={(e) => {
+                                        const newSoal = [...formData.soal]
+                                        newSoal[soalIndex].jawaban[
+                                          jawabanIndex
+                                        ].text = e.target.value
+                                        setFormData({
+                                          ...formData,
+                                          soal: newSoal,
+                                        })
+                                      }}
+                                    />
+                                    <Button
+                                      size="small"
+                                      startIcon={<Image />}
+                                      component="label"
+                                      sx={{ ml: 1 }}
+                                    >
+                                      <input
+                                        hidden
+                                        accept="image/*"
+                                        type="file"
+                                        onChange={(e) => {
+                                          const file = e.target.files?.[0]
+                                          if (file)
+                                            handleImageUpload(
+                                              file,
+                                              'answer',
+                                              soalIndex,
+                                              jawabanIndex
+                                            )
+                                        }}
+                                      />
+                                    </Button>
+                                  </Box>
+                                )
+                              )}
+                            </FormGroup>
+                          ) : (
+                            // Regular Multiple Choice and True/False (radio buttons)
+                            <RadioGroup
+                              value={soal.jawaban.findIndex(
+                                (ans: any) => ans.isCorrect
+                              )}
+                              onChange={(e) => {
+                                const newSoal = [...formData.soal]
+                                newSoal[soalIndex].jawaban.forEach(
+                                  (answer: any, idx: any) => {
+                                    answer.isCorrect =
+                                      idx === parseInt(e.target.value)
+                                  }
+                                )
+                                setFormData({ ...formData, soal: newSoal })
+                              }}
+                            >
+                              {soal.jawaban.map(
+                                (jawaban: any, jawabanIndex: any) => (
+                                  <Box
+                                    key={jawabanIndex}
+                                    sx={{
+                                      display: 'flex',
+                                      alignItems: 'center',
+                                      mb: 1,
+                                    }}
+                                  >
+                                    <FormControlLabel
+                                      value={jawabanIndex}
+                                      control={<Radio />}
+                                      label={`${String.fromCharCode(65 + jawabanIndex)}.`}
+                                    />
+                                    <TextField
+                                      fullWidth
+                                      size="small"
+                                      value={jawaban.text}
+                                      onChange={(e) => {
+                                        const newSoal = [...formData.soal]
+                                        newSoal[soalIndex].jawaban[
+                                          jawabanIndex
+                                        ].text = e.target.value
+                                        setFormData({
+                                          ...formData,
+                                          soal: newSoal,
+                                        })
+                                      }}
+                                      disabled={
+                                        soal.type === QuestionType.TRUE_FALSE
+                                      }
+                                    />
+                                    {soal.type !== QuestionType.TRUE_FALSE && (
+                                      <Button
+                                        size="small"
+                                        startIcon={<Image />}
+                                        component="label"
+                                        sx={{ ml: 1 }}
+                                      >
+                                        <input
+                                          hidden
+                                          accept="image/*"
+                                          type="file"
+                                          onChange={(e) => {
+                                            const file = e.target.files?.[0]
+                                            if (file)
+                                              handleImageUpload(
+                                                file,
+                                                'answer',
+                                                soalIndex,
+                                                jawabanIndex
+                                              )
+                                          }}
+                                        />
+                                      </Button>
+                                    )}
+                                  </Box>
+                                )
+                              )}
+                            </RadioGroup>
+                          )}
+                        </Grid>
+                      )}
+
+                      {/* Explanation */}
+                      <Grid item xs={12}>
+                        <TextField
+                          fullWidth
+                          label="Penjelasan (Optional)"
+                          multiline
+                          rows={2}
+                          value={soal.explanation || ''}
+                          onChange={(e) => {
+                            const newSoal = [...formData.soal]
+                            newSoal[soalIndex].explanation = e.target.value
+                            setFormData({ ...formData, soal: newSoal })
+                          }}
+                        />
+                      </Grid>
+                    </Grid>
+                  </CardContent>
+                </Card>
+              ))}
+
+              {/* Add Question Button - Moved to bottom */}
+              <Box sx={{ display: 'flex', justifyContent: 'center', mt: 2 }}>
+                <Button
+                  variant="outlined"
+                  startIcon={<Add />}
+                  onClick={addQuestion}
+                  size="large"
                 >
-                  {durasiOptions.map((option) => (
-                    <MenuItem key={option} value={option}>
-                      {option}
-                    </MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
-            </Grid>
-            <Grid item xs={12} md={6}>
-              <Button
-                variant="outlined"
-                startIcon={<Add />}
-                onClick={addQuestion}
-                fullWidth
-                sx={{ height: '40px' }}
-              >
-                Tambah soal
-              </Button>
-            </Grid>
-          </Grid>
-
-          <Divider sx={{ my: 3 }} />
-
-          {formData.soal.map((soal, soalIndex) => (
-            <Box
-              key={soalIndex}
-              sx={{ mb: 4, p: 2, border: '1px solid #e0e0e0', borderRadius: 1 }}
-            >
-              <Typography variant="subtitle2" sx={{ mb: 1 }}>
-                {soalIndex + 1}. Jawab pertanyaan dibawah ini dengan benar
-              </Typography>
-              <TextField
-                fullWidth
-                multiline
-                rows={2}
-                size="small"
-                value={soal.pertanyaan}
-                onChange={(e) =>
-                  handleQuestionChange(soalIndex, e.target.value)
-                }
-                sx={{ mb: 2 }}
-              />
-
-              <RadioGroup
-                value={soal.jawaban.findIndex((ans) => ans.isCorrect)}
-                onChange={(e) =>
-                  handleCorrectAnswerChange(soalIndex, parseInt(e.target.value))
-                }
-              >
-                {soal.jawaban.map((jawaban, jawabanIndex) => (
-                  <Box
-                    key={jawabanIndex}
-                    sx={{ display: 'flex', alignItems: 'center', mb: 1 }}
-                  >
-                    <FormControlLabel
-                      value={jawabanIndex}
-                      control={<Radio />}
-                      label={`${String.fromCharCode(65 + jawabanIndex)}.`}
-                    />
-                    <TextField
-                      fullWidth
-                      size="small"
-                      value={jawaban.text}
-                      onChange={(e) =>
-                        handleAnswerChange(
-                          soalIndex,
-                          jawabanIndex,
-                          e.target.value
-                        )
-                      }
-                    />
-                  </Box>
-                ))}
-              </RadioGroup>
+                  Tambah Soal
+                </Button>
+              </Box>
             </Box>
-          ))}
+          )}
         </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setShowFormCreate(false)}>Batalkan</Button>
-          <Button onClick={handleSubmit} variant="contained" color="primary">
-            Simpan soal ujian
+
+        <DialogActions sx={{ p: 2 }}>
+          <Button onClick={() => setShowFormCreate(false)}>Batal</Button>
+          <Button
+            onClick={() => handleSubmit('draft')}
+            variant="outlined"
+            startIcon={<Drafts />}
+          >
+            Simpan Draft
+          </Button>
+          <Button
+            onClick={() => handleSubmit('active')}
+            variant="contained"
+            color="primary"
+            startIcon={<Save />}
+          >
+            Publikasi
           </Button>
         </DialogActions>
       </Dialog>
+
+      {/* Upload Excel Dialog */}
+      <Dialog
+        open={showUploadDialog}
+        onClose={() => setShowUploadDialog(false)}
+      >
+        <DialogTitle>Import Soal dari Excel</DialogTitle>
+        <DialogContent>
+          <Box sx={{ p: 2 }}>
+            <Alert severity="info" sx={{ mb: 2 }}>
+              Download template Excel terlebih dahulu, lalu isi soal sesuai
+              format yang disediakan.
+            </Alert>
+            <Button
+              variant="outlined"
+              onClick={downloadExcelTemplate}
+              sx={{ mb: 2 }}
+              fullWidth
+            >
+              Download Template Excel
+            </Button>
+            <Button variant="contained" component="label" fullWidth>
+              Upload File Excel
+              <input
+                hidden
+                accept=".xlsx,.xls"
+                type="file"
+                onChange={(e) => {
+                  const file = e.target.files?.[0]
+                  if (file) {
+                    handleExcelImport(file)
+                    setShowUploadDialog(false)
+                  }
+                }}
+              />
+            </Button>
+          </Box>
+        </DialogContent>
+      </Dialog>
+
+      {/* Reopen Exam Dialog */}
+      <Dialog
+        open={showReopenDialog}
+        onClose={() => setShowReopenDialog(false)}
+      >
+        <DialogTitle>Buka Kembali Ujian</DialogTitle>
+        <DialogContent>
+          <Typography sx={{ mb: 2 }}>
+            Apakah Anda yakin ingin membuka kembali ujian "{selectedItem?.title}
+            "?
+          </Typography>
+          <Alert severity="warning">
+            Siswa yang sudah submit akan bisa mengerjakan ujian dari awal.
+          </Alert>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setShowReopenDialog(false)}>Batal</Button>
+          <Button
+            onClick={() => handleReopenExam(selectedItem?.id)}
+            variant="contained"
+            color="warning"
+          >
+            Buka Kembali
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Online Students Dialog */}
+      <OnlineStudentsDialog
+        open={showOnlineStudents}
+        onClose={() => setShowOnlineStudents(false)}
+        examId={selectedItem?.id}
+      />
+
+      {/* Attendance Dialog */}
+      <AttendanceDialog
+        open={showAttendanceDialog}
+        onClose={() => setShowAttendanceDialog(false)}
+        examId={selectedItem?.id}
+      />
 
       <DialogConfirm
         open={showDeleteConfirm}
@@ -633,9 +1500,13 @@ export default function BankSoalList() {
           setSelectedItem(undefined)
         }}
         title="Hapus Soal"
-        content={`Yakin menghapus soal ujian ini?`}
-        onSubmit={handleDelete}
+        content={`Yakin menghapus soal ujian "${selectedItem?.title}"?`}
+        onSubmit={() => {
+          // Handle delete
+          setShowDeleteConfirm(false)
+          toast.success('Soal ujian berhasil dihapus')
+        }}
       />
-    </>
+    </MathJaxContext>
   )
 }

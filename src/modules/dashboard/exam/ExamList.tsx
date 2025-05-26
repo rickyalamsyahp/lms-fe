@@ -1,11 +1,12 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-// BankSoalList.jsx
 'use client'
 
-import { Replay } from '@mui/icons-material'
+import { Info, Replay } from '@mui/icons-material'
 import {
+  Alert,
   Box,
   Button,
+  Chip,
   Dialog,
   DialogActions,
   DialogContent,
@@ -14,161 +15,230 @@ import {
   Stack,
   Typography,
 } from '@mui/material'
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import Commandbar from '../../../components/shared/Commandbar'
 import DataTable from '../../../components/shared/DataTable'
 import { useSession } from '../../../context/session'
+import ExamCard from './__components/ExamCard'
 import { useCourseList } from './__shared/api'
 
-export default function ExamList() {
+export default function EnhancedExamList() {
   const navigate = useNavigate()
   const { isMobile, state } = useSession()
   const [page, setPage] = useState(1)
   const [size, setSize] = useState(10)
   const [search, setSearch] = useState('')
-  const [showFormCreate, setShowFormCreate] = useState(false)
-  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
-  const [selectedItem, setSelectedItem] = useState<any>(undefined)
-  const [openTimeWarning, setOpenTimeWarning] = useState(false)
-  const [isExamStarted, setIsExamStarted] = useState(false)
-  const { data: courseList, mutate: refetch } = useCourseList({
-    page: 1,
-    size: 50,
+  const [selectedExam, setSelectedExam] = useState<any>(null)
+  const [showExamInfo, setShowExamInfo] = useState(false)
+
+  const { data: examList, mutate: refetch } = useCourseList({
+    page,
+    size,
     kodeKelas: state.profile?.kodeKelas,
     studentId: state.profile?.nis,
-    // order: 'asc',
-    // orderBy: 'level',
-    // 'published:eq': true,
   })
 
-  // Fetch data when filters change
-  useEffect(() => {
-    // In a real app, you would fetch data based on filters
-    console.log('Fetching data...')
-  }, [page, size, search])
+  const checkExamAvailability = (exam: any) => {
+    const now = new Date()
+    const examDate = new Date(exam.scheduledAt)
+    const [hours, minutes] = exam.jamUjian.split(':').map(Number)
+    examDate.setHours(hours, minutes, 0, 0)
 
-  // Function to check if the current time matches the scheduled exam time
-  const checkExamTime = (exam: any) => {
-    // Get current date and time
-    const currentTime = new Date()
+    const timeDiff = examDate.getTime() - now.getTime()
+    const minutesDiff = Math.floor(timeDiff / (1000 * 60))
 
-    // Check if the exam has scheduledAt and jamUjian properties
-    if (exam?.scheduledAt) {
-      const scheduledTime = new Date(exam.scheduledAt)
-
-      // If jamUjian exists and needs to be compared as well
-      if (exam?.jamUjian) {
-        // Extract hours and minutes from jamUjian (assuming format like "08:00")
-        const [hours, minutes] = exam.jamUjian.split(':').map(Number)
-
-        // Check if current time matches scheduled date and time
-        const sameDate =
-          currentTime.getDate() === scheduledTime.getDate() &&
-          currentTime.getMonth() === scheduledTime.getMonth() &&
-          currentTime.getFullYear() === scheduledTime.getFullYear()
-
-        // Check if the current time matches the hour and minute
-        const sameTime =
-          currentTime.getHours() === hours &&
-          currentTime.getMinutes() === minutes
-
-        return sameDate && sameTime
-      }
-
-      // If only scheduledAt needs to be compared
-      return currentTime.getTime() === scheduledTime.getTime()
+    return {
+      canStart: timeDiff <= 0 && timeDiff > -(exam.duration * 60 * 1000),
+      timeUntilStart: minutesDiff > 0 ? minutesDiff : 0,
+      isExpired: timeDiff < -(exam.duration * 60 * 1000),
     }
-
-    // If no scheduled time is set, allow the exam to start
-    return true
   }
 
-  // Handle exam start
+  const getExamStatus = (exam: any) => {
+    if (
+      exam.result?.status === 'submitted' ||
+      exam.result?.status === 'auto_submitted'
+    ) {
+      return { label: 'Selesai', color: 'success' as const }
+    }
+    if (exam.result?.status === 'in_progress') {
+      return { label: 'Sedang Berlangsung', color: 'warning' as const }
+    }
+    if (exam.result?.status === 'reopened') {
+      return { label: 'Dibuka Kembali', color: 'info' as const }
+    }
+
+    const availability = checkExamAvailability(exam)
+    if (availability.isExpired) {
+      return { label: 'Berakhir', color: 'error' as const }
+    }
+    if (availability.canStart) {
+      return { label: 'Dapat Dimulai', color: 'success' as const }
+    }
+    if (availability.timeUntilStart > 0) {
+      return {
+        label: `${availability.timeUntilStart} menit lagi`,
+        color: 'default' as const,
+      }
+    }
+
+    return { label: 'Menunggu', color: 'default' as const }
+  }
+
   const handleStartExam = async (exam: any) => {
-    // try {
-    //   if (checkExamTime(exam)) {
-    //     // 1. Masuk ke fullscreen
-    //     // if (document.documentElement.requestFullscreen) {
-    //     //   await document.documentElement.requestFullscreen()
-    //     // }
-    //     navigate(`/dashboard/exam/${exam?.id}`)
-    //   } else {
-    //     setSelectedItem(exam)
-    //     setOpenTimeWarning(true)
-    //   }
-    // } catch (error) {
-    //   console.error('Gagal masuk fullscreen:', error)
-    // }
-    navigate(`/dashboard/exam/${exam?.id}`)
+    const availability = checkExamAvailability(exam)
+    // console.log(availability)
+
+    if (!availability.canStart && exam.result?.status !== 'reopened') {
+      setSelectedExam(exam)
+      setShowExamInfo(true)
+      return
+    }
+
+    try {
+      // Try to enter fullscreen
+      if (document.documentElement.requestFullscreen) {
+        await document.documentElement.requestFullscreen()
+      }
+
+      navigate(`/dashboard/exam/${exam.id}`)
+    } catch (error) {
+      console.error('Failed to enter fullscreen:', error)
+      navigate(`/dashboard/exam/${exam.id}`)
+    }
   }
 
   const columns = [
     {
-      label: 'Mata Pelajaran',
-      render: (item: any) => <Typography>{item.subject?.nama}</Typography>,
-    },
-    {
-      label: 'Kelas',
-      render: (item: any) => <Typography>{item.classroom?.nama}</Typography>,
-    },
-    {
-      label: 'Jurusan',
+      label: 'Ujian',
       render: (item: any) => (
-        <Typography>{item.classroom?.jurusans?.nama}</Typography>
+        <Box>
+          <Typography fontWeight="bold">{item.title}</Typography>
+          <Typography variant="body2" color="text.secondary">
+            {item.subject?.nama}
+          </Typography>
+          <Typography variant="caption" color="text.secondary">
+            {item.description}
+          </Typography>
+        </Box>
       ),
     },
     {
-      label: 'Tanggal Ujian',
+      label: 'Jadwal',
       render: (item: any) => (
-        <Typography>
-          {item.scheduledAt
-            ? new Date(item.scheduledAt).toLocaleDateString()
-            : '-'}
-        </Typography>
+        <Box>
+          <Typography variant="body2">
+            {new Date(item.scheduledAt).toLocaleDateString('id-ID', {
+              weekday: 'long',
+              year: 'numeric',
+              month: 'long',
+              day: 'numeric',
+            })}
+          </Typography>
+          <Typography variant="body2" color="primary">
+            {item.jamUjian} WIB
+          </Typography>
+          <Typography variant="caption" color="text.secondary">
+            Durasi: {item.duration} menit
+          </Typography>
+        </Box>
       ),
     },
     {
-      label: 'Jam Ujian',
-      render: (item: any) => <Typography>{item.jamUjian || '-'}</Typography>,
-    },
-    {
-      label: 'Durasi',
+      label: 'Info',
       render: (item: any) => (
-        <Typography>{item.duration || '-'} Menit</Typography>
+        <Box>
+          <Typography variant="body2">
+            {item.totalQuestions} soal • {item.totalPoints} poin
+          </Typography>
+          <Typography variant="caption" color="text.secondary">
+            {item.teacher?.nama}
+          </Typography>
+          {item.passingScore && (
+            <Typography
+              variant="caption"
+              display="block"
+              color="text.secondary"
+            >
+              KKM: {item.passingScore}%
+            </Typography>
+          )}
+        </Box>
       ),
     },
     {
-      label: 'Nama Guru',
-      render: (item: any) => <Typography>{item.teacher?.nama}</Typography>,
+      label: 'Status',
+      render: (item: any) => {
+        const status = getExamStatus(item)
+        return (
+          <Box>
+            <Chip label={status.label} color={status.color} size="small" />
+            {item.result?.score !== undefined && (
+              <Typography variant="body2" sx={{ mt: 1 }}>
+                Nilai: {item.result.score}/{item.result.totalPoints}
+              </Typography>
+            )}
+          </Box>
+        )
+      },
     },
     {
       label: 'Aksi',
-      render: (item: any) => (
-        <Stack direction="row" spacing={1}>
-          {item.result !== null ? (
+      render: (item: any) => {
+        const status = getExamStatus(item)
+        const availability = checkExamAvailability(item)
+        console.log(status)
+        return (
+          <Stack direction="row" spacing={1}>
             <Button
-              variant="contained"
-              color="primary"
               size="small"
-              // onClick={() => handleStartExam(item)}
-              disabled={true}
+              startIcon={<Info />}
+              onClick={() => {
+                setSelectedExam(item)
+                setShowExamInfo(true)
+              }}
             >
-              Sudah Ujian
+              Info
             </Button>
-          ) : (
+
+            {(status.label === 'Dapat Dimulai' ||
+              item.result?.status === 'reopened') && (
+              <Button
+                variant="contained"
+                color="primary"
+                size="small"
+                onClick={() => handleStartExam(item)}
+              >
+                {item.result?.status === 'reopened'
+                  ? 'Lanjut Ujian'
+                  : 'Mulai Ujian'}
+              </Button>
+            )}
+
             <Button
               variant="contained"
               color="primary"
               size="small"
               onClick={() => handleStartExam(item)}
-              // disabled={item.result !== null ? true : false}
             >
-              Mulai Ujian
+              {item.result?.status === 'reopened'
+                ? 'Lanjut Ujian'
+                : 'Mulai Ujian'}
             </Button>
-          )}
-        </Stack>
-      ),
+
+            {status.label === 'Selesai' && item.allowReview && (
+              <Button
+                variant="outlined"
+                size="small"
+                onClick={() => navigate(`/dashboard/exam/${item.id}/review`)}
+              >
+                Review
+              </Button>
+            )}
+          </Stack>
+        )
+      },
     },
   ]
 
@@ -179,86 +249,131 @@ export default function ExamList() {
           title="Menu Ujian"
           searchProps={{
             onSearch: (newSearch) => setSearch(newSearch),
-            placeholder: 'Pencarian...',
+            placeholder: 'Cari ujian...',
           }}
           rightAddon={
-            <>
-              <IconButton
-                onClick={() => refetch()}
-                sx={{ mr: isMobile ? 0 : 2 }}
-              >
-                <Replay />
-              </IconButton>
-            </>
+            <IconButton onClick={() => refetch()} sx={{ mr: isMobile ? 0 : 2 }}>
+              <Replay />
+            </IconButton>
           }
         />
 
         <Box sx={{ flex: 1, px: 2 }}>
           <Box sx={{ my: 2 }}>
             <Typography variant="h6" sx={{ mb: 1 }}>
-              MENU UJIAN
+              DAFTAR UJIAN
             </Typography>
             <Typography variant="body2" sx={{ mb: 2 }}>
-              Menu ujian berisi informasi terkait dengan daftar ujian yang akan
-              dilakukan oleh siswa.
+              Berikut adalah daftar ujian yang tersedia untuk Anda.
             </Typography>
           </Box>
 
-          <DataTable
-            data={courseList?.results}
-            loading={!courseList}
-            columns={columns}
-            paginationProps={{
-              rowsPerPageOptions: [10, 25, 50],
-              rowsPerPage: size,
-              count: Number(courseList?.total || 0),
-              page,
-              onPageChange: (e, value) => setPage(value + 1),
-              onRowsPerPageChange: (e) => {
-                setSize(Number(e.target.value))
-                setPage(1)
-              },
-            }}
-          />
+          {isMobile ? (
+            <Stack spacing={2}>
+              {examList?.results?.map((exam: any) => (
+                <ExamCard
+                  key={exam.id}
+                  exam={exam}
+                  onStartExam={handleStartExam}
+                />
+              ))}
+            </Stack>
+          ) : (
+            <DataTable
+              data={examList?.results}
+              loading={!examList}
+              columns={columns}
+              paginationProps={{
+                rowsPerPageOptions: [10, 25, 50],
+                rowsPerPage: size,
+                count: Number(examList?.total || 0),
+                page,
+                onPageChange: (e, value) => setPage(value + 1),
+                onRowsPerPageChange: (e) => {
+                  setSize(Number(e.target.value))
+                  setPage(1)
+                },
+              }}
+            />
+          )}
         </Box>
       </Stack>
 
-      {/* Warning Dialog when exam time doesn't match */}
+      {/* Exam Info Dialog */}
       <Dialog
-        open={openTimeWarning}
-        onClose={() => setOpenTimeWarning(false)}
-        aria-labelledby="time-warning-dialog-title"
+        open={showExamInfo}
+        onClose={() => setShowExamInfo(false)}
+        maxWidth="sm"
+        fullWidth
       >
-        <DialogTitle id="time-warning-dialog-title">
-          Belum Waktunya Ujian
-        </DialogTitle>
+        <DialogTitle>{selectedExam?.title}</DialogTitle>
         <DialogContent>
-          <Typography>
-            Maaf, belum waktunya untuk mengerjakan ujian ini. Ujian hanya dapat
-            dimulai sesuai jadwal yang telah ditentukan.
-          </Typography>
-          {selectedItem && (
-            <Box sx={{ mt: 2 }}>
-              <Typography variant="subtitle2">Detail Ujian:</Typography>
-              <Typography variant="body2">
-                Mata Pelajaran: {selectedItem.subject?.nama}
-              </Typography>
-              <Typography variant="body2">
-                Tanggal:{' '}
-                {selectedItem.scheduledAt
-                  ? new Date(selectedItem.scheduledAt).toLocaleDateString()
-                  : '-'}
-              </Typography>
-              <Typography variant="body2">
-                Jam: {selectedItem.jamUjian || '-'}
-              </Typography>
-            </Box>
+          {selectedExam && (
+            <Stack spacing={2}>
+              <Box>
+                <Typography variant="subtitle2">Mata Pelajaran:</Typography>
+                <Typography>{selectedExam.subject?.nama}</Typography>
+              </Box>
+
+              <Box>
+                <Typography variant="subtitle2">Jadwal:</Typography>
+                <Typography>
+                  {new Date(selectedExam.scheduledAt).toLocaleDateString(
+                    'id-ID',
+                    {
+                      weekday: 'long',
+                      year: 'numeric',
+                      month: 'long',
+                      day: 'numeric',
+                    }
+                  )}{' '}
+                  • {selectedExam.jamUjian} WIB
+                </Typography>
+              </Box>
+
+              <Box>
+                <Typography variant="subtitle2">Durasi:</Typography>
+                <Typography>{selectedExam.duration} menit</Typography>
+              </Box>
+
+              <Box>
+                <Typography variant="subtitle2">Jumlah Soal:</Typography>
+                <Typography>
+                  {selectedExam.totalQuestions} soal ({selectedExam.totalPoints}{' '}
+                  poin)
+                </Typography>
+              </Box>
+
+              <Box>
+                <Typography variant="subtitle2">Guru:</Typography>
+                <Typography>{selectedExam.teacher?.nama}</Typography>
+              </Box>
+
+              {selectedExam.instructions && (
+                <Box>
+                  <Typography variant="subtitle2">Instruksi:</Typography>
+                  <Typography variant="body2">
+                    {selectedExam.instructions}
+                  </Typography>
+                </Box>
+              )}
+
+              {selectedExam.passingScore && (
+                <Alert severity="info">
+                  Nilai minimum kelulusan: {selectedExam.passingScore}%
+                </Alert>
+              )}
+
+              {selectedExam.requireAllAnswers && (
+                <Alert severity="warning">
+                  Anda harus menjawab semua soal sebelum dapat submit.
+                </Alert>
+              )}
+            </Stack>
           )}
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setOpenTimeWarning(false)} color="primary">
-            Tutup
-          </Button>
+          <Button onClick={() => setShowExamInfo(false)}>Tutup</Button>
         </DialogActions>
       </Dialog>
     </>
