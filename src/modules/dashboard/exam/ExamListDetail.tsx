@@ -44,6 +44,64 @@ export default function ExamTake() {
   const [isSubmitting, setIsSubmitting] = useState<any>(false)
   const [isExamStarted, setIsExamStarted] = useState(false)
 
+  // Base URL untuk asset (sesuaikan dengan backend URL Anda)
+  const BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:3000'
+
+  // Helper function to render images
+  const renderImage = (imageUrl: string, alt: string) => {
+    if (!imageUrl) return null
+
+    const fullImageUrl = imageUrl.startsWith('http')
+      ? imageUrl
+      : `${BASE_URL}${imageUrl}`
+
+    return (
+      <Box sx={{ my: 2 }}>
+        <img
+          src={fullImageUrl}
+          alt={alt}
+          style={{
+            maxWidth: '100%',
+            height: 'auto',
+            borderRadius: '8px',
+            border: '1px solid #e0e0e0',
+          }}
+          onError={(e) => {
+            console.error('Error loading image:', fullImageUrl)
+            e.currentTarget.style.display = 'none'
+          }}
+        />
+      </Box>
+    )
+  }
+
+  // Helper function to render audio
+  const renderAudio = (audioUrl: string) => {
+    if (!audioUrl) return null
+
+    const fullAudioUrl = audioUrl.startsWith('http')
+      ? audioUrl
+      : `${BASE_URL}${audioUrl}`
+
+    return (
+      <Box sx={{ my: 2 }}>
+        <audio
+          controls
+          style={{ width: '100%', maxWidth: '400px' }}
+          onError={(e) => {
+            console.error('Error loading audio:', fullAudioUrl)
+          }}
+        >
+          <source src={fullAudioUrl} type="audio/mpeg" />
+          <source src={fullAudioUrl} type="audio/wav" />
+          <source src={fullAudioUrl} type="audio/ogg" />
+          <source src={fullAudioUrl} type="audio/m4a" />
+          Your browser does not support the audio element.
+        </audio>
+      </Box>
+    )
+  }
+
   // Fetch exam data
   const fetchExamData = async () => {
     try {
@@ -68,15 +126,23 @@ export default function ExamTake() {
         }
         return shuffled
       }
+
       const displayQuestions = questionsResponse.data.map(
         (questionData: any) => ({
           id: questionData.id,
           question: questionData.content,
+          imageUrl: questionData.imageUrl,
+          audioUrl: questionData.audioUrl,
+          equation: questionData.equation,
+          explanation: questionData.explanation,
+          points: questionData.points,
           options: shuffleArray2(questionData.answers).map(
             (answer: any, index: any) => ({
               value: String.fromCharCode(97 + index),
               label: answer.content,
               isCorrect: answer.isCorrect,
+              imageUrl: answer.imageUrl,
+              audioUrl: answer.audioUrl,
             })
           ),
         })
@@ -121,7 +187,7 @@ export default function ExamTake() {
   // Auto-submit when time runs out
   useEffect(() => {
     if (timeLeft === 0 && !examSubmitted) {
-      // handleSubmitExam()
+      handleSubmitExam()
     }
   }, [timeLeft])
 
@@ -133,8 +199,6 @@ export default function ExamTake() {
   }
 
   const handleAnswerChange = (questionId: any, value: any) => {
-    console.log(value)
-
     setAnswers((prev: any) => ({
       ...prev,
       [questionId]: value,
@@ -202,41 +266,157 @@ export default function ExamTake() {
     {
       id: 1,
       question: 'Jawab pertanyaan dibawah ini dengan benar',
+      imageUrl: '',
+      audioUrl: '',
+      equation: '',
+      explanation: '',
+      points: 10,
       options: [
-        { value: 'a', label: 'Jawaban A benar', isCorrect: false },
-        { value: 'b', label: 'Jawaban B benar', isCorrect: true },
-        { value: 'c', label: 'Jawaban C benar', isCorrect: false },
-        { value: 'd', label: 'Jawaban D benar', isCorrect: false },
+        {
+          value: 'a',
+          label: 'Jawaban A benar',
+          isCorrect: false,
+          imageUrl: '',
+          audioUrl: '',
+        },
+        {
+          value: 'b',
+          label: 'Jawaban B benar',
+          isCorrect: true,
+          imageUrl: '',
+          audioUrl: '',
+        },
+        {
+          value: 'c',
+          label: 'Jawaban C benar',
+          isCorrect: false,
+          imageUrl: '',
+          audioUrl: '',
+        },
+        {
+          value: 'd',
+          label: 'Jawaban D benar',
+          isCorrect: false,
+          imageUrl: '',
+          audioUrl: '',
+        },
       ],
     },
     {
       id: 2,
       question: 'Jawab pertanyaan dibawah ini dengan benar',
+      imageUrl: '',
+      audioUrl: '',
+      equation: '',
+      explanation: '',
+      points: 10,
       options: [
-        { value: 'a', label: 'Jawaban A benar', isCorrect: true },
-        { value: 'b', label: 'Jawaban B benar', isCorrect: false },
-        { value: 'c', label: 'Jawaban C benar', isCorrect: false },
-        { value: 'd', label: 'Jawaban D benar', isCorrect: false },
+        {
+          value: 'a',
+          label: 'Jawaban A benar',
+          isCorrect: true,
+          imageUrl: '',
+          audioUrl: '',
+        },
+        {
+          value: 'b',
+          label: 'Jawaban B benar',
+          isCorrect: false,
+          imageUrl: '',
+          audioUrl: '',
+        },
+        {
+          value: 'c',
+          label: 'Jawaban C benar',
+          isCorrect: false,
+          imageUrl: '',
+          audioUrl: '',
+        },
+        {
+          value: 'd',
+          label: 'Jawaban D benar',
+          isCorrect: false,
+          imageUrl: '',
+          audioUrl: '',
+        },
       ],
     },
     {
       id: 3,
       question: 'Jawab pertanyaan dibawah ini dengan benar',
+      imageUrl: '',
+      audioUrl: '',
+      equation: '',
+      explanation: '',
+      points: 10,
       options: [
-        { value: 'a', label: 'Jawaban A benar', isCorrect: false },
-        { value: 'b', label: 'Jawaban B benar', isCorrect: false },
-        { value: 'c', label: 'Jawaban C benar', isCorrect: true },
-        { value: 'd', label: 'Jawaban D benar', isCorrect: false },
+        {
+          value: 'a',
+          label: 'Jawaban A benar',
+          isCorrect: false,
+          imageUrl: '',
+          audioUrl: '',
+        },
+        {
+          value: 'b',
+          label: 'Jawaban B benar',
+          isCorrect: false,
+          imageUrl: '',
+          audioUrl: '',
+        },
+        {
+          value: 'c',
+          label: 'Jawaban C benar',
+          isCorrect: true,
+          imageUrl: '',
+          audioUrl: '',
+        },
+        {
+          value: 'd',
+          label: 'Jawaban D benar',
+          isCorrect: false,
+          imageUrl: '',
+          audioUrl: '',
+        },
       ],
     },
     {
       id: 4,
       question: 'Jawab pertanyaan dibawah ini dengan benar',
+      imageUrl: '',
+      audioUrl: '',
+      equation: '',
+      explanation: '',
+      points: 10,
       options: [
-        { value: 'a', label: 'Jawaban A benar', isCorrect: false },
-        { value: 'b', label: 'Jawaban B benar', isCorrect: false },
-        { value: 'c', label: 'Jawaban C benar', isCorrect: false },
-        { value: 'd', label: 'Jawaban D benar', isCorrect: true },
+        {
+          value: 'a',
+          label: 'Jawaban A benar',
+          isCorrect: false,
+          imageUrl: '',
+          audioUrl: '',
+        },
+        {
+          value: 'b',
+          label: 'Jawaban B benar',
+          isCorrect: false,
+          imageUrl: '',
+          audioUrl: '',
+        },
+        {
+          value: 'c',
+          label: 'Jawaban C benar',
+          isCorrect: false,
+          imageUrl: '',
+          audioUrl: '',
+        },
+        {
+          value: 'd',
+          label: 'Jawaban D benar',
+          isCorrect: true,
+          imageUrl: '',
+          audioUrl: '',
+        },
       ],
     },
   ]
@@ -273,7 +453,7 @@ export default function ExamTake() {
 
     if (screenfull.isEnabled) {
       screenfull.request().catch(() => {
-        // handleSubmitExam()
+        handleSubmitExam()
         // console.warn('Gagal masuk fullscreen')
       })
     }
@@ -343,33 +523,100 @@ export default function ExamTake() {
               Waktu Ujian: {examData?.duration || 30} Menit
             </Typography>
             <Typography>
-              Kelas: {examData?.classroom?.nama || 'X KULINER 2'}
+              Kelas:{' '}
+              {examData?.classrooms?.map((c: any) => c.nama).join(', ') ||
+                'X KULINER 2'}
             </Typography>
             <Typography>Semester: {examData?.semester || '2'}</Typography>
           </Box>
         </Paper>
-
         <Paper sx={{ p: 3 }}>
           {displayQuestions.map((question: any, index: any) => (
-            <Box key={question.id} sx={{ mb: 4 }}>
-              <Typography sx={{ mb: 1 }}>
+            <Box
+              key={question.id}
+              sx={{
+                mb: 4,
+                pb: 3,
+                borderBottom:
+                  index < displayQuestions.length - 1
+                    ? '1px solid #e0e0e0'
+                    : 'none',
+              }}
+            >
+              <Typography variant="h6" sx={{ mb: 2, fontWeight: 'bold' }}>
                 {index + 1}. {question.question}
               </Typography>
+
+              {/* Render question image if exists */}
+              {renderImage(question.imageUrl, `Question ${index + 1} image`)}
+
+              {/* Render question audio if exists */}
+              {renderAudio(question.audioUrl)}
+
+              {/* Render equation if exists */}
+              {question.equation && (
+                <Box sx={{ my: 2, p: 2, bgcolor: 'grey.50', borderRadius: 1 }}>
+                  <Typography variant="body2" color="text.secondary">
+                    Persamaan:
+                  </Typography>
+                  <Typography
+                    sx={{ fontFamily: 'monospace', fontSize: '1.1rem' }}
+                  >
+                    {question.equation}
+                  </Typography>
+                </Box>
+              )}
+
               <RadioGroup
                 value={answers[question.id] || ''}
                 onChange={(e) =>
                   handleAnswerChange(question.id, e.target.value)
                 }
+                sx={{ mt: 2 }}
               >
                 {question.options.map((option: any) => (
-                  <FormControlLabel
-                    key={option.value}
-                    value={option.value}
-                    control={<Radio />}
-                    label={`${option.value.toUpperCase()}. ${option.label}`}
-                  />
+                  <Box key={option.value} sx={{ mb: 1 }}>
+                    <FormControlLabel
+                      value={option.value}
+                      control={<Radio />}
+                      label={
+                        <Box sx={{ width: '100%' }}>
+                          <Typography>
+                            {option.value.toUpperCase()}. {option.label}
+                          </Typography>
+                          {/* Render option image if exists */}
+                          {renderImage(
+                            option.imageUrl,
+                            `Option ${option.value} image`
+                          )}
+                          {/* Render option audio if exists */}
+                          {renderAudio(option.audioUrl)}
+                        </Box>
+                      }
+                      sx={{
+                        m: 0,
+                        p: 1,
+                        width: '100%',
+                        alignItems: 'flex-start',
+                        borderRadius: 1,
+                        '&:hover': {
+                          backgroundColor: 'grey.50',
+                        },
+                        '& .MuiFormControlLabel-label': {
+                          width: '100%',
+                        },
+                      }}
+                    />
+                  </Box>
                 ))}
               </RadioGroup>
+
+              {/* Show points */}
+              <Box sx={{ mt: 2, pt: 1, borderTop: '1px solid #f0f0f0' }}>
+                <Typography variant="body2" color="text.secondary">
+                  Poin: {question.points}
+                </Typography>
+              </Box>
             </Box>
           ))}
 

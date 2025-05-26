@@ -46,6 +46,14 @@ export function createCours(payload: any) {
   return api.post<any>('/soal/banksoal', payload)
 }
 
+export function createImage(payload: any) {
+  return api.post<any>('/soal/banksoal/image', payload)
+}
+
+export function createAudio(payload: any) {
+  return api.post<any>('/soal/banksoal/audio', payload)
+}
+
 export function updateCours(id: string, payload: any) {
   return api.put<Course>(`/admin/course/${id}`, payload)
 }

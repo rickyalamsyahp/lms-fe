@@ -11,6 +11,7 @@ import CourseList from './modules/dashboard/course/CourseList'
 import ExamList from './modules/dashboard/exam/ExamList'
 import ExamListDetail from './modules/dashboard/exam/ExamListDetail'
 import DashboardLayout from './modules/dashboard/Layout'
+import ExamAnalytics from './modules/dashboard/result/ExamAnalitic'
 import CourseExamList from './modules/dashboard/result/ResultList'
 import UserList from './modules/dashboard/user/UserList'
 import reportWebVitals from './reportWebVitals'
@@ -50,6 +51,10 @@ const router = createBrowserRouter([
       {
         path: '/dashboard/exam/:id',
         element: <ExamListDetail />,
+      },
+      {
+        path: '/dashboard/result/:id',
+        element: <ExamAnalytics />,
       },
       {
         path: '/dashboard/user',

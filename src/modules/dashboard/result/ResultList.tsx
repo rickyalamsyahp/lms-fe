@@ -1,4 +1,4 @@
-import { Assessment, Download, Replay, Visibility } from '@mui/icons-material'
+import { Download, Replay, Visibility } from '@mui/icons-material'
 import {
   Box,
   Button,
@@ -165,20 +165,20 @@ export default function EnhancedCourseListExam() {
           >
             Detail
           </Button>
-          {state.isInstructor && (
+          {/* {state.isInstructor && (
             <Button
               size="small"
               startIcon={<Assessment />}
               onClick={() =>
                 window.open(
-                  `/dashboard/exam/${item.questionBankId}/analytics`,
+                  `/dashboard/result/${item.questionBankId}`,
                   '_blank'
                 )
               }
             >
               Analisis
             </Button>
-          )}
+          )} */}
         </Stack>
       ),
     },

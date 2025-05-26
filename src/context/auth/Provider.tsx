@@ -18,7 +18,6 @@ export default function AuthProvider(props: any) {
   const { data: user } = useProfile(
     {
       onSuccess: (res) => {
-        console.log(res.data)
         setUrlPrefix(res.data.scope)
         if (res.data && !ready) {
           setReady(true)

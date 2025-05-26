@@ -58,7 +58,9 @@ import { useSession } from '../../../context/session'
 import AttendanceDialog from './__components/AttendanceDialog'
 import OnlineStudentsDialog from './__components/OnlineStudentsDialog'
 import {
+  createAudio,
   createCours,
+  createImage,
   getJurusan,
   getKelas,
   getMapel,
@@ -269,7 +271,7 @@ export default function EnhancedBankSoalList() {
     newSoal[questionIndex].jawaban[answerIndex].isCorrect = isCorrect
     setFormData({ ...formData, soal: newSoal })
   }
-
+  const apiUrl = process.env.REACT_APP_API_URL
   // Handle file uploads
   const handleImageUpload = async (
     file: File,
@@ -281,22 +283,21 @@ export default function EnhancedBankSoalList() {
       const formDatas = new FormData()
       formDatas.append('file', file)
 
-      const response = await fetch('/api/upload/image', {
-        method: 'POST',
-        body: formDatas,
-      })
+      const result = (await createImage(formDatas)) as any
 
-      const result = await response.json()
+      if (result && result.data) {
+        const imageUrl = result.data.path.replace('./', '/') // Contoh konversi relatif ke URL publik
 
-      if (result.success) {
         const newSoal = [...formData.soal]
         if (type === 'question') {
-          newSoal[questionIndex].imageUrl = result.url
+          newSoal[questionIndex].imageUrl = imageUrl
         } else if (type === 'answer' && answerIndex !== undefined) {
-          newSoal[questionIndex].jawaban[answerIndex].imageUrl = result.url
+          newSoal[questionIndex].jawaban[answerIndex].imageUrl = imageUrl
         }
         setFormData({ ...formData, soal: newSoal })
         toast.success('Gambar berhasil diupload')
+      } else {
+        toast.error('Respons tidak valid')
       }
     } catch (error) {
       toast.error('Gagal upload gambar')
@@ -313,22 +314,21 @@ export default function EnhancedBankSoalList() {
       const formDatas = new FormData()
       formDatas.append('file', file)
 
-      const response = await fetch('/api/upload/audio', {
-        method: 'POST',
-        body: formDatas,
-      })
+      const result = (await createAudio(formDatas)) as any
 
-      const result = await response.json()
+      if (result && result.data) {
+        const imageUrl = result.data.path.replace('./', '/') // Contoh konversi relatif ke URL publik
 
-      if (result.success) {
         const newSoal = [...formData.soal]
         if (type === 'question') {
-          newSoal[questionIndex].audioUrl = result.url
+          newSoal[questionIndex].audioUrl = imageUrl
         } else if (type === 'answer' && answerIndex !== undefined) {
-          newSoal[questionIndex].jawaban[answerIndex].audioUrl = result.url
+          newSoal[questionIndex].jawaban[answerIndex].audioUrl = imageUrl
         }
         setFormData({ ...formData, soal: newSoal })
-        toast.success('Audio berhasil diupload')
+        toast.success('Gambar berhasil diupload')
+      } else {
+        toast.error('Respons tidak valid')
       }
     } catch (error) {
       toast.error('Gagal upload audio')
@@ -796,7 +796,7 @@ export default function EnhancedBankSoalList() {
                   </Select>
                 </FormControl>
               </Grid>
-              <Grid item xs={12} md={6}>
+              {/* <Grid item xs={12} md={6}>
                 <FormControl fullWidth>
                   <InputLabel>Jurusan</InputLabel>
                   <Select
@@ -813,7 +813,7 @@ export default function EnhancedBankSoalList() {
                     ))}
                   </Select>
                 </FormControl>
-              </Grid>
+              </Grid> */}
 
               <Grid item xs={12}>
                 <Autocomplete
@@ -1135,11 +1135,10 @@ export default function EnhancedBankSoalList() {
                             />
                           </Button>
                         </Box>
-
                         {soal.imageUrl && (
                           <Box sx={{ mt: 1 }}>
                             <img
-                              src={soal.imageUrl}
+                              src={`${apiUrl}${soal.imageUrl}`}
                               alt="Question"
                               style={{ maxWidth: 200, height: 'auto' }}
                             />
@@ -1148,7 +1147,7 @@ export default function EnhancedBankSoalList() {
 
                         {soal.audioUrl && (
                           <Box sx={{ mt: 1 }}>
-                            <audio controls src={soal.audioUrl} />
+                            <audio controls src={`${apiUrl}${soal.audioUrl}`} />
                           </Box>
                         )}
                       </Grid>
@@ -1212,66 +1211,176 @@ export default function EnhancedBankSoalList() {
                             <FormGroup>
                               {soal.jawaban.map(
                                 (jawaban: any, jawabanIndex: any) => (
-                                  <Box
-                                    key={jawabanIndex}
-                                    sx={{
-                                      display: 'flex',
-                                      alignItems: 'center',
-                                      mb: 1,
-                                    }}
-                                  >
-                                    <FormControlLabel
-                                      control={
-                                        <Checkbox
-                                          checked={jawaban.isCorrect}
-                                          onChange={(e) =>
-                                            handleComplexAnswerChange(
-                                              soalIndex,
-                                              jawabanIndex,
-                                              e.target.checked
-                                            )
-                                          }
-                                        />
-                                      }
-                                      label={`${String.fromCharCode(65 + jawabanIndex)}.`}
-                                    />
-                                    <TextField
-                                      fullWidth
-                                      size="small"
-                                      value={jawaban.text}
-                                      onChange={(e) => {
-                                        const newSoal = [...formData.soal]
-                                        newSoal[soalIndex].jawaban[
-                                          jawabanIndex
-                                        ].text = e.target.value
-                                        setFormData({
-                                          ...formData,
-                                          soal: newSoal,
-                                        })
+                                  <Box key={jawabanIndex} sx={{ mb: 2 }}>
+                                    <Box
+                                      sx={{
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        mb: 1,
                                       }}
-                                    />
-                                    <Button
-                                      size="small"
-                                      startIcon={<Image />}
-                                      component="label"
-                                      sx={{ ml: 1 }}
                                     >
-                                      <input
-                                        hidden
-                                        accept="image/*"
-                                        type="file"
-                                        onChange={(e) => {
-                                          const file = e.target.files?.[0]
-                                          if (file)
-                                            handleImageUpload(
-                                              file,
-                                              'answer',
-                                              soalIndex,
-                                              jawabanIndex
-                                            )
-                                        }}
+                                      <FormControlLabel
+                                        control={
+                                          <Checkbox
+                                            checked={jawaban.isCorrect}
+                                            onChange={(e) =>
+                                              handleComplexAnswerChange(
+                                                soalIndex,
+                                                jawabanIndex,
+                                                e.target.checked
+                                              )
+                                            }
+                                          />
+                                        }
+                                        label={`${String.fromCharCode(65 + jawabanIndex)}.`}
                                       />
-                                    </Button>
+
+                                      {/* Tampilkan text input hanya jika belum ada gambar */}
+                                      {!jawaban.imageUrl && (
+                                        <TextField
+                                          fullWidth
+                                          size="small"
+                                          placeholder="Ketik jawaban atau upload gambar"
+                                          value={jawaban.text}
+                                          onChange={(e) => {
+                                            const newSoal = [...formData.soal]
+                                            newSoal[soalIndex].jawaban[
+                                              jawabanIndex
+                                            ].text = e.target.value
+                                            setFormData({
+                                              ...formData,
+                                              soal: newSoal,
+                                            })
+                                          }}
+                                        />
+                                      )}
+
+                                      <Box
+                                        sx={{ ml: 1, display: 'flex', gap: 1 }}
+                                      >
+                                        <Button
+                                          size="small"
+                                          variant="outlined"
+                                          startIcon={<Image />}
+                                          component="label"
+                                        >
+                                          {jawaban.imageUrl
+                                            ? 'Ganti'
+                                            : 'Gambar'}
+                                          <input
+                                            hidden
+                                            accept="image/*"
+                                            type="file"
+                                            onChange={(e) => {
+                                              const file = e.target.files?.[0]
+                                              if (file) {
+                                                handleImageUpload(
+                                                  file,
+                                                  'answer',
+                                                  soalIndex,
+                                                  jawabanIndex
+                                                )
+                                              }
+                                            }}
+                                          />
+                                        </Button>
+
+                                        <Button
+                                          size="small"
+                                          variant="outlined"
+                                          startIcon={<AudioFile />}
+                                          component="label"
+                                        >
+                                          Audio
+                                          <input
+                                            hidden
+                                            accept="audio/*"
+                                            type="file"
+                                            onChange={(e) => {
+                                              const file = e.target.files?.[0]
+                                              if (file) {
+                                                handleAudioUpload(
+                                                  file,
+                                                  'answer',
+                                                  soalIndex,
+                                                  jawabanIndex
+                                                )
+                                              }
+                                            }}
+                                          />
+                                        </Button>
+
+                                        {/* Tombol hapus media */}
+                                        {(jawaban.imageUrl ||
+                                          jawaban.audioUrl) && (
+                                          <IconButton
+                                            size="small"
+                                            color="error"
+                                            onClick={() => {
+                                              const newSoal = [...formData.soal]
+                                              newSoal[soalIndex].jawaban[
+                                                jawabanIndex
+                                              ].imageUrl = ''
+                                              newSoal[soalIndex].jawaban[
+                                                jawabanIndex
+                                              ].audioUrl = ''
+                                              setFormData({
+                                                ...formData,
+                                                soal: newSoal,
+                                              })
+                                            }}
+                                          >
+                                            <Delete />
+                                          </IconButton>
+                                        )}
+                                      </Box>
+                                    </Box>
+
+                                    {/* Tampilkan gambar jika ada */}
+                                    {jawaban.imageUrl && (
+                                      <Box sx={{ ml: 4, mt: 1 }}>
+                                        <img
+                                          src={`${apiUrl}${jawaban.imageUrl}`}
+                                          alt={`Jawaban ${String.fromCharCode(65 + jawabanIndex)}`}
+                                          style={{
+                                            maxWidth: 200,
+                                            maxHeight: 150,
+                                            height: 'auto',
+                                            border: '1px solid #ddd',
+                                            borderRadius: 4,
+                                          }}
+                                        />
+                                      </Box>
+                                    )}
+
+                                    {/* Tampilkan audio jika ada */}
+                                    {jawaban.audioUrl && (
+                                      <Box sx={{ ml: 4, mt: 1 }}>
+                                        <audio
+                                          controls
+                                          src={`${apiUrl}${jawaban.audioUrl}`}
+                                          style={{
+                                            width: '100%',
+                                            maxWidth: 300,
+                                          }}
+                                        />
+                                      </Box>
+                                    )}
+
+                                    {/* Tampilkan text sebagai caption jika ada gambar */}
+                                    {jawaban.imageUrl && jawaban.text && (
+                                      <Typography
+                                        variant="caption"
+                                        sx={{
+                                          ml: 4,
+                                          display: 'block',
+                                          mt: 0.5,
+                                          fontStyle: 'italic',
+                                        }}
+                                      >
+                                        {jawaban.text}
+                                      </Typography>
+                                    )}
                                   </Box>
                                 )
                               )}
@@ -1295,60 +1404,178 @@ export default function EnhancedBankSoalList() {
                             >
                               {soal.jawaban.map(
                                 (jawaban: any, jawabanIndex: any) => (
-                                  <Box
-                                    key={jawabanIndex}
-                                    sx={{
-                                      display: 'flex',
-                                      alignItems: 'center',
-                                      mb: 1,
-                                    }}
-                                  >
-                                    <FormControlLabel
-                                      value={jawabanIndex}
-                                      control={<Radio />}
-                                      label={`${String.fromCharCode(65 + jawabanIndex)}.`}
-                                    />
-                                    <TextField
-                                      fullWidth
-                                      size="small"
-                                      value={jawaban.text}
-                                      onChange={(e) => {
-                                        const newSoal = [...formData.soal]
-                                        newSoal[soalIndex].jawaban[
-                                          jawabanIndex
-                                        ].text = e.target.value
-                                        setFormData({
-                                          ...formData,
-                                          soal: newSoal,
-                                        })
+                                  <Box key={jawabanIndex} sx={{ mb: 2 }}>
+                                    <Box
+                                      sx={{
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        mb: 1,
                                       }}
-                                      disabled={
-                                        soal.type === QuestionType.TRUE_FALSE
-                                      }
-                                    />
-                                    {soal.type !== QuestionType.TRUE_FALSE && (
-                                      <Button
-                                        size="small"
-                                        startIcon={<Image />}
-                                        component="label"
-                                        sx={{ ml: 1 }}
-                                      >
-                                        <input
-                                          hidden
-                                          accept="image/*"
-                                          type="file"
+                                    >
+                                      <FormControlLabel
+                                        value={jawabanIndex}
+                                        control={<Radio />}
+                                        label={`${String.fromCharCode(65 + jawabanIndex)}.`}
+                                      />
+
+                                      {/* Tampilkan text input hanya jika belum ada gambar */}
+                                      {!jawaban.imageUrl && (
+                                        <TextField
+                                          fullWidth
+                                          size="small"
+                                          placeholder="Ketik jawaban atau upload gambar"
+                                          value={jawaban.text}
                                           onChange={(e) => {
-                                            const file = e.target.files?.[0]
-                                            if (file)
-                                              handleImageUpload(
-                                                file,
-                                                'answer',
-                                                soalIndex,
-                                                jawabanIndex
-                                              )
+                                            const newSoal = [...formData.soal]
+                                            newSoal[soalIndex].jawaban[
+                                              jawabanIndex
+                                            ].text = e.target.value
+                                            setFormData({
+                                              ...formData,
+                                              soal: newSoal,
+                                            })
+                                          }}
+                                          disabled={
+                                            soal.type ===
+                                            QuestionType.TRUE_FALSE
+                                          }
+                                        />
+                                      )}
+
+                                      {soal.type !==
+                                        QuestionType.TRUE_FALSE && (
+                                        <Box
+                                          sx={{
+                                            ml: 1,
+                                            display: 'flex',
+                                            gap: 1,
+                                          }}
+                                        >
+                                          <Button
+                                            size="small"
+                                            variant="outlined"
+                                            startIcon={<Image />}
+                                            component="label"
+                                          >
+                                            {jawaban.imageUrl
+                                              ? 'Ganti'
+                                              : 'Gambar'}
+                                            <input
+                                              hidden
+                                              accept="image/*"
+                                              type="file"
+                                              onChange={(e) => {
+                                                const file = e.target.files?.[0]
+                                                if (file) {
+                                                  handleImageUpload(
+                                                    file,
+                                                    'answer',
+                                                    soalIndex,
+                                                    jawabanIndex
+                                                  )
+                                                }
+                                              }}
+                                            />
+                                          </Button>
+
+                                          <Button
+                                            size="small"
+                                            variant="outlined"
+                                            startIcon={<AudioFile />}
+                                            component="label"
+                                          >
+                                            Audio
+                                            <input
+                                              hidden
+                                              accept="audio/*"
+                                              type="file"
+                                              onChange={(e) => {
+                                                const file = e.target.files?.[0]
+                                                if (file) {
+                                                  handleAudioUpload(
+                                                    file,
+                                                    'answer',
+                                                    soalIndex,
+                                                    jawabanIndex
+                                                  )
+                                                }
+                                              }}
+                                            />
+                                          </Button>
+
+                                          {/* Tombol hapus media */}
+                                          {(jawaban.imageUrl ||
+                                            jawaban.audioUrl) && (
+                                            <IconButton
+                                              size="small"
+                                              color="error"
+                                              onClick={() => {
+                                                const newSoal = [
+                                                  ...formData.soal,
+                                                ]
+                                                newSoal[soalIndex].jawaban[
+                                                  jawabanIndex
+                                                ].imageUrl = ''
+                                                newSoal[soalIndex].jawaban[
+                                                  jawabanIndex
+                                                ].audioUrl = ''
+                                                setFormData({
+                                                  ...formData,
+                                                  soal: newSoal,
+                                                })
+                                              }}
+                                            >
+                                              <Delete />
+                                            </IconButton>
+                                          )}
+                                        </Box>
+                                      )}
+                                    </Box>
+
+                                    {/* Tampilkan gambar jika ada */}
+                                    {jawaban.imageUrl && (
+                                      <Box sx={{ ml: 4, mt: 1 }}>
+                                        <img
+                                          src={`${apiUrl}${jawaban.imageUrl}`}
+                                          alt={`Jawaban ${String.fromCharCode(65 + jawabanIndex)}`}
+                                          style={{
+                                            maxWidth: 200,
+                                            maxHeight: 150,
+                                            height: 'auto',
+                                            border: '1px solid #ddd',
+                                            borderRadius: 4,
                                           }}
                                         />
-                                      </Button>
+                                      </Box>
+                                    )}
+
+                                    {/* Tampilkan audio jika ada */}
+                                    {jawaban.audioUrl && (
+                                      <Box sx={{ ml: 4, mt: 1 }}>
+                                        <audio
+                                          controls
+                                          src={`${apiUrl}${jawaban.audioUrl}`}
+                                          style={{
+                                            width: '100%',
+                                            maxWidth: 300,
+                                          }}
+                                        />
+                                      </Box>
+                                    )}
+
+                                    {/* Tampilkan text sebagai caption jika ada gambar */}
+                                    {jawaban.imageUrl && jawaban.text && (
+                                      <Typography
+                                        variant="caption"
+                                        sx={{
+                                          ml: 4,
+                                          display: 'block',
+                                          mt: 0.5,
+                                          fontStyle: 'italic',
+                                        }}
+                                      >
+                                        {jawaban.text}
+                                      </Typography>
                                     )}
                                   </Box>
                                 )

@@ -87,14 +87,14 @@ export default function EnhancedExamList() {
   }
 
   const handleStartExam = async (exam: any) => {
-    // const availability = checkExamAvailability(exam)
-    // // console.log(availability)
+    const availability = checkExamAvailability(exam)
+    // console.log(availability)
 
-    // if (!availability.canStart && exam.result?.status !== 'reopened') {
-    //   setSelectedExam(exam)
-    //   setShowExamInfo(true)
-    //   return
-    // }
+    if (!availability.canStart && exam.result?.status !== 'reopened') {
+      setSelectedExam(exam)
+      setShowExamInfo(true)
+      return
+    }
 
     try {
       // Try to enter fullscreen
@@ -188,7 +188,7 @@ export default function EnhancedExamList() {
       render: (item: any) => {
         const status = getExamStatus(item)
         const availability = checkExamAvailability(item)
-        console.log(status)
+
         return (
           <Stack direction="row" spacing={1}>
             <Button
@@ -203,39 +203,19 @@ export default function EnhancedExamList() {
             </Button>
 
             {(status.label === 'Dapat Dimulai' ||
-              item.result?.status === 'reopened') && (
-              <Button
-                variant="contained"
-                color="primary"
-                size="small"
-                onClick={() => handleStartExam(item)}
-              >
-                {item.result?.status === 'reopened'
-                  ? 'Lanjut Ujian'
-                  : 'Mulai Ujian'}
-              </Button>
-            )}
-
-            <Button
-              variant="contained"
-              color="primary"
-              size="small"
-              onClick={() => handleStartExam(item)}
-            >
-              {item.result?.status === 'reopened'
-                ? 'Lanjut Ujian'
-                : 'Mulai Ujian'}
-            </Button>
-
-            {status.label === 'Selesai' && item.allowReview && (
-              <Button
-                variant="outlined"
-                size="small"
-                onClick={() => navigate(`/dashboard/exam/${item.id}/review`)}
-              >
-                Review
-              </Button>
-            )}
+              item.result?.status === 'reopened') &&
+              item.result?.results.length !== 0 && (
+                <Button
+                  variant="contained"
+                  color="primary"
+                  size="small"
+                  onClick={() => handleStartExam(item)}
+                >
+                  {item.result?.status === 'reopened'
+                    ? 'Lanjut Ujian'
+                    : 'Mulai Ujian'}
+                </Button>
+              )}
           </Stack>
         )
       },
